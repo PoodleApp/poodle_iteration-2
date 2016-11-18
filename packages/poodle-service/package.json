@@ -8,5 +8,22 @@
     "type": "git"
   },
   "author": "Jesse Hallett <jesse@sitr.us>",
-  "license": "MIT"
+  "license": "MIT",
+  "babel": {
+    "presets": [
+      "react"
+    ],
+    "plugins": [
+      "transform-object-rest-spread"
+    ]
+  },
+  "dependencies": {
+    "imap": "^0.8.18"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-plugin-transform-object-rest-spread": "^6.19.0",
+    "babel-preset-react": "^6.16.0",
+    "flow-bin": "^0.35.0"
+  }
 }
