@@ -11,10 +11,9 @@
   "license": "MIT",
   "babel": {
     "presets": [
-      "react"
-    ],
-    "plugins": [
-      "transform-object-rest-spread"
+      "react",
+      "stage-3",
+      "node7"
     ]
   },
   "dependencies": {
@@ -25,8 +24,9 @@
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
-    "babel-plugin-transform-object-rest-spread": "^6.19.0",
+    "babel-preset-node7": "^1.2.0",
     "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-3": "^6.17.0",
     "flow-bin": "^0.35.0"
   }
 }

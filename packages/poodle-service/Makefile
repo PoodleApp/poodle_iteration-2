@@ -32,7 +32,7 @@ all: build
 
 # Ask `make` to build all of the output `.js` files that we want to produce.
 # This target also depends on the `node_modules/` directory, so that `make`
-# automatically runs `npm install` if `package.json` has changed.
+# automatically runs `yarn install` if `package.json` has changed.
 build: node_modules $(out_files)
 
 # This rule tells `make` how to turn a `.js.flow` file into a `.js` file.
@@ -50,4 +50,4 @@ clean:
 # after changes to `package.json`, and instructs `make` on how to install
 # modules to get back up-to-date.
 node_modules: package.json
-	npm install
+	yarn install

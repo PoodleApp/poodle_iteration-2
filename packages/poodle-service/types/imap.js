@@ -150,6 +150,7 @@ declare module "imap" {
     // in `ConnectionSeq`.
     seq: ConnectionSeq;
     fetch(source: MessageSource, opts?: FetchOptions): ImapFetch;
+    serverSupports(capability: string): boolean;
   }
   // Imap events:
   // - 'ready' : ()

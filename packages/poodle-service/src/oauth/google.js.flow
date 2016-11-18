@@ -43,7 +43,7 @@ export interface BrowserWindow extends events$EventEmitter {
   loadUrl(url: string): mixed,
 }
 
-type XOAuth2Generator = Generator
+export type XOAuth2Generator = Generator
 
 declare class Generator extends stream$Readable {
   constructor(options?: Object): void;
@@ -86,7 +86,7 @@ export function getAccessToken(openWindow: () => BrowserWindow, opts: AccessToke
 export function getTokenGenerator(opts: TokenGeneratorOpts): Promise<XOAuth2Generator> {
   const { email, credentials: creds, client_id, client_secret } = opts
   if (creds && creds.refresh_token) {
-    return Promise.resolve(tokenGenerator(email, creds))
+    return Promise.resolve(tokenGenerator(opts))
   }
   else {
     return Promise.reject(new Error('OAuth credentials are not available.'))
@@ -113,13 +113,14 @@ function initImap(opts: ImapOpts): Promise<Connection> {
   return p
 }
 
-function tokenGenerator(userEmail: string, creds: OauthCredentials): XOAuth2Generator {
+function tokenGenerator(opts: TokenGeneratorOpts): XOAuth2Generator {
+  const { email, client_id, client_secret, credentials } = opts
   return xoauth2.createXOAuth2Generator({
-    user:         userEmail,
+    user:         email,
     // accessUrl:    'https://accounts.google.com/oauth2/v3/token',
     clientId:     client_id,
     clientSecret: client_secret,
-    refreshToken: creds.refresh_token,
+    refreshToken: credentials.refresh_token,
     customParams: {
       redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
     },
