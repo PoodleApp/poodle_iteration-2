@@ -17,9 +17,20 @@ import type { Observable } from 'kefir'
 
 type Message = ReadStream
 
+export function fetchMessage(uuid: string, conn: Connection): Promise<Message> {
+  if (!conn.serverSupports(capabilities.googleExtensions)) {
+    return Promise.reject(
+      new Error('cannot fetch a message by ID because server does not support X-GM-EXT-1')
+    )
+  }
+  return searchAllMail(`rfc822msgid:${uuid}`, conn).toPromise()
+}
+
 export function searchAllMail(query: string, conn: Connection): Observable<Message, mixed> {
   if (!conn.serverSupports(capabilities.googleExtensions)) {
-    throw new Error('cannot search all mail because server does not support X-GM-EXT-1')
+    return kefir.constantError(
+      Error('cannot search all mail because server does not support X-GM-EXT-1')
+    )
   }
   return _searchAllMail([['X-GM-RAW', query]], conn)
 }
