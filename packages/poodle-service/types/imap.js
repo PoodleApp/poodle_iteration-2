@@ -1,6 +1,6 @@
 declare module "imap" {
 
-  declare type ImapOpts = {
+  declare export type ImapOpts = {
     user?:        string,
     password?:    string,
     xoauth?:      string,
@@ -16,13 +16,13 @@ declare module "imap" {
     debug?:       (info: string) => void,
   }
 
-  declare type Namespace = {
+  declare export type Namespace = {
     prefix:    string,
     delimiter: ?string,
     extensions: ?Array<{ name: 'string', params: ?Array<string> }>,
   }
 
-  declare type Headers = { [key:string]: string[] }
+  declare export type Headers = { [key:string]: string[] }
 
   // declare type Box = {
   //   name:           string,
@@ -40,16 +40,16 @@ declare module "imap" {
   //   }
   // }
 
-  declare type Box = {
+  declare export type Box = {
     attribs:   string[],
     delimiter: string,
     children:  ?Boxes,
     parent:    ?Object,
   }
 
-  declare type Boxes = { [key:string]: Box }
+  declare export type Boxes = { [key:string]: Box }
 
-  declare type MessagePart = {
+  declare export type MessagePart = {
     partID?:      string,
     type:         string,  // eg, 'text'
     subtype?:     string,  // eg, 'plain'
@@ -66,15 +66,15 @@ declare module "imap" {
   }
 
   // Should be: type MessageTree = [MessagePart, ...MessageTree]
-  declare type MessageTree = MessagePart | MessageTree[]
+  declare export type MessageTree = MessagePart | MessageTree[]
 
-  declare type Flag = '\\Seen'
+  declare export type Flag = '\\Seen'
     | '\\Answered'
     | '\\Flagged'
     | '\\Deleted'
     | '\\Draft'
 
-  declare type FetchOptions = {
+  declare export type FetchOptions = {
     markSeen?:  boolean,
     struct?:    boolean,  // fetch message structure
     envelope?:  boolean,
@@ -83,23 +83,23 @@ declare module "imap" {
     bodies?:    string | string[],  // e.g., 'HEADER.FIELDS (FROM SUBJECT TO DATE)'
   }
 
-  declare type MessageSource = string | string[]
-  declare type UID = string
+  declare export type MessageSource = string | string[]
+  declare export type UID = string
 
-  declare class ImapFetch extends events$EventEmitter {}
+  declare export type ImapFetch = events$EventEmitter
   // ImapFetch events:
   // - 'message' : (msg: ImapMessage, seqno: number)
   // - 'error'   : (err: Error)
   // - 'end'     : ()
 
-  declare class ImapMessage extends events$EventEmitter {}
+  declare export type ImapMessage = events$EventEmitter
   // ImapMessage events:
   // - 'body' : (stream: ReadableStream, info: { which: string, size: number })
   // - 'attributes' : (attrs: MessageAttributes)
   //
   // `which` corresponds to single `bodies` element in FetchOptions
 
-  declare type MessageAttributes = {
+  declare export type MessageAttributes = {
     uid:    number,
     flags:  Flag[],
     date:   Date,
@@ -114,7 +114,7 @@ declare module "imap" {
     fetch(source: MessageSource, opts?: FetchOptions): ImapFetch;
   }
 
-  declare class Connection extends events$EventEmitter {
+  declare export default class Connection extends events$EventEmitter {
     state:     string;  // eg. 'disconnected', 'connected', 'authenticated'
     delimiter: ?string; // folder hierarchy delimiter
     namespaces: {
@@ -162,6 +162,4 @@ declare module "imap" {
   // - 'error' : (err: Error & { source: string })
   // - 'close' : (hadError: boolean)
   // - 'end' : ()
-
-  declare var exports: typeof Connection
 }

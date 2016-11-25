@@ -1,0 +1,43 @@
+/* @flow */
+
+import Connection            from 'imap'
+import * as kefir            from 'kefir'
+import * as capabilities     from '../capabilities'
+import * as imap             from '../util/imap'
+import { fromEventsWithEnd } from '../util/kefir'
+import * as promises         from '../util/promises'
+
+import type { ReadStream }  from 'fs'
+import type {
+  FetchOptions,
+  ImapMessage,
+  MessageSource,
+} from 'imap'
+import type { Observable } from 'kefir'
+
+type Message = ReadStream
+
+export function searchAllMail(query: string, conn: Connection): Observable<Message, mixed> {
+  if (!conn.serverSupports(capabilities.googleExtensions)) {
+    throw new Error('cannot search all mail because server does not support X-GM-EXT-1')
+  }
+  return _searchAllMail([['X-GM-RAW', query]], conn)
+}
+
+function _searchAllMail(criteria: mixed[], conn: Connection): Observable<Message, mixed> {
+  const uidsPromise = imap.openAllMail(true, conn).then(box => (
+    promises.lift1(cb => conn.search(criteria, cb))
+  ))
+  return kefir.fromPromise(uidsPromise)
+  .flatMap(uids => fetchMessages(uids, { bodies: [''] }, conn))
+  .flatMap(messageBodyStream)
+}
+
+function messageBodyStream(msg: ImapMessage): Observable<Message, mixed> {
+  return fromEventsWithEnd(msg, 'body', (stream, info) => stream)
+}
+
+// TODO: Use 'changedsince' option defined by RFC4551
+function fetchMessages(source: MessageSource, opts: FetchOptions, conn: Connection): Observable<ImapMessage,mixed> {
+  return fromEventsWithEnd(conn.fetch(source, opts), 'message', (msg, seqno) => msg)
+}

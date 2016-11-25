@@ -25,6 +25,11 @@ export async function openBox(
   }
 }
 
+// TODO: capability check for 'All' mailbox
+export function openAllMail(readonly: boolean, imap: Connection): Promise<Box> {
+  return openBox(boxByAttribute('\\All'), readonly, imap)
+}
+
 function findBox(p: (box: Box) => boolean, boxes: Boxes, path?: string = ''): ?[string, Box] {
   const pairs = Object.keys(boxes).map(k => [k, boxes[k]])
   const match = pairs.find(([_, b]) => p(b))
@@ -39,4 +44,8 @@ function findBox(p: (box: Box) => boolean, boxes: Boxes, path?: string = ''): ?[
     .filter(child => !!child)
     [0]
   }
+}
+
+function boxByAttribute(attribute: string): (box: Box) => boolean {
+  return box => box.attribs.some(a => a === attribute)
 }
