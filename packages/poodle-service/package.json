@@ -9,6 +9,11 @@
   },
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "MIT",
+  "scripts": {
+    "build": "make",
+    "pretest": "npm run build",
+    "test": "node test/capabilities_test.js"
+  },
   "babel": {
     "presets": [
       "react",

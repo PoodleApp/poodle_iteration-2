@@ -9,6 +9,7 @@ async function testGetCapabilities() {
   const conn   = await google.getConnection(tokGen)
   for (const cap of [
     capabilities.googleExtensions,
+    capabilities.sort,
     capabilities.threadReferences,
     capabilities.threadOrderedSubject,
   ]) {
