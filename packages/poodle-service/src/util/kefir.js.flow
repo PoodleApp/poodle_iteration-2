@@ -14,7 +14,7 @@ export function fromEventsWithEnd<T,S:events$EventEmitter>(
       const value = transform ? transform(...values) : values[0]
       emitter.emit(value)
     })
-    eventSource.on('error', err => { emitter.emit(err); emitter.end() })
+    eventSource.once('error', err => { emitter.error(err); emitter.end() })
     eventSource.once('end', () => { emitter.end() })
   })
 }

@@ -1,11 +1,11 @@
 /* @flow */
 
 import capabilitiesTest from './capabilities_test'
-import envelopeTest     from './envelope_test'
+import fetchTest        from './fetch_test'
 
 const tests = [
   capabilitiesTest(),
-  envelopeTest(),
+  fetchTest(),
 ]
 
 Promise.all(tests)

@@ -4,10 +4,13 @@ import dateformat            from 'dateformat'
 import Connection            from 'imap'
 import * as kefir            from 'kefir'
 import * as capabilities     from '../capabilities'
+import { decode }            from '../encoding'
 import * as imap             from '../util/imap'
 import { fromEventsWithEnd } from '../util/kefir'
+import * as M                from '../models/Message'
 import * as promises         from '../util/promises'
 
+import type { ReadStream } from 'fs'
 import type {
   Box,
   FetchOptions,
@@ -19,12 +22,7 @@ import type {
 import type { Observable } from 'kefir'
 import type { Message } from '../models/Message'
 
-type Cache = (msgid: string) => Promise<?Message>
-
-export async function fetchMessage(msgid: string, cache: Cache, conn: Connection): Promise<Message> {
-  const fromCache = await cache(msgid)
-  if (fromCache) { return fromCache }
-
+export async function fetchMessage(msgid: string, conn: Connection): Promise<Message> {
   if (!conn.serverSupports(capabilities.googleExtensions)) {
     return Promise.reject(
       new Error('cannot fetch a message by ID because server does not support X-GM-EXT-1')
@@ -32,6 +30,20 @@ export async function fetchMessage(msgid: string, cache: Cache, conn: Connection
   }
 
   return searchAllMail(`rfc822msgid:${msgid}`, conn).toPromise()
+}
+
+export function fetchMessagePart(msg: Message, partId: string, conn: Connection): Promise<ReadStream> {
+  const part = M.getPart(partId, msg)
+  if (!part) {
+    return Promise.reject(new Error(`partId ${partId} does not exist in message ${msg.uid}`))
+  }
+
+  const encoding = part.encoding
+
+  return fetchMessages([(msg.uid: number)], { bodies: `${partId}` }, conn)
+  .flatMap(messageBodyStream)
+  .map(body => encoding ? decode(encoding, body) : body)
+  .toPromise()
 }
 
 export function searchAllMail(query: string, conn: Connection): Observable<Message, mixed> {
@@ -87,7 +99,10 @@ function _searchAllMail(criteria: mixed[], conn: Connection): Observable<Message
     promises.lift1(cb => conn.search(criteria, cb))
   ))
   return kefir.fromPromise(uidsPromise)
-  .flatMap(uids => fetchMessages(uids, { bodies: ['HEADER'], struct: true }, conn))
+  .flatMap(uids => fetchMessages(uids, {
+    envelope: true,
+    struct: true,
+  }, conn))
   .flatMap(getAttributes)
 }
 
@@ -96,7 +111,7 @@ function fetchMessages(source: MessageSource, opts: FetchOptions, conn: Connecti
   return fromEventsWithEnd(conn.fetch(source, opts), 'message', (msg, seqno) => msg)
 }
 
-function messageBodyStream(msg: ImapMessage): Observable<Message, mixed> {
+function messageBodyStream(msg: ImapMessage): Observable<ReadStream, mixed> {
   return fromEventsWithEnd(msg, 'body', (stream, info) => stream)
 }
 

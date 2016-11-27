@@ -90,7 +90,7 @@ declare module "imap" {
     bodies?:    string | string[],  // e.g., 'HEADER.FIELDS (FROM SUBJECT TO DATE)'
   }
 
-  declare export type MessageSource = string | string[]
+  declare export type MessageSource = string | string[] | number[]
   declare export type UID = string
 
   declare export type ImapFetch = events$EventEmitter
@@ -111,10 +111,28 @@ declare module "imap" {
     flags:  Flag[],
     date:   Date,
     struct: MessageStruct,
+    envelope: {
+      date:      string,  // ISO 8601
+      subject:   string,
+      from:      Address[],
+      sender:    Address[],
+      replyTo:   Address[],
+      to:        Address[],
+      cc:        ?Address[],
+      bcc:       ?Address[],
+      inReplyTo: ?Address[],
+      messageId: string,  // unique message ID in angle brackets
+    },
     size:   number,
     'x-gm-labels'?: string[],
     'x-gm-thrid'?:  string,
     'x-gm-msgid'?:  string,
+  }
+
+  declare type Address = {
+    name:    string,  // e.g., person's full name
+    mailbox: string,  // username portion of email address
+    host:    string,  // host portion of email address
   }
 
   declare class ConnectionSeq {
