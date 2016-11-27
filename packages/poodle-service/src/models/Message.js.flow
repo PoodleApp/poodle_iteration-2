@@ -1,0 +1,7 @@
+/* @flow */
+
+import type {
+  MessageAttributes,
+} from 'imap'
+
+export type Message = MessageAttributes

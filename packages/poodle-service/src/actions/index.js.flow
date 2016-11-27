@@ -8,7 +8,6 @@ import * as imap             from '../util/imap'
 import { fromEventsWithEnd } from '../util/kefir'
 import * as promises         from '../util/promises'
 
-import type { ReadStream }  from 'fs'
 import type {
   Box,
   FetchOptions,
@@ -18,9 +17,7 @@ import type {
   UID,
 } from 'imap'
 import type { Observable } from 'kefir'
-
-// TODO
-type Message = ReadStream
+import type { Message } from '../models/Message'
 
 type Cache = (msgid: string) => Promise<?Message>
 
@@ -53,10 +50,6 @@ export function fetchRecent(since: Date, box: Box, conn: Connection): Observable
   return kefir.fromPromise(uidsPromise).flatMap(
     uids => fetchConversations(uids, conn)
   )
-}
-
-function messageBodyStream(msg: ImapMessage): Observable<Message, mixed> {
-  return fromEventsWithEnd(msg, 'body', (stream, info) => stream)
 }
 
 // TODO: check cache for each uid
@@ -94,13 +87,17 @@ function _searchAllMail(criteria: mixed[], conn: Connection): Observable<Message
     promises.lift1(cb => conn.search(criteria, cb))
   ))
   return kefir.fromPromise(uidsPromise)
-  .flatMap(uids => fetchMessages(uids, { bodies: [''] }, conn))
-  .flatMap(messageBodyStream)
+  .flatMap(uids => fetchMessages(uids, { bodies: ['HEADER'], struct: true }, conn))
+  .flatMap(getAttributes)
 }
 
 // TODO: Use 'changedsince' option defined by RFC4551
 function fetchMessages(source: MessageSource, opts: FetchOptions, conn: Connection): Observable<ImapMessage,mixed> {
   return fromEventsWithEnd(conn.fetch(source, opts), 'message', (msg, seqno) => msg)
+}
+
+function messageBodyStream(msg: ImapMessage): Observable<Message, mixed> {
+  return fromEventsWithEnd(msg, 'body', (stream, info) => stream)
 }
 
 function getAttributes(message: ImapMessage): Observable<MessageAttributes,mixed> {

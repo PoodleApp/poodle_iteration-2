@@ -65,8 +65,15 @@ declare module "imap" {
     lines?:       number,
   }
 
-  // Should be: type MessageTree = [MessagePart, ...MessageTree]
-  declare export type MessageTree = MessagePart | MessageTree[]
+  /*
+   * If Flow supported a rest-tuple syntax, this type would properly be:
+   *
+   *     type MessageStruct = [MessagePart, ...MessageStruct]
+   *
+   * Since Flow does not support that, we must use a type definition that is
+   * a little more general than it should be.
+   */
+  declare export type MessageStruct = (MessagePart | MessageStruct)[]
 
   declare export type Flag = '\\Seen'
     | '\\Answered'
@@ -103,7 +110,7 @@ declare module "imap" {
     uid:    number,
     flags:  Flag[],
     date:   Date,
-    struct: MessageTree,
+    struct: MessageStruct,
     size:   number,
     'x-gm-labels'?: string[],
     'x-gm-thrid'?:  string,
