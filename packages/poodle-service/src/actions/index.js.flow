@@ -1,5 +1,6 @@
 /* @flow */
 
+import dateformat            from 'dateformat'
 import Connection            from 'imap'
 import * as kefir            from 'kefir'
 import * as capabilities     from '../capabilities'
@@ -9,21 +10,31 @@ import * as promises         from '../util/promises'
 
 import type { ReadStream }  from 'fs'
 import type {
+  Box,
   FetchOptions,
   ImapMessage,
+  MessageAttributes,
   MessageSource,
+  UID,
 } from 'imap'
 import type { Observable } from 'kefir'
 
+// TODO
 type Message = ReadStream
 
-export function fetchMessage(uuid: string, conn: Connection): Promise<Message> {
+type Cache = (msgid: string) => Promise<?Message>
+
+export async function fetchMessage(msgid: string, cache: Cache, conn: Connection): Promise<Message> {
+  const fromCache = await cache(msgid)
+  if (fromCache) { return fromCache }
+
   if (!conn.serverSupports(capabilities.googleExtensions)) {
     return Promise.reject(
       new Error('cannot fetch a message by ID because server does not support X-GM-EXT-1')
     )
   }
-  return searchAllMail(`rfc822msgid:${uuid}`, conn).toPromise()
+
+  return searchAllMail(`rfc822msgid:${msgid}`, conn).toPromise()
 }
 
 export function searchAllMail(query: string, conn: Connection): Observable<Message, mixed> {
@@ -32,7 +43,50 @@ export function searchAllMail(query: string, conn: Connection): Observable<Messa
       Error('cannot search all mail because server does not support X-GM-EXT-1')
     )
   }
+
   return _searchAllMail([['X-GM-RAW', query]], conn)
+}
+
+export function fetchRecent(since: Date, box: Box, conn: Connection): Observable<Message[], mixed> {
+  const q = dateformat(since, 'mmmm d, yyyy')
+  const uidsPromise = promises.lift1(cb => conn.search([['SINCE', q]], cb))
+  return kefir.fromPromise(uidsPromise).flatMap(
+    uids => fetchConversations(uids, conn)
+  )
+}
+
+function messageBodyStream(msg: ImapMessage): Observable<Message, mixed> {
+  return fromEventsWithEnd(msg, 'body', (stream, info) => stream)
+}
+
+// TODO: check cache for each uid
+function fetchConversations(uids: UID[], conn: Connection): Observable<Message[], mixed> {
+  if (!conn.serverSupports(capabilities.googleExtensions)) {
+    return kefir.constantError(
+      new Error('cannot fetch a message by ID because server does not support X-GM-EXT-1')
+    )
+  }
+
+  const threadIds = fetchMessages(uids, {/* metadata only */}, conn)
+  .flatMap(message => getAttributes(message))
+  .scan(
+    (ids, msgAttrs) => {
+      const id = msgAttrs['x-gm-thrid']
+      return id ? ids.add(id) : ids
+    },
+    new Set
+  )
+  .last()
+
+  return threadIds.flatMap(ids => {
+    const threadStreams = Array.from(ids).map(
+      id => _searchAllMail([['X-GM-THRID', id]], conn).scan(
+        (thread, message) => thread.concat(message), []
+      )
+      .last()
+    )
+    return kefir.merge(threadStreams)
+  })
 }
 
 function _searchAllMail(criteria: mixed[], conn: Connection): Observable<Message, mixed> {
@@ -44,11 +98,11 @@ function _searchAllMail(criteria: mixed[], conn: Connection): Observable<Message
   .flatMap(messageBodyStream)
 }
 
-function messageBodyStream(msg: ImapMessage): Observable<Message, mixed> {
-  return fromEventsWithEnd(msg, 'body', (stream, info) => stream)
-}
-
 // TODO: Use 'changedsince' option defined by RFC4551
 function fetchMessages(source: MessageSource, opts: FetchOptions, conn: Connection): Observable<ImapMessage,mixed> {
   return fromEventsWithEnd(conn.fetch(source, opts), 'message', (msg, seqno) => msg)
+}
+
+function getAttributes(message: ImapMessage): Observable<MessageAttributes,mixed> {
+  return fromEventsWithEnd(message, 'attributes')
 }
