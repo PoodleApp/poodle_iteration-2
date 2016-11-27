@@ -12,7 +12,7 @@
   "scripts": {
     "build": "make",
     "pretest": "npm run build",
-    "test": "node test/capabilities_test.js"
+    "test": "node test/index.js"
   },
   "babel": {
     "presets": [
@@ -34,6 +34,7 @@
     "babel-preset-node7": "^1.2.0",
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-3": "^6.17.0",
-    "flow-bin": "^0.36.0"
+    "flow-bin": "^0.36.0",
+    "format-json": "^1.0.3"
   }
 }

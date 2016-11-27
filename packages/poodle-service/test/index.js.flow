@@ -1,0 +1,16 @@
+/* @flow */
+
+import capabilitiesTest from './capabilities_test'
+import envelopeTest     from './envelope_test'
+
+const tests = [
+  capabilitiesTest(),
+  envelopeTest(),
+]
+
+Promise.all(tests)
+  .then(_ => process.exit(0))
+  .catch(err => {
+    console.error(err)
+    process.exit(1)
+  })

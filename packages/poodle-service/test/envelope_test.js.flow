@@ -1,0 +1,18 @@
+/* @flow */
+
+import * as json       from 'format-json'
+import * as actions    from '../src/actions'
+import * as google     from '../src/oauth/google'
+import * as googletest from './oauth/google'
+
+const msgId = '55dad9e6.633e460a.c2b46.ffffce8f@mx.google.com'
+
+export default async function testGetEnvelope() {
+  const tokGen = await googletest.getTokenGenerator()
+  const conn   = await google.getConnection(tokGen)
+  const msg    = await actions.fetchMessage(msgId, () => Promise.resolve(), conn)
+
+  console.log('downloaded message:')
+  console.log(json.diffy(msg))
+  console.log('')
+}

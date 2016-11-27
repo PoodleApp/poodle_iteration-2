@@ -4,9 +4,11 @@ import * as google       from '../src/oauth/google'
 import * as capabilities from '../src/capabilities'
 import * as googletest   from './oauth/google'
 
-async function testGetCapabilities() {
+export default async function testGetCapabilities() {
   const tokGen = await googletest.getTokenGenerator()
   const conn   = await google.getConnection(tokGen)
+
+  console.log('server capabilities:')
   for (const cap of [
     capabilities.googleExtensions,
     capabilities.sort,
@@ -15,6 +17,5 @@ async function testGetCapabilities() {
   ]) {
     console.log(`server supports ${cap}:`, conn.serverSupports(cap))
   }
+  console.log('')
 }
-
-testGetCapabilities().then(() => process.exit(0))
