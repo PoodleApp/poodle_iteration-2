@@ -18,3 +18,11 @@ export function fromEventsWithEnd<T,S:events$EventEmitter>(
     eventSource.once('end', () => { emitter.end() })
   })
 }
+
+export function takeAll<T,E>(obs: Observable<T,E>): Promise<T[]> {
+  return obs.scan(
+    (xs: T[], x: T) => xs.concat(x), []
+  )
+  .last()
+  .toPromise()
+}

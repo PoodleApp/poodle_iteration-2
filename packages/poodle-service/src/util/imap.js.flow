@@ -46,6 +46,6 @@ function findBox(p: (box: Box) => boolean, boxes: Boxes, path?: string = ''): ?[
   }
 }
 
-function boxByAttribute(attribute: string): (box: Box) => boolean {
+export function boxByAttribute(attribute: string): (box: Box) => boolean {
   return box => box.attribs.some(a => a === attribute)
 }

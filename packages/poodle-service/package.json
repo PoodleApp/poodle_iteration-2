@@ -25,6 +25,7 @@
     "dateformat": "^2.0.0",
     "googleapis": "^14.2.0",
     "graphql": "^0.8.2",
+    "graphql-custom-datetype": "^0.3.0",
     "imap": "^0.8.18",
     "kefir": "^3.6.0",
     "libqp": "^1.1.0",

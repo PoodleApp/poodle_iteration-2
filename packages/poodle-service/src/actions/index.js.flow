@@ -3,7 +3,6 @@
 import dateformat            from 'dateformat'
 import Connection            from 'imap'
 import * as kefir            from 'kefir'
-import * as capabilities     from '../capabilities'
 import { decode }            from '../encoding'
 import * as imap             from '../util/imap'
 import { fromEventsWithEnd } from '../util/kefir'
@@ -17,21 +16,12 @@ import type {
   ImapMessage,
   MessageAttributes,
   MessageSource,
-  UID,
 } from 'imap'
 import type { Observable } from 'kefir'
 import type { Message } from '../models/Message'
 
-export async function fetchMessage(msgid: string, conn: Connection): Promise<Message> {
-  if (!conn.serverSupports(capabilities.googleExtensions)) {
-    return Promise.reject(
-      new Error('cannot fetch a message by ID because server does not support X-GM-EXT-1')
-    )
-  }
 
-  return searchAllMail(`rfc822msgid:${msgid}`, conn).toPromise()
-}
-
+// TODO: should we require an open box here?
 export function fetchMessagePart(msg: Message, partId: string, conn: Connection): Promise<ReadStream> {
   const part = M.getPart(partId, msg)
   if (!part) {
@@ -46,68 +36,24 @@ export function fetchMessagePart(msg: Message, partId: string, conn: Connection)
   .toPromise()
 }
 
-export function searchAllMail(query: string, conn: Connection): Observable<Message, mixed> {
-  if (!conn.serverSupports(capabilities.googleExtensions)) {
-    return kefir.constantError(
-      Error('cannot search all mail because server does not support X-GM-EXT-1')
-    )
-  }
-
-  return _searchAllMail([['X-GM-RAW', query]], conn)
-}
-
-export function fetchRecent(since: Date, box: Box, conn: Connection): Observable<Message[], mixed> {
-  const q = dateformat(since, 'mmmm d, yyyy')
-  const uidsPromise = promises.lift1(cb => conn.search([['SINCE', q]], cb))
-  return kefir.fromPromise(uidsPromise).flatMap(
-    uids => fetchConversations(uids, conn)
-  )
-}
-
-// TODO: check cache for each uid
-function fetchConversations(uids: UID[], conn: Connection): Observable<Message[], mixed> {
-  if (!conn.serverSupports(capabilities.googleExtensions)) {
-    return kefir.constantError(
-      new Error('cannot fetch a message by ID because server does not support X-GM-EXT-1')
-    )
-  }
-
-  const threadIds = fetchMessages(uids, {/* metadata only */}, conn)
-  .flatMap(message => getAttributes(message))
-  .scan(
-    (ids, msgAttrs) => {
-      const id = msgAttrs['x-gm-thrid']
-      return id ? ids.add(id) : ids
-    },
-    new Set
-  )
-  .last()
-
-  return threadIds.flatMap(ids => {
-    const threadStreams = Array.from(ids).map(
-      id => _searchAllMail([['X-GM-THRID', id]], conn).scan(
-        (thread, message) => thread.concat(message), []
-      )
-      .last()
-    )
-    return kefir.merge(threadStreams)
-  })
-}
-
-function _searchAllMail(criteria: mixed[], conn: Connection): Observable<Message, mixed> {
-  const uidsPromise = imap.openAllMail(true, conn).then(box => (
-    promises.lift1(cb => conn.search(criteria, cb))
-  ))
+export function search(criteria: mixed[], box: Box, conn: Connection): Observable<Message, mixed> {
+  const uidsPromise = promises.lift1(cb => conn.search(criteria, cb))
   return kefir.fromPromise(uidsPromise)
-  .flatMap(uids => fetchMessages(uids, {
-    envelope: true,
-    struct: true,
-  }, conn))
-  .flatMap(getAttributes)
+    .flatMap(uids => fetchMessages(uids, {
+      envelope: true,
+      struct: true,
+    }, conn))
+    .flatMap(getAttributes)
+}
+
+export function fetchRecent(since: Date, box: Box, conn: Connection): Observable<Message, mixed> {
+  const q = dateformat(since, 'mmmm d, yyyy')
+  return search([['SINCE', q]], box, conn)
 }
 
 // TODO: Use 'changedsince' option defined by RFC4551
-function fetchMessages(source: MessageSource, opts: FetchOptions, conn: Connection): Observable<ImapMessage,mixed> {
+// TODO: should we require an open box here?
+export function fetchMessages(source: MessageSource, opts: FetchOptions, conn: Connection): Observable<ImapMessage,mixed> {
   return fromEventsWithEnd(conn.fetch(source, opts), 'message', (msg, seqno) => msg)
 }
 
