@@ -24,6 +24,7 @@
   "dependencies": {
     "dateformat": "^2.0.0",
     "googleapis": "^14.2.0",
+    "graphql": "^0.8.2",
     "imap": "^0.8.18",
     "kefir": "^3.6.0",
     "libqp": "^1.1.0",
@@ -35,7 +36,7 @@
     "babel-preset-node7": "^1.2.0",
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-3": "^6.17.0",
-    "flow-bin": "^0.36.0",
+    "flow-bin": "^0.37.4",
     "format-json": "^1.0.3"
   }
 }
