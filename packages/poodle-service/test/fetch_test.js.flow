@@ -11,10 +11,14 @@ import * as promises      from '../src/util/promises'
 const msgId = '55dad9e6.633e460a.c2b46.ffffce8f@mx.google.com'
 
 export default function test() {
-  return Promise.all([
-    testFetchMessage(),
-    testFetchMessagePart(),
-  ])
+  return [
+    testFetchMessage,
+    testFetchMessagePart,
+  ]
+  .reduce(
+    (test, nextTestFn) => test.then(nextTestFn),
+    Promise.resolve()
+  )
 }
 
 async function testFetchMessage() {

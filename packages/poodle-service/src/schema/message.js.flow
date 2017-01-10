@@ -74,17 +74,22 @@ export const queryType = new GraphQLObjectType({
     size: {
       type: GraphQLInt,
     },
-    'x-gm-labels': {
+
+    // TODO: these field names do not match the underlying property names
+    xGmLabels: {
       type: new GraphQLList(new GraphQLNonNull(GraphQLString)),
       description: 'Gmail labels on the message',
+      resolve: msg => msg['x-gm-labels'],
     },
-    'x-gm-thrid': {
+    xGmThrid: {
       type: GraphQLString,
       description: 'ID of thread that message belongs to (Gmail only)',
+      resolve: msg => msg['x-gm-thrid'],
     },
-    'x-gm-msgid': {
+    xGmMsgid: {
       type: GraphQLString,
       description: 'ID of message (Gmail only)',
+      resolve: msg => msg['x-gm-msgid'],
     },
   }
 })

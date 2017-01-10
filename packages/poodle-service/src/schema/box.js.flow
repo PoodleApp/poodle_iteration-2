@@ -23,15 +23,15 @@ export const queryType = new GraphQLObjectType({
       description: 'Download messages from the given mailbox',
       args: {
         id: {
-          type: new GraphQLNonNull(GraphQLString),
+          type: GraphQLString,
           description: 'RFC 822 message ID',
         },
         search: {
-          type: new GraphQLNonNull(GraphQLString),
+          type: GraphQLString,
           description: 'Gmail search query',
         },
         since: {
-          type: new GraphQLNonNull(GraphQLDateTime),
+          type: GraphQLDateTime,
           description: 'Find messages that were received after the given time',
         },
       },
