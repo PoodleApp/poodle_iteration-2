@@ -1,12 +1,27 @@
 {
-  "name": "poodle2",
+  "name": "poodle",
   "version": "0.1.0",
-  "private": true,
+  "description": "Experimental email client with social features",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hallettj/poodle.git"
+  },
+  "keywords": [
+    "email"
+  ],
+  "author": "Jesse Hallett <jesse@sitr.us>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/hallettj/poodle/issues"
+  },
+  "homepage": "https://github.com/hallettj/poodle#readme",
   "devDependencies": {
     "flow-bin": "^0.37.4",
     "react-scripts": "0.8.5"
   },
   "dependencies": {
+    "arfe": "PoodleApp/arfe",
+    "grahpql-imap": "PoodleApp/graphql-imap",
     "react": "^15.4.2",
     "react-dom": "^15.4.2"
   },
