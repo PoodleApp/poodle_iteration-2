@@ -22,7 +22,7 @@
   "dependencies": {
     "apollo-client": "^0.7.1",
     "arfe": "PoodleApp/arfe",
-    "grahpql-imap": "PoodleApp/graphql-imap",
+    "graphql-imap": "PoodleApp/graphql-imap",
     "react": "^15.4.2",
     "react-apollo": "^0.8.1",
     "react-dom": "^15.4.2",
