@@ -20,10 +20,14 @@
     "react-scripts": "0.8.5"
   },
   "dependencies": {
+    "apollo-client": "^0.7.1",
     "arfe": "PoodleApp/arfe",
     "grahpql-imap": "PoodleApp/graphql-imap",
     "react": "^15.4.2",
-    "react-dom": "^15.4.2"
+    "react-apollo": "^0.8.1",
+    "react-dom": "^15.4.2",
+    "react-redux": "^5.0.2",
+    "redux": "^3.6.0"
   },
   "scripts": {
     "start": "react-scripts start",
