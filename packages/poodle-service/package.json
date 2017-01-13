@@ -1,6 +1,6 @@
 {
-  "name": "imap-store",
-  "version": "1.0.0",
+  "name": "graphql-imap",
+  "version": "0.0.1",
   "description": "Abstracts IMAP interactions, such as downloading entire threads; provides transparent caching",
   "main": "index.js",
   "repository": {
