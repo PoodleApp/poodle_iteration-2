@@ -32,8 +32,8 @@ query MessageById($msgId: String!) {
 
 async function testQueryMessage() {
   const tokGen = await googletest.getTokenGenerator()
-  const conn   = await google.getConnection(tokGen)
-  const result = await graphql(schema, messageById, null, { conn }, { msgId })
+  const connectionFactory = () => google.getConnection(tokGen)
+  const result = await graphql(schema, messageById, null, { connectionFactory }, { msgId })
 
   console.log("\n")
   console.log('result of query:')

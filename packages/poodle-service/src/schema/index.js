@@ -11,6 +11,15 @@ import Connection                    from 'imap'
 import * as imaputil                 from '../util/imap'
 import { queryType as boxQueryType } from './box'
 
+/*
+ * GraphQL schema for IMAP interface
+ *
+ * Requires a connection factory function in context.
+ * It should have the type:
+ *
+ *     () => Promise<Connection>
+ *
+ */
 export default new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'RootQueryType',
@@ -24,12 +33,16 @@ export default new GraphQLSchema({
             description: 'Find a box with a given attribute - e.g. `\\All`',
           }
         },
-        resolve(root, args, context) {
-          const conn: Connection = context.conn
+        async resolve(root, args, context) {
+          // TODO: Get `connectionFactory` from `context` or `root`?
+          const cf: () => Promise<Connection> = context.connectionFactory
+
           if (args.attribute) {
-            return imaputil.openBox(
+            const conn = await cf()
+            const box  = await imaputil.openBox(
               imaputil.boxByAttribute(args.attribute), true, conn
             )
+            return [conn, box]  // pass connection with box
           }
         },
       },

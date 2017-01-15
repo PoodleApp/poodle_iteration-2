@@ -12,6 +12,7 @@ import { fetchRecent }          from '../actions'
 import { fetchMessage, search } from '../actions/google'
 import * as kefirutil           from '../util/kefir'
 
+import type { Box } from 'imap'
 import { queryType as messageQueryType } from './message'
 
 export const queryType = new GraphQLObjectType({
@@ -35,9 +36,7 @@ export const queryType = new GraphQLObjectType({
           description: 'Find messages that were received after the given time',
         },
       },
-      resolve(box, args, context) {
-        const conn: Connection = context.conn
-
+      resolve([conn, box]: [Connection, Box], args, context) {
         const id: ?string = args.id
         if (id) {
           return fetchMessage(id, box, conn)

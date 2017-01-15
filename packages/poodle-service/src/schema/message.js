@@ -9,9 +9,6 @@ import {
 } from 'graphql'
 import GraphQLDateTime from 'graphql-custom-datetype'
 
-import Connection                        from 'imap'
-import * as imaputil                     from '../util/imap'
-
 const addressQueryType = new GraphQLObjectType({
   name: 'Address',
   description: 'Represents data in email header fields, `to`, `from`, etc.',
