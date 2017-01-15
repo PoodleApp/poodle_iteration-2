@@ -3,12 +3,7 @@ npm-debug.log
 yarn-error.log
 
 # Generated files
-index.js
-index.js.map
-src/**/*.js
-src/**/*.js.map
-test/**/*.js
-test/**/*.js.map
+lib/
 
 # Misc
 .DS_Store
