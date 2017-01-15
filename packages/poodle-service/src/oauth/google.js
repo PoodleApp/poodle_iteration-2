@@ -93,19 +93,20 @@ export function getTokenGenerator(opts: TokenGeneratorOpts): Promise<XOAuth2Gene
   }
 }
 
-export function getConnection(tokenGen: XOAuth2Generator): Promise<Connection> {
-  return lift1(cb => tokenGen.getToken(cb))
-  .then(auth => initImap({
-    xoauth2: auth,
+export async function getConnection(tokenGen: XOAuth2Generator): Promise<Connection> {
+  const token = await lift1(cb => tokenGen.getToken(cb))
+  return initImap(token)
+}
+
+export function initImap(token: string, opts: ImapOpts = {}): Promise<Connection> {
+  const imap = new Connection({
+    ...opts,
+    xoauth2: token,
     host: 'imap.gmail.com',
     port: 993,
     tls: true,
-  }))
-}
-
-function initImap(opts: ImapOpts): Promise<Connection> {
-  var imap = new Connection(opts)
-  var p = new Promise((resolve, reject) => {
+  })
+  const p = new Promise((resolve, reject) => {
     imap.once('ready', () => resolve(imap))
     imap.once('error', reject)
   })
