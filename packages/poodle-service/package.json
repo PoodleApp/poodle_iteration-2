@@ -4,15 +4,17 @@
   "description": "Abstracts IMAP interactions, such as downloading entire threads; provides transparent caching",
   "main": "index.js",
   "repository": {
-    "url": "https://github.com/PoodleApp/imap-store",
+    "url": "https://github.com/PoodleApp/graphql-imap",
     "type": "git"
   },
   "author": "Jesse Hallett <jesse@sitr.us>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
+    "test": "flow check",
     "build": "make",
-    "pretest": "npm run build",
-    "test": "node test/index.js"
+    "prepublishOnly": "npm test && npm run build",
+    "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
+    "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
   },
   "babel": {
     "presets": [
@@ -39,6 +41,7 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-3": "^6.17.0",
     "flow-bin": "^0.37.4",
-    "format-json": "^1.0.3"
+    "format-json": "^1.0.3",
+    "in-publish": "^2.0.0"
   }
 }
