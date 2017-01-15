@@ -10,7 +10,6 @@
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
   "scripts": {
-    "pretest": "npm run build",
     "test": "babel-node test/index.js",
     "build": "make",
     "prepublishOnly": "npm test && npm run build",
