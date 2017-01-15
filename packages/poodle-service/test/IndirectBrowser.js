@@ -17,8 +17,8 @@ export default class IndirectBrowser extends EventEmitter {
       input: process.stdin,
       output: process.stdout,
     })
-    rl.question('After logging in, please enter the browser window title:', title => {
-      this.title = title
+    rl.question('Log in, and then paste code here: ', code => {
+      this.title = `Success code=${code}`
       this.emit('page-title-updated')
     })
   }
