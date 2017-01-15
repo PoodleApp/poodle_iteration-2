@@ -10,7 +10,8 @@
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
   "scripts": {
-    "test": "flow check",
+    "pretest": "npm run build",
+    "test": "babel-node test/index.js",
     "build": "make",
     "prepublishOnly": "npm test && npm run build",
     "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
