@@ -1,7 +1,7 @@
 [ignore]
-.*/node_modules/arfe/test/.*
-.*/node_modules/graphql-imap/test/.*
-.*/node_modules/mailcomposer/.*
+.*/arfe/test/.*
+.*/graphql-imap/test/.*
+.*/mailcomposer/.*
 
 [include]
 
