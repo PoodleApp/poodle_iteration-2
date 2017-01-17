@@ -6,6 +6,9 @@
   "repository": "git+https://github.com/PoodleApp/poodle-electron.git",
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
+  "scripts": {
+    "start": "electron ."
+  },
   "devDependencies": {
     "babel-cli": "^6.18.0",
     "babel-preset-node7": "^1.4.0",
