@@ -1,4 +1,7 @@
 [ignore]
+.*/arfe/test/.*
+.*/graphql-imap/test/.*
+.*/mailcomposer/.*
 
 [include]
 

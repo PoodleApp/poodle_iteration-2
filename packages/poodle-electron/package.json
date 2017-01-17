@@ -2,12 +2,18 @@
   "name": "poodle-electron",
   "version": "0.1.0",
   "description": "Desktop version of Poodle, an email client with social features",
-  "main": "index.js",
+  "main": "lib/index.js",
   "repository": "git+https://github.com/PoodleApp/poodle-electron.git",
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "electron ."
+    "start": "yarn run build:watch && electron .",
+    "test": "babel-node test/index.js",
+    "build": "make",
+    "build:watch": "watch 'yarn run make' src",
+    "prepublishOnly": "yarn test && yarn run build",
+    "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
+    "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
@@ -15,6 +21,13 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-3": "^6.17.0",
     "electron": "^1.4.14",
-    "flow-bin": "^0.37.4"
+    "flow-bin": "^0.37.4",
+    "in-publish": "^2.0.0",
+    "watch": "^1.0.1"
+  },
+  "dependencies": {
+    "apollo-client": "^0.7.3",
+    "react-apollo": "^0.8.1",
+    "react-dom": "^15.4.2"
   }
 }
