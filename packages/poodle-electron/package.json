@@ -7,13 +7,25 @@
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "yarn run build:watch && electron .",
+    "start": "electron .",
     "test": "babel-node test/index.js",
     "build": "make",
-    "build:watch": "watch 'yarn run make' src",
+    "build:watch": "watch 'yarn run build' src",
     "prepublishOnly": "yarn test && yarn run build",
     "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
     "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
+  },
+  "babel": {
+    "presets": [
+      "react",
+      "stage-3",
+      "node7"
+    ]
+  },
+  "dependencies": {
+    "apollo-client": "^0.7.3",
+    "react-apollo": "^0.8.1",
+    "react-dom": "^15.4.2"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
@@ -24,10 +36,5 @@
     "flow-bin": "^0.37.4",
     "in-publish": "^2.0.0",
     "watch": "^1.0.1"
-  },
-  "dependencies": {
-    "apollo-client": "^0.7.3",
-    "react-apollo": "^0.8.1",
-    "react-dom": "^15.4.2"
   }
 }
