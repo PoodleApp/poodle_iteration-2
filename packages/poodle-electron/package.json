@@ -1,0 +1,17 @@
+{
+  "name": "poodle-electron",
+  "version": "0.1.0",
+  "description": "Desktop version of Poodle, an email client with social features",
+  "main": "index.js",
+  "repository": "git+https://github.com/PoodleApp/poodle-electron.git",
+  "author": "Jesse Hallett <jesse@sitr.us>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-preset-node7": "^1.4.0",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-3": "^6.17.0",
+    "electron": "^1.4.14",
+    "flow-bin": "^0.37.4"
+  }
+}
