@@ -1,10 +1,10 @@
 {
-  "name": "poodle",
+  "name": "poodle-core",
   "version": "0.1.0",
   "description": "Experimental email client with social features",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hallettj/poodle.git"
+    "url": "git+https://github.com/PoodleApp/poodle-core.git"
   },
   "keywords": [
     "email"
@@ -12,9 +12,9 @@
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/hallettj/poodle/issues"
+    "url": "https://github.com/PoodleApp/poodle-core/issues"
   },
-  "homepage": "https://github.com/hallettj/poodle#readme",
+  "homepage": "https://github.com/PoodleApp/poodle-core#readme",
   "devDependencies": {
     "flow-bin": "^0.37.4",
     "react-scripts": "0.8.5"
