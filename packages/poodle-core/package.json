@@ -25,7 +25,7 @@
     "prepublishOnly": "yarn test && yarn run build",
     "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
     "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
-  }
+  },
   "babel": {
     "presets": [
       "react",
@@ -45,5 +45,5 @@
   "devDependencies": {
     "flow-bin": "^0.37.4",
     "react-scripts": "0.8.5"
-  },
+  }
 }
