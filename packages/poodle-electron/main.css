@@ -1,0 +1,42 @@
+/* apply a natural box layout model to all elements, but allowing components to change */
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+a {
+  color: #0091ea; // lightBlueA700
+  color: #7c4dff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+::selection {
+  background-color: #40c4ff; // lightBlueA200
+}
+
+html {
+  font-family: 'Roboto', sans-serif;
+}
+
+body, h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+body {
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.markdown-content p {
+  white-space: pre-wrap;
+}
+
+.wait, .wait * {
+  cursor: wait;
+}
