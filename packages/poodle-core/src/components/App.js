@@ -1,17 +1,21 @@
 /* @flow */
 
-import React, { Component } from 'react'
+import React        from 'react'
+import RaisedButton from 'material-ui/RaisedButton'
 
-class App extends Component {
+type AppProps = {}
+
+class App extends React.Component<void, AppProps, void> {
   render() {
     return (
       <div className="App">
         <div className="App-header">
           <h2>Poodle</h2>
         </div>
-        <p>
-          Welcome to Poodle!
-        </p>
+        <div>
+          <p>Welcome to Poodle!</p>
+          <RaisedButton label="Begin" />
+        </div>
       </div>
     )
   }

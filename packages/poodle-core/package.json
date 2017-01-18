@@ -37,9 +37,12 @@
     "apollo-client": "^0.7.1",
     "arfe": "PoodleApp/arfe",
     "graphql-imap": "PoodleApp/graphql-imap",
+    "material-ui": "^0.16.7",
     "react": "^15.4.2",
     "react-apollo": "^0.8.1",
+    "react-dom": "^15.4.2",
     "react-redux": "^5.0.2",
+    "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.6.0"
   },
   "devDependencies": {
@@ -48,6 +51,8 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-3": "^6.17.0",
     "flow-bin": "^0.37.4",
-    "react-scripts": "0.8.5"
+    "in-publish": "^2.0.0",
+    "react-scripts": "0.8.5",
+    "watch": "^1.0.1"
   }
 }

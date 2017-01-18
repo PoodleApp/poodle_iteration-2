@@ -1,12 +1,18 @@
 /* @flow */
 
-import React              from 'react'
-import * as redux         from 'redux'
-import App                from './components/App'
-import buildRootReducer   from './reducers'
+import ApolloClient         from 'apollo-client'
+import MuiThemeProvider     from 'material-ui/styles/MuiThemeProvider'
+import React                from 'react'
+import { ApolloProvider }   from 'react-apollo'
+import injectTapEventPlugin from 'react-tap-event-plugin'
+import * as redux           from 'redux'
+import App                  from './components/App'
+import buildRootReducer     from './reducers'
 
-import typeof ApolloClient from 'apollo-client'
-import type { Store }      from 'redux'
+import type { Store } from 'redux'
+
+// Adds support for `onTouchTap` to React components
+injectTapEventPlugin()
 
 export function reduxStore(client: ApolloClient): Store {
   return redux.createStore(
@@ -18,4 +24,14 @@ export function reduxStore(client: ApolloClient): Store {
         : f => f
     )
   )
+}
+
+export function RootComponent(): React.Element<*> {
+  const client = new ApolloClient()
+  const store  = reduxStore(client)
+  return <ApolloProvider store={store} client={client}>
+    <MuiThemeProvider>
+      <App />
+    </MuiThemeProvider>
+  </ApolloProvider>
 }
