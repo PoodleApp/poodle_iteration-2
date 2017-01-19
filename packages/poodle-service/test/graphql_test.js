@@ -1,10 +1,9 @@
 /* @flow */
 
-import { graphql }      from 'graphql'
-import * as json        from 'format-json'
-import * as google      from '../src/oauth/google'
-import * as googletest  from './oauth/google'
-import { executeQuery } from '../src'
+import * as json       from 'format-json'
+import * as google     from '../src/oauth/google'
+import * as googletest from './oauth/google'
+import { graphql }     from '../src'
 
 const msgId = '55dad9e6.633e460a.c2b46.ffffce8f@mx.google.com'
 
@@ -33,7 +32,7 @@ query MessageById($msgId: String!) {
 async function testQueryMessage() {
   const tokGen = await googletest.getTokenGenerator()
   const connectionFactory = () => google.getConnection(tokGen)
-  const result = await executeQuery(messageById, connectionFactory, { msgId })
+  const result = await graphql(messageById, connectionFactory, { msgId })
 
   console.log("\n")
   console.log('result of query:')
