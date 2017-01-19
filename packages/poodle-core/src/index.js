@@ -1,13 +1,14 @@
 /* @flow */
 
-import ApolloClient         from 'apollo-client'
-import MuiThemeProvider     from 'material-ui/styles/MuiThemeProvider'
-import React                from 'react'
-import { ApolloProvider }   from 'react-apollo'
-import injectTapEventPlugin from 'react-tap-event-plugin'
-import * as redux           from 'redux'
-import App                  from './components/App'
-import buildRootReducer     from './reducers'
+import ApolloClient             from 'apollo-client'
+import MuiThemeProvider         from 'material-ui/styles/MuiThemeProvider'
+import React                    from 'react'
+import { ApolloProvider }       from 'react-apollo'
+import injectTapEventPlugin     from 'react-tap-event-plugin'
+import * as redux               from 'redux'
+import App                      from './components/App'
+import buildRootReducer         from './reducers'
+import { GraphQLImapInterface } from './transport'
 
 import type { Store } from 'redux'
 
@@ -27,7 +28,10 @@ export function reduxStore(client: ApolloClient): Store {
 }
 
 export function RootComponent(): React.Element<*> {
-  const client = new ApolloClient()
+  const connectionFactory: any = null // TODO
+  const client = new ApolloClient({
+    networkInterface: new GraphQLImapInterface(connectionFactory)
+  })
   const store  = reduxStore(client)
   return <ApolloProvider store={store} client={client}>
     <MuiThemeProvider>
