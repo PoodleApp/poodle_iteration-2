@@ -6,6 +6,8 @@ import schema      from './schema'
 
 import type { ExecutionResult } from 'graphql'
 
+export type IMAPConnection = Connection
+
 export { default as schema } from './schema'
 
 export function executeQuery(
