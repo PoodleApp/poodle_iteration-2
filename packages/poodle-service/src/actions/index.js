@@ -16,6 +16,7 @@ import type {
   ImapMessage,
   MessageAttributes,
   MessageSource,
+  UID,
 } from 'imap'
 import type { Observable } from 'kefir'
 import type { Message } from '../models/Message'
@@ -44,6 +45,11 @@ export function search(criteria: mixed[], box: Box, conn: Connection): Observabl
       struct: true,
     }, conn))
     .flatMap(getAttributes)
+}
+
+export function searchUids(criteria: mixed[], box: Box, conn: Connection): Observable<UID[], mixed> {
+  const uidsPromise = promises.lift1(cb => conn.search(criteria, cb))
+  return kefir.fromPromise(uidsPromise)
 }
 
 export function fetchRecent(since: Date, box: Box, conn: Connection): Observable<Message, mixed> {

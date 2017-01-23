@@ -19,10 +19,9 @@ export function fromEventsWithEnd<T,S:events$EventEmitter>(
   })
 }
 
-export function takeAll<T,E>(obs: Observable<T,E>): Promise<T[]> {
+export function takeAll<T,E>(obs: Observable<T,E>): Observable<T[],E> {
   return obs.scan(
     (xs: T[], x: T) => xs.concat(x), []
   )
   .last()
-  .toPromise()
 }

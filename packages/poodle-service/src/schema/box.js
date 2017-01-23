@@ -51,7 +51,7 @@ export const Box = new GraphQLObjectType({
           // TODO: could these be streamed?
           return kefirutil.takeAll(
             search(query, box, conn)
-          )
+          ).toPromise()
         }
 
         const since: ?Date = args.since
@@ -59,7 +59,7 @@ export const Box = new GraphQLObjectType({
           // TODO: could these be streamed?
           return kefirutil.takeAll(
             fetchRecent(since, box, conn)
-          )
+          ).toPromise()
         }
       },
     },
@@ -78,7 +78,7 @@ export const Box = new GraphQLObjectType({
         if (query) {
           return kefirutil.takeAll(
             searchByThread(query, box, conn)
-          )
+          ).toPromise()
         }
 
         return []

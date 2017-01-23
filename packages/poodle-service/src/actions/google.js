@@ -6,9 +6,10 @@
 
 import * as kefir        from 'kefir'
 import Connection        from 'imap'
+import * as basic        from './index'
 import * as capabilities from '../capabilities'
 import * as promises     from '../util/promises'
-import * as basic        from './index'
+import * as kefirutil    from '../util/kefir'
 
 import type {
   Box,
@@ -45,8 +46,7 @@ export function searchByThread(query: string, box: Box, conn: Connection): Obser
     )
   }
 
-  const uidsPromise = promises.lift1(cb => conn.search([['X-GM-RAW', query]], cb))
-  return kefir.fromPromise(uidsPromise)
+  return basic.searchUids([['X-GM-RAW', query]], box, conn)
     .flatMap(uids => fetchConversations(uids, box, conn))
 }
 
@@ -92,14 +92,12 @@ function fetchThreadIds(uids: UID[], box: Box, conn: Connection): Observable<str
 }
 
 function fetchConversation(threadId: string, box: Box, conn: Connection): Observable<Message[], mixed> {
-  return basic.fetchMessages([['X-GM-THRID', threadId]], {
-    envelope: true,
-    struct:   true,
-  }, conn)
+  const msgs = basic.searchUids([['X-GM-THRID', threadId]], box, conn)
+    .flatMap(uids => basic.fetchMessages(uids, {
+      envelope: true,
+      struct:   true,
+    }, conn))
     .flatMap(basic.getAttributes)
-    .scan(
-      (thread: Message[], message: Message) => { thread.push(message); return thread },
-      ([]: Message[])
-    )
-    .last()
+
+  return kefirutil.takeAll(msgs)
 }
