@@ -12,6 +12,7 @@
   "scripts": {
     "test": "babel-node test/index.js",
     "build": "make",
+    "build:watch": "watch 'yarn run build' src",
     "prepublishOnly": "npm test && npm run build",
     "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
     "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
@@ -42,6 +43,7 @@
     "babel-preset-stage-3": "^6.17.0",
     "flow-bin": "^0.37.4",
     "format-json": "^1.0.3",
-    "in-publish": "^2.0.0"
+    "in-publish": "^2.0.0",
+    "watch": "^1.0.1"
   }
 }
