@@ -90,8 +90,7 @@ declare module "imap" {
     bodies?:    string | string[],  // e.g., 'HEADER.FIELDS (FROM SUBJECT TO DATE)'
   }
 
-  declare export type MessageSources = MessageSource | MessageSource[]
-  declare export type MessageSource = string | number | [string, string]
+  declare export type MessageSource = string | string[] | number[]
   declare export type UID = string
 
   declare export type ImapFetch = events$EventEmitter
@@ -137,7 +136,7 @@ declare module "imap" {
   }
 
   declare class ConnectionSeq {
-    fetch(source: MessageSources, opts?: FetchOptions): ImapFetch;
+    fetch(source: MessageSource, opts?: FetchOptions): ImapFetch;
   }
 
   declare export default class Connection extends events$EventEmitter {
@@ -175,7 +174,7 @@ declare module "imap" {
     // All of these methods have sequence-based counterparts. Those are declared
     // in `ConnectionSeq`.
     seq: ConnectionSeq;
-    fetch(source: MessageSources, opts?: FetchOptions): ImapFetch;
+    fetch(source: MessageSource, opts?: FetchOptions): ImapFetch;
     serverSupports(capability: string): boolean;
   }
   // Imap events:

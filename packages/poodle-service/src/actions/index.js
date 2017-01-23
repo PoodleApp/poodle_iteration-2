@@ -15,7 +15,7 @@ import type {
   FetchOptions,
   ImapMessage,
   MessageAttributes,
-  MessageSources,
+  MessageSource,
 } from 'imap'
 import type { Observable } from 'kefir'
 import type { Message } from '../models/Message'
@@ -53,7 +53,7 @@ export function fetchRecent(since: Date, box: Box, conn: Connection): Observable
 
 // TODO: Use 'changedsince' option defined by RFC4551
 // TODO: should we require an open box here?
-export function fetchMessages(source: MessageSources, opts: FetchOptions, conn: Connection): Observable<ImapMessage,mixed> {
+export function fetchMessages(source: MessageSource, opts: FetchOptions, conn: Connection): Observable<ImapMessage,mixed> {
   return fromEventsWithEnd(conn.fetch(source, opts), 'message', (msg, seqno) => msg)
 }
 
