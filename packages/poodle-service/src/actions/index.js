@@ -61,6 +61,6 @@ function messageBodyStream(msg: ImapMessage): Observable<ReadStream, mixed> {
   return fromEventsWithEnd(msg, 'body', (stream, info) => stream)
 }
 
-function getAttributes(message: ImapMessage): Observable<MessageAttributes,mixed> {
+export function getAttributes(message: ImapMessage): Observable<MessageAttributes,mixed> {
   return fromEventsWithEnd(message, 'attributes')
 }

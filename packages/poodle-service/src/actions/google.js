@@ -38,32 +38,53 @@ export function search(query: string, box: Box, conn: Connection): Observable<Me
   return basic.search([['X-GM-RAW', query]], box, conn)
 }
 
-// // TODO: check cache for each uid
-// function fetchConversations(uids: UID[], box: Box, conn: Connection): Observable<Message[], mixed> {
-//   if (!conn.serverSupports(capabilities.googleExtensions)) {
-//     return kefir.constantError(
-//       new Error('cannot fetch a message by ID because server does not support X-GM-EXT-1')
-//     )
-//   }
+// TODO: check cache for each uid
+export function fetchConversations(
+  uids: UID[],
+  box: Box,
+  conn: Connection,
+  limit: number = 0
+): Observable<Message[], mixed> {
+  if (!conn.serverSupports(capabilities.googleExtensions)) {
+    return kefir.constantError(
+      new Error('cannot fetch a message by ID because server does not support X-GM-EXT-1')
+    )
+  }
 
-//   const threadIds = basic.fetchMessages(uids, {/* metadata only */}, conn)
-//   .flatMap(message => basic.getAttributes(message))
-//   .scan(
-//     (ids, msgAttrs) => {
-//       const id = msgAttrs['x-gm-thrid']
-//       return id ? ids.add(id) : ids
-//     },
-//     new Set
-//   )
-//   .last()
+  const uids_ = limit > 0 ? uids.slice(0, limit) : uids
+  const threadIds = fetchThreadIds(uids_, box, conn)
+  return threadIds.flatMap(tIds => {
+    const threadStreams = tIds.map(
+      threadId => fetchConversation(threadId, box, conn)
+    )
+    return kefir.merge(threadStreams)
+  })
+}
 
-//   return threadIds.flatMap(ids => {
-//     const threadStreams = Array.from(ids).map(
-//       id => _searchAllMail([['X-GM-THRID', id]], conn).scan(
-//         (thread, message) => thread.concat(message), []
-//       )
-//       .last()
-//     )
-//     return kefir.merge(threadStreams)
-//   })
-// }
+function fetchThreadIds(uids: UID[], box: Box, conn: Connection): Observable<string[], mixed> {
+  return basic.fetchMessages(uids, {/* metadata only */}, conn)
+    .flatMap(message => basic.getAttributes(message))
+    .scan(
+      (tIds: Set<string>, msgAttrs) => {
+        const threadId = msgAttrs['x-gm-thrid']
+        if (!threadId) {
+          // TODO: reflect error in returned Observable
+          throw new Error(`attribute \`x-gm-thrid\` is missing: ${JSON.stringify(msgAttrs)}`)
+        }
+        return tIds.add(threadId)
+      },
+      new Set
+    )
+    .last()
+    .map(set => Array.from(set.values()))
+}
+
+function fetchConversation(threadId: string, box: Box, conn: Connection): Observable<Message[], mixed> {
+  return basic.fetchMessages([['X-GM-THRID', threadId]], { bodies: [''] }, conn)
+    .flatMap(basic.getAttributes)
+    .scan(
+      (thread: Message[], message: Message) => { thread.push(message); return thread },
+      ([]: Message[])
+    )
+    .last()
+}
