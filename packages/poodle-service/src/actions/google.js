@@ -47,11 +47,11 @@ export function searchByThread(query: string, box: Box, conn: Connection): Obser
   }
 
   return basic.searchUids([['X-GM-RAW', query]], box, conn)
-    .flatMap(uids => fetchConversations(uids, box, conn))
+    .flatMap(uids => fetchThreads(uids, box, conn))
 }
 
 // TODO: check cache for each uid
-function fetchConversations(
+function fetchThreads(
   uids: UID[],
   box: Box,
   conn: Connection,
@@ -65,33 +65,24 @@ function fetchConversations(
 
   const uids_ = limit > 0 ? uids.slice(0, limit) : uids
   const threadIds = fetchThreadIds(uids_, box, conn)
-  return threadIds.flatMap(tIds => {
-    const threadStreams = tIds.map(
-      threadId => fetchConversation(threadId, box, conn)
-    )
-    return kefir.merge(threadStreams)
-  })
+  return threadIds.flatMap(threadId => fetchThread(threadId, box, conn))
 }
 
-function fetchThreadIds(uids: UID[], box: Box, conn: Connection): Observable<string[], mixed> {
+function fetchThreadIds(uids: UID[], box: Box, conn: Connection): Observable<string, mixed> {
   return basic.fetchMessages(uids, {/* metadata only */}, conn)
-    .flatMap(message => basic.getAttributes(message))
-    .scan(
-      (tIds: Set<string>, msgAttrs) => {
-        const threadId = msgAttrs['x-gm-thrid']
-        if (!threadId) {
-          // TODO: reflect error in returned Observable
-          throw new Error(`attribute \`x-gm-thrid\` is missing: ${JSON.stringify(msgAttrs)}`)
-        }
-        return tIds.add(threadId)
-      },
-      new Set
-    )
-    .last()
-    .map(set => Array.from(set.values()))
+    .flatMap(basic.getAttributes)
+    .map(message => {
+      const threadId = message['x-gm-thrid']
+      if (!threadId) {
+        // TODO: reflect error in returned Observable
+        throw new Error(`attribute \`x-gm-thrid\` is missing: ${JSON.stringify(message)}`)
+      }
+      return threadId
+    })
+    .skipDuplicates()
 }
 
-function fetchConversation(threadId: string, box: Box, conn: Connection): Observable<Message[], mixed> {
+function fetchThread(threadId: string, box: Box, conn: Connection): Observable<Message[], mixed> {
   const msgs = basic.searchUids([['X-GM-THRID', threadId]], box, conn)
     .flatMap(uids => basic.fetchMessages(uids, {
       envelope: true,
