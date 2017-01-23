@@ -12,12 +12,13 @@ import Connection                               from 'imap'
 import { fetchRecent }                          from '../actions'
 import { fetchMessage, search, searchByThread } from '../actions/google'
 import * as kefirutil                           from '../util/kefir'
+import { Message }                              from './message'
+import { Thread }                               from './thread'
 
 import type { Box as ImapBox } from 'imap'
-import { Message }             from './message'
 
 const Messages = new GraphQLList(new GraphQLNonNull(Message))
-const Threads  = new GraphQLList(new GraphQLNonNull(Messages))
+const Threads  = new GraphQLList(new GraphQLNonNull(Thread))
 
 export const Box = new GraphQLObjectType({
   name: 'Box',

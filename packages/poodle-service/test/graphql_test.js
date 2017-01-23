@@ -20,16 +20,16 @@ export default function test() {
 
 const messageById = `
 query MessageById($msgId: String!) {
-  box(attribute: "\\\\All") {
+  allMail: box(attribute: "\\\\All") {
     messages(id: $msgId) {
       flags
       date
       envelope {
+        messageId
         subject
         from { name }
         to { name }
       }
-      size
       xGmLabels
     }
   }
@@ -38,17 +38,20 @@ query MessageById($msgId: String!) {
 
 const threadById = `
 query ThreadById($query: String!) {
-  box(attribute: "\\\\All") {
+  allMail: box(attribute: "\\\\All") {
     threads(search: $query) {
-      flags
-      date
-      envelope {
-        subject
-        from { name }
-        to { name }
+      id
+      messages {
+        flags
+        date
+        envelope {
+          messageId
+          subject
+          from { name }
+          to { name }
+        }
+        xGmLabels
       }
-      size
-      xGmLabels
     }
   }
 }

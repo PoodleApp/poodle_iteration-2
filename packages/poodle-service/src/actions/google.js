@@ -16,7 +16,8 @@ import type {
   UID,
 } from 'imap'
 import type { Observable } from 'kefir'
-import type { Message } from '../models/Message'
+import type { Message }    from '../models/Message'
+import type { Thread }     from '../models/Thread'
 
 // Works best with the `\\All` box provided in Gmail
 export async function fetchMessage(msgid: string, box: Box, conn: Connection): Promise<Message> {
@@ -39,7 +40,7 @@ export function search(query: string, box: Box, conn: Connection): Observable<Me
   return basic.search([['X-GM-RAW', query]], box, conn)
 }
 
-export function searchByThread(query: string, box: Box, conn: Connection): Observable<Message[], mixed> {
+export function searchByThread(query: string, box: Box, conn: Connection): Observable<Thread, mixed> {
   if (!conn.serverSupports(capabilities.googleExtensions)) {
     return kefir.constantError(
       Error('cannot search all mail because server does not support X-GM-EXT-1')
@@ -56,7 +57,7 @@ function fetchThreads(
   box: Box,
   conn: Connection,
   limit: number = 0
-): Observable<Message[], mixed> {
+): Observable<Thread, mixed> {
   if (!conn.serverSupports(capabilities.googleExtensions)) {
     return kefir.constantError(
       new Error('cannot fetch a message by ID because server does not support X-GM-EXT-1')
@@ -82,13 +83,14 @@ function fetchThreadIds(uids: UID[], box: Box, conn: Connection): Observable<str
     .skipDuplicates()
 }
 
-function fetchThread(threadId: string, box: Box, conn: Connection): Observable<Message[], mixed> {
-  const msgs = basic.searchUids([['X-GM-THRID', threadId]], box, conn)
+function fetchThread(threadId: string, box: Box, conn: Connection): Observable<Thread, mixed> {
+  const msgEvents = basic.searchUids([['X-GM-THRID', threadId]], box, conn)
     .flatMap(uids => basic.fetchMessages(uids, {
       envelope: true,
       struct:   true,
     }, conn))
     .flatMap(basic.getAttributes)
 
-  return kefirutil.takeAll(msgs)
+  return kefirutil.takeAll(msgEvents)
+    .map(messages => ({ id: threadId, messages }))
 }
