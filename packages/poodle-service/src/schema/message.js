@@ -9,7 +9,7 @@ import {
 } from 'graphql'
 import GraphQLDateTime from 'graphql-custom-datetype'
 
-const addressQueryType = new GraphQLObjectType({
+const Address = new GraphQLObjectType({
   name: 'Address',
   description: 'Represents data in email header fields, `to`, `from`, etc.',
   fields: {
@@ -28,21 +28,21 @@ const addressQueryType = new GraphQLObjectType({
   },
 })
 
-const addressListQueryType = new GraphQLList(new GraphQLNonNull(addressQueryType))
+const AddressList = new GraphQLList(new GraphQLNonNull(Address))
 
-const envelopeQueryType = new GraphQLObjectType({
+const Envelope = new GraphQLObjectType({
   name: 'Envelope',
   description: 'Metadata on an email message',
   fields: {
     date:      { type: GraphQLDateTime },
     subject:   { type: GraphQLString },
-    from:      { type: addressListQueryType },
-    sender:    { type: addressListQueryType },
-    replyTo:   { type: addressListQueryType },
-    to:        { type: addressListQueryType },
-    cc:        { type: addressListQueryType },
-    bcc:       { type: addressListQueryType },
-    inReplyTo: { type: addressListQueryType },
+    from:      { type: AddressList },
+    sender:    { type: AddressList },
+    replyTo:   { type: AddressList },
+    to:        { type: AddressList },
+    cc:        { type: AddressList },
+    bcc:       { type: AddressList },
+    inReplyTo: { type: AddressList },
     messageId: {
       type: new GraphQLNonNull(GraphQLString),
       description: 'RFC 822 message ID',
@@ -50,7 +50,7 @@ const envelopeQueryType = new GraphQLObjectType({
   },
 })
 
-export const queryType = new GraphQLObjectType({
+export const Message = new GraphQLObjectType({
   name: 'Message',
   description: 'A single email message',
   fields: {
@@ -65,7 +65,7 @@ export const queryType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLDateTime),
     },
     envelope: {
-      type: envelopeQueryType,
+      type: Envelope,
       description: 'Email metadata',
     },
     size: {

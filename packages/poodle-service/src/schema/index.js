@@ -7,9 +7,9 @@ import {
   GraphQLString,
 } from 'graphql'
 
-import Connection                    from 'imap'
-import * as imaputil                 from '../util/imap'
-import { queryType as boxQueryType } from './box'
+import Connection    from 'imap'
+import * as imaputil from '../util/imap'
+import { Box }       from './box'
 
 /*
  * GraphQL schema for IMAP interface
@@ -22,10 +22,10 @@ import { queryType as boxQueryType } from './box'
  */
 export default new GraphQLSchema({
   query: new GraphQLObjectType({
-    name: 'RootQueryType',
+    name: 'Root',
     fields: {
       box: {
-        type: boxQueryType,
+        type: Box,
         description: 'An individual mailbox on an IMAP server',
         args: {
           attribute: {
