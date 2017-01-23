@@ -38,8 +38,20 @@ export function search(query: string, box: Box, conn: Connection): Observable<Me
   return basic.search([['X-GM-RAW', query]], box, conn)
 }
 
+export function searchByThread(query: string, box: Box, conn: Connection): Observable<Message[], mixed> {
+  if (!conn.serverSupports(capabilities.googleExtensions)) {
+    return kefir.constantError(
+      Error('cannot search all mail because server does not support X-GM-EXT-1')
+    )
+  }
+
+  const uidsPromise = promises.lift1(cb => conn.search([['X-GM-RAW', query]], cb))
+  return kefir.fromPromise(uidsPromise)
+    .flatMap(uids => fetchConversations(uids, box, conn))
+}
+
 // TODO: check cache for each uid
-export function fetchConversations(
+function fetchConversations(
   uids: UID[],
   box: Box,
   conn: Connection,
@@ -80,7 +92,10 @@ function fetchThreadIds(uids: UID[], box: Box, conn: Connection): Observable<str
 }
 
 function fetchConversation(threadId: string, box: Box, conn: Connection): Observable<Message[], mixed> {
-  return basic.fetchMessages([['X-GM-THRID', threadId]], { bodies: [''] }, conn)
+  return basic.fetchMessages([['X-GM-THRID', threadId]], {
+    envelope: true,
+    struct:   true,
+  }, conn)
     .flatMap(basic.getAttributes)
     .scan(
       (thread: Message[], message: Message) => { thread.push(message); return thread },

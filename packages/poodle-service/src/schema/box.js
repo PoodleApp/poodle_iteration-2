@@ -62,6 +62,27 @@ export const Box = new GraphQLObjectType({
           )
         }
       },
-    }
+    },
+
+    threads: {
+      type: Threads,
+      description: 'Download lists of messages related by `in-reply-to` and `references` headers (Gmail only)',
+      args: {
+        search: {
+          type: new GraphQLNonNull(GraphQLString),  // as the only argument, is required for now
+          description: 'Gmail search query',
+        },
+      },
+      resolve([conn, box]: [Connection, ImapBox], args, context) {
+        const query: ?string = args.search
+        if (query) {
+          return kefirutil.takeAll(
+            searchByThread(query, box, conn)
+          )
+        }
+
+        return []
+      },
+    },
   },
 })
