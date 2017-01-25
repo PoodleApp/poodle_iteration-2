@@ -2758,6 +2758,10 @@ graphql-tag@^1.1.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-1.2.2.tgz#b25d081332bc5323f03b32d4c5e7bfec753efc7a"
 
+graphql-tag@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-1.2.3.tgz#74c62443fbf3e693647426d7359f7e3e6ce7dace"
+
 graphql@^0.8.2:
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-0.8.2.tgz#eb1bb524b38104bbf2c9157f9abc67db2feba7d2"

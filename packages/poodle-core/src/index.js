@@ -15,9 +15,14 @@ import type { Store } from 'redux'
 // Adds support for `onTouchTap` to React components
 injectTapEventPlugin()
 
-export function reduxStore(client: ApolloClient): Store {
-  return redux.createStore(
+export function reduxStore(): [Store, ApolloClient] {
+  const client = new ApolloClient({
+    networkInterface: new GraphQLImapInterface()
+  })
+
+  const store = redux.createStore(
     buildRootReducer(client),
+    {},  // initial state
     redux.compose(
       redux.applyMiddleware(client.middleware()),
       typeof window.devToolsExtension !== 'undefined'
@@ -25,14 +30,12 @@ export function reduxStore(client: ApolloClient): Store {
         : f => f
     )
   )
+
+  return [store, client]
 }
 
 export function RootComponent(): React.Element<*> {
-  const connectionFactory: any = null // TODO
-  const client = new ApolloClient({
-    networkInterface: new GraphQLImapInterface(connectionFactory)
-  })
-  const store  = reduxStore(client)
+  const [store, client] = reduxStore()
   return <ApolloProvider store={store} client={client}>
     <MuiThemeProvider>
       <App />

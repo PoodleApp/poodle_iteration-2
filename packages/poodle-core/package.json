@@ -37,6 +37,7 @@
     "apollo-client": "^0.7.1",
     "arfe": "PoodleApp/arfe",
     "graphql-imap": "PoodleApp/graphql-imap",
+    "graphql-tag": "^1.2.3",
     "material-ui": "^0.16.7",
     "react": "^15.4.2",
     "react-apollo": "^0.8.1",
