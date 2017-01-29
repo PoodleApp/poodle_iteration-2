@@ -25,6 +25,7 @@
     ]
   },
   "dependencies": {
+    "arfe": "PoodleApp/arfe",
     "dateformat": "^2.0.0",
     "googleapis": "^14.2.0",
     "graphql": "^0.8.2",

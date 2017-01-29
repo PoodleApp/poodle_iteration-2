@@ -8,6 +8,8 @@ import {
 } from 'graphql'
 import GraphQLDateTime from 'graphql-custom-datetype'
 
+import * as arfethread                          from 'arfe/models/thread'
+import * as arfeconv                            from 'arfe/conversation'
 import Connection                               from 'imap'
 import { fetchRecent }                          from '../actions'
 import { fetchMessage, search, searchByThread } from '../actions/google'
@@ -17,13 +19,34 @@ import { Thread }                               from './thread'
 
 import type { Box as ImapBox } from 'imap'
 
-const Messages = new GraphQLList(new GraphQLNonNull(Message))
-const Threads  = new GraphQLList(new GraphQLNonNull(Thread))
+const Conversations = new GraphQLList(new GraphQLNonNull(Conversation))
+const Messages      = new GraphQLList(new GraphQLNonNull(Message))
+const Threads       = new GraphQLList(new GraphQLNonNull(Thread))
 
 export const Box = new GraphQLObjectType({
   name: 'Box',
   description: 'A mailbox on an IMAP server',
   fields: {
+    conversations: {
+      type: Conversations,
+      descriptions: 'Activities derived from message threads according to the ARFE protocol',
+      args: {
+        search: {
+          type: new GraphQLNonNull(GraphQLString),  // as the only argument, is required for now
+          description: 'Gmail search query',
+        },
+      },
+      async resolve([conn, box]: [Connection, ImapBox], args, context) {
+        const query: ?string = args.search
+        if (query) {
+          const messages = await kefirutil.takeAll(
+            searchByThread(query, box, conn)
+          ).toPromise()
+          const thread = arfethread.buildThread(messages)
+        }
+      }
+    },
+
     messages: {
       type: Messages,
       description: 'Download messages from the given mailbox',

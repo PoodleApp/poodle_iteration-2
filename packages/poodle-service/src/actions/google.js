@@ -11,12 +11,12 @@ import * as capabilities from '../capabilities'
 import * as promises     from '../util/promises'
 import * as kefirutil    from '../util/kefir'
 
+import type { Message } from 'arfe/lib/models/Message'
 import type {
   Box,
   UID,
 } from 'imap'
 import type { Observable } from 'kefir'
-import type { Message }    from '../models/Message'
 import type { Thread }     from '../models/Thread'
 
 // Works best with the `\\All` box provided in Gmail

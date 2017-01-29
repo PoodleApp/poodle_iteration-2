@@ -1,8 +1,8 @@
 /* @flow */
 
-import * as fs           from 'fs'
-import * as google       from '../../src/oauth/google'
-import IndirectBrowser   from '../IndirectBrowser'
+import * as fs         from 'fs'
+import * as google     from '../../src/oauth/google'
+import IndirectBrowser from '../IndirectBrowser'
 
 function getClientIdAndSecret(): { client_id: string, client_secret: string } {
   const client_id = process.env.CLIENT_ID

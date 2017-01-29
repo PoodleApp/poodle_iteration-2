@@ -1,12 +1,12 @@
 /* @flow */
 
+import * as M                from 'arfe/lib/models/Message'
 import dateformat            from 'dateformat'
 import Connection            from 'imap'
 import * as kefir            from 'kefir'
 import { decode }            from '../encoding'
 import * as imap             from '../util/imap'
 import { fromEventsWithEnd } from '../util/kefir'
-import * as M                from '../models/Message'
 import * as promises         from '../util/promises'
 
 import type { ReadStream } from 'fs'
