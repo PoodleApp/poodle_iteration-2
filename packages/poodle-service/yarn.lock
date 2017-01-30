@@ -41,11 +41,7 @@ activitystrea.ms@^0.14.0:
     vocabs-social "^0.11.1"
     vocabs-xsd "^0.11.1"
 
-activitystreams-context@>=0.10.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/activitystreams-context/-/activitystreams-context-1.0.0.tgz#a99c2b50f9c4ded553e6b861a415d0f179322c61"
-
-activitystreams-context@^0.10.0:
+activitystreams-context@>=0.10.0, activitystreams-context@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/activitystreams-context/-/activitystreams-context-0.10.0.tgz#3e110126b71e942b4418fda7a6008231158ba484"
 
@@ -922,9 +918,9 @@ fill-range@^2.1.0:
     repeat-element "^1.1.2"
     repeat-string "^1.5.2"
 
-flow-bin@^0.37.4:
-  version "0.37.4"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.37.4.tgz#3d8da2ef746e80e730d166e09040f4198969b76b"
+flow-bin@^0.38.0:
+  version "0.38.0"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.38.0.tgz#3ae096d401c969cc8b5798253fb82381e2d0237a"
 
 follow-redirects@0.0.3:
   version "0.0.3"
@@ -2419,11 +2415,7 @@ uid-number@~0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/uid-number/-/uid-number-0.0.6.tgz#0ea10e8035e8eb5b8e4449f06da1c730663baa81"
 
-underscore@:
-  version "1.8.3"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.8.3.tgz#4f3fb53b106e6097fcf9cb4109f2a5e9bdfa5022"
-
-underscore@~1.7.0:
+underscore@, underscore@~1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.7.0.tgz#6bbaf0877500d36be34ecaa584e0db9fef035209"
 
