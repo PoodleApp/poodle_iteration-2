@@ -129,7 +129,7 @@ declare module "imap" {
     'x-gm-msgid'?:  string,
   }
 
-  declare type Address = {
+  declare export type Address = {
     name:    string,  // e.g., person's full name
     mailbox: string,  // username portion of email address
     host:    string,  // host portion of email address
