@@ -4,6 +4,7 @@
  * @flow
  */
 
+import Message           from 'arfe/lib/models/Message'
 import * as kefir        from 'kefir'
 import Connection        from 'imap'
 import * as basic        from './index'
@@ -11,7 +12,6 @@ import * as capabilities from '../capabilities'
 import * as promises     from '../util/promises'
 import * as kefirutil    from '../util/kefir'
 
-import type { Message } from 'arfe/lib/models/Message'
 import type {
   Box,
   UID,
@@ -70,7 +70,7 @@ function fetchThreads(
 }
 
 function fetchThreadIds(uids: UID[], box: Box, conn: Connection): Observable<string, mixed> {
-  return basic.fetchMessages(uids, {/* metadata only */}, conn)
+  return basic.fetch(uids, {/* metadata only */}, conn)
     .flatMap(basic.getAttributes)
     .map(message => {
       const threadId = message['x-gm-thrid']
@@ -85,12 +85,7 @@ function fetchThreadIds(uids: UID[], box: Box, conn: Connection): Observable<str
 
 function fetchThread(threadId: string, box: Box, conn: Connection): Observable<Thread, mixed> {
   const msgEvents = basic.searchUids([['X-GM-THRID', threadId]], box, conn)
-    .flatMap(uids => basic.fetchMessages(uids, {
-      envelope: true,
-      struct:   true,
-    }, conn))
-    .flatMap(basic.getAttributes)
-
+    .flatMap(uids => basic.fetchMetadata(uids, conn))
   return kefirutil.takeAll(msgEvents)
     .map(messages => ({ id: threadId, messages }))
 }

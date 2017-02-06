@@ -1,8 +1,22 @@
 /* @flow */
 
+import { Buffer } from 'buffer'
 import * as kefir from 'kefir'
 
 import type { Observable } from 'kefir'
+
+export function collectData<S:events$EventEmitter>(
+  eventSource: S
+): Observable<Buffer, mixed> {
+  const chunkEvents = fromEventsWithEnd(eventSource, 'data')
+  return chunkEvents.scan(
+    (chunks: Buffer[], chunk) => chunks.concat(chunk), []
+  )
+    .last()
+    .map(chunks => {
+      return Buffer.concat(chunks)
+    })
+}
 
 export function fromEventsWithEnd<T,S:events$EventEmitter>(
   eventSource: S,

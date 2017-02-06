@@ -45,6 +45,10 @@ activitystreams-context@>=0.10.0, activitystreams-context@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/activitystreams-context/-/activitystreams-context-0.10.0.tgz#3e110126b71e942b4418fda7a6008231158ba484"
 
+addressparser@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/addressparser/-/addressparser-1.0.1.tgz#47afbe1a2a9262191db6838e4fd1d39b40821746"
+
 addressparser@~0.3.2:
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/addressparser/-/addressparser-0.3.2.tgz#59873f35e8fcf6c7361c10239261d76e15348bb2"
@@ -773,6 +777,34 @@ dkim-signer@~0.1.1:
     mimelib "~0.2.15"
     punycode "~1.2.4"
 
+dom-serializer@0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/dom-serializer/-/dom-serializer-0.1.0.tgz#073c697546ce0780ce23be4a28e293e40bc30c82"
+  dependencies:
+    domelementtype "~1.1.1"
+    entities "~1.1.1"
+
+domelementtype@1, domelementtype@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/domelementtype/-/domelementtype-1.3.0.tgz#b17aed82e8ab59e52dd9c19b1756e0fc187204c2"
+
+domelementtype@~1.1.1:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/domelementtype/-/domelementtype-1.1.3.tgz#bd28773e2642881aec51544924299c5cd822185b"
+
+domhandler@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-2.3.0.tgz#2de59a0822d5027fabff6f032c2b25a2a8abe738"
+  dependencies:
+    domelementtype "1"
+
+domutils@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/domutils/-/domutils-1.5.1.tgz#dcd8488a26f563d61079e48c9f7b7e32373682cf"
+  dependencies:
+    dom-serializer "0"
+    domelementtype "1"
+
 double-ended-queue@2.1.0-0:
   version "2.1.0-0"
   resolved "https://registry.yarnpkg.com/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz#103d3527fd31528f40188130c841efdd78264e5c"
@@ -817,6 +849,10 @@ end-stream@~0.1.0:
   resolved "https://registry.yarnpkg.com/end-stream/-/end-stream-0.1.0.tgz#32003f3f438a2b0143168137f8fa6e9866c81ed5"
   dependencies:
     write-stream "~0.4.3"
+
+entities@^1.1.1, entities@~1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/entities/-/entities-1.1.1.tgz#6e5c2d0a5621b5dadaecef80b90edfb5cd7772f0"
 
 errno@~0.1.1:
   version "0.1.4"
@@ -1199,6 +1235,10 @@ hawk@~3.1.3:
     hoek "2.x.x"
     sntp "1.x.x"
 
+he@1.1.1, he@^1.0.0:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/he/-/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
+
 he@~0.3.6:
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/he/-/he-0.3.6.tgz#9d7bc446e77963933301dd602d5731cb861135e0"
@@ -1213,6 +1253,27 @@ home-or-tmp@^2.0.0:
   dependencies:
     os-homedir "^1.0.0"
     os-tmpdir "^1.0.1"
+
+html-to-text@3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/html-to-text/-/html-to-text-3.1.0.tgz#7f07ef2173e5a0441e7315c192013a00a52d5e4a"
+  dependencies:
+    he "^1.0.0"
+    htmlparser2 "^3.9.2"
+    optimist "^0.6.1"
+    underscore "^1.8.3"
+    underscore.string "^3.2.3"
+
+htmlparser2@^3.9.2:
+  version "3.9.2"
+  resolved "https://registry.yarnpkg.com/htmlparser2/-/htmlparser2-3.9.2.tgz#1bdf87acca0f3f9e53fa4fcceb0f4b4cbb00b338"
+  dependencies:
+    domelementtype "^1.3.0"
+    domhandler "^2.3.0"
+    domutils "^1.5.1"
+    entities "^1.1.1"
+    inherits "^2.0.1"
+    readable-stream "^2.0.2"
 
 http-signature@~1.1.0:
   version "1.1.1"
@@ -1564,7 +1625,27 @@ levelup@1.3.3:
     semver "~5.1.0"
     xtend "~4.0.0"
 
-libqp:
+libbase64@0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/libbase64/-/libbase64-0.1.0.tgz#62351a839563ac5ff5bd26f12f60e9830bb751e6"
+
+libmime@3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/libmime/-/libmime-3.1.0.tgz#115012f1672051adc8809a8f93955ffc3648edf9"
+  dependencies:
+    iconv-lite "0.4.15"
+    libbase64 "0.1.0"
+    libqp "1.1.0"
+
+libmime@^2.1.2:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/libmime/-/libmime-2.1.3.tgz#25017ca5ab5a1e98aadbe2725017cf1d48a42a0c"
+  dependencies:
+    iconv-lite "0.4.15"
+    libbase64 "0.1.0"
+    libqp "1.1.0"
+
+libqp, libqp@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/libqp/-/libqp-1.1.0.tgz#f5e6e06ad74b794fb5b5b66988bf728ef1dedbe8"
 
@@ -1626,6 +1707,18 @@ mailcomposer@hallettj/mailcomposer#patched:
     mimelib "~0.2.15"
     object-assign "^4.0.1"
 
+mailparser@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/mailparser/-/mailparser-2.0.1.tgz#6424d3d6221f01eeddc182a5a9abaafa370c723d"
+  dependencies:
+    addressparser "1.0.1"
+    he "1.1.1"
+    html-to-text "3.1.0"
+    iconv-lite "0.4.15"
+    libmime "3.1.0"
+    mailsplit "3.1.2"
+    marked "0.3.6"
+
 mailparser@hallettj/mailparser#5a63d765154da78020fbb2a5b8f399a481e82967:
   version "0.5.2"
   resolved "https://codeload.github.com/hallettj/mailparser/tar.gz/5a63d765154da78020fbb2a5b8f399a481e82967"
@@ -1635,9 +1728,19 @@ mailparser@hallettj/mailparser#5a63d765154da78020fbb2a5b8f399a481e82967:
     mimelib "^0.2.19"
     uue "^2.1.1"
 
+mailsplit@3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/mailsplit/-/mailsplit-3.1.2.tgz#d62ab1321aebdd282446a09c9821a11ce610f0f6"
+  dependencies:
+    libmime "^2.1.2"
+
 map-obj@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"
+
+marked@0.3.6:
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.6.tgz#b2c6c618fccece4ef86c4fc6cb8a7cbf5aeda8d7"
 
 meow@~2.0.0:
   version "2.0.0"
@@ -1701,7 +1804,7 @@ mimelib@^0.2.19, mimelib@~0.2.15:
   dependencies:
     brace-expansion "^1.0.0"
 
-minimist@0.0.8:
+minimist@0.0.8, minimist@~0.0.1:
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.8.tgz#857fcabfc3397d2625b8228262e86aa7a011b05d"
 
@@ -1870,6 +1973,13 @@ once@~1.3.0, once@~1.3.3:
   resolved "https://registry.yarnpkg.com/once/-/once-1.3.3.tgz#b2e261557ce4c314ec8304f3fa82663e4297ca20"
   dependencies:
     wrappy "1"
+
+optimist@^0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/optimist/-/optimist-0.6.1.tgz#da3ea74686fa21a19a111c326e90eb15a0196686"
+  dependencies:
+    minimist "~0.0.1"
+    wordwrap "~0.0.2"
 
 os-homedir@^1.0.0, os-homedir@^1.0.1:
   version "1.0.2"
@@ -2273,6 +2383,10 @@ source-map@^0.5.0, source-map@^0.5.3:
   version "0.5.6"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.6.tgz#75ce38f52bf0733c5a7f0c118d81334a2bb5f412"
 
+sprintf-js@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
+
 sshpk@^1.7.0:
   version "1.10.1"
   resolved "https://registry.yarnpkg.com/sshpk/-/sshpk-1.10.1.tgz#30e1a5d329244974a1af61511339d595af6638b0"
@@ -2415,9 +2529,20 @@ uid-number@~0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/uid-number/-/uid-number-0.0.6.tgz#0ea10e8035e8eb5b8e4449f06da1c730663baa81"
 
+underscore.string@^3.2.3:
+  version "3.3.4"
+  resolved "https://registry.yarnpkg.com/underscore.string/-/underscore.string-3.3.4.tgz#2c2a3f9f83e64762fdc45e6ceac65142864213db"
+  dependencies:
+    sprintf-js "^1.0.3"
+    util-deprecate "^1.0.2"
+
 underscore@, underscore@~1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.7.0.tgz#6bbaf0877500d36be34ecaa584e0db9fef035209"
+
+underscore@^1.8.3:
+  version "1.8.3"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.8.3.tgz#4f3fb53b106e6097fcf9cb4109f2a5e9bdfa5022"
 
 unpipe@1.0.0:
   version "1.0.0"
@@ -2441,7 +2566,7 @@ utf7@>=1.0.2:
   dependencies:
     semver "~5.3.0"
 
-util-deprecate@~1.0.1:
+util-deprecate@^1.0.2, util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
 
@@ -2551,6 +2676,10 @@ wide-align@^1.1.0:
   resolved "https://registry.yarnpkg.com/wide-align/-/wide-align-1.1.0.tgz#40edde802a71fea1f070da3e62dcda2e7add96ad"
   dependencies:
     string-width "^1.0.1"
+
+wordwrap@~0.0.2:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-0.0.3.tgz#a3d5da6cd5c0bc0008d37234bbaf1bed63059107"
 
 wrappy@1:
   version "1.0.2"

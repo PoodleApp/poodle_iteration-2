@@ -1,6 +1,6 @@
 /* @flow */
 
-import type { Message } from './Message'
+import type { Message } from 'arfe/lib/models/Message'
 
 export type Thread = {
   id: string,

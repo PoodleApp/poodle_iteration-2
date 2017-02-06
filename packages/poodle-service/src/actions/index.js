@@ -1,13 +1,14 @@
 /* @flow */
 
-import * as M                from 'arfe/lib/models/Message'
-import dateformat            from 'dateformat'
-import Connection            from 'imap'
-import * as kefir            from 'kefir'
-import { decode }            from '../encoding'
-import * as imap             from '../util/imap'
-import { fromEventsWithEnd } from '../util/kefir'
-import * as promises         from '../util/promises'
+import Message          from 'arfe/lib/models/Message'
+import dateformat       from 'dateformat'
+import Connection       from 'imap'
+import * as kefir       from 'kefir'
+import { simpleParser } from 'mailparser'
+import { decode }       from '../encoding'
+import * as imap        from '../util/imap'
+import * as kefirutil   from '../util/kefir'
+import * as promises    from '../util/promises'
 
 import type { ReadStream } from 'fs'
 import type {
@@ -19,19 +20,19 @@ import type {
   UID,
 } from 'imap'
 import type { Observable } from 'kefir'
-import type { Message } from '../models/Message'
 
+const headersSelection = 'HEADER'
 
 // TODO: should we require an open box here?
 export function fetchMessagePart(msg: Message, partId: string, conn: Connection): Promise<ReadStream> {
-  const part = M.getPart(partId, msg)
+  const part = msg.getPart(partId)
   if (!part) {
     return Promise.reject(new Error(`partId ${partId} does not exist in message ${msg.uid}`))
   }
 
   const encoding = part.encoding
 
-  return fetchMessages([(msg.uid: number)], { bodies: `${partId}` }, conn)
+  return fetch([msg.uid], { bodies: `${partId}` }, conn)
   .flatMap(messageBodyStream)
   .map(body => encoding ? decode(encoding, body) : body)
   .toPromise()
@@ -40,11 +41,7 @@ export function fetchMessagePart(msg: Message, partId: string, conn: Connection)
 export function search(criteria: mixed[], box: Box, conn: Connection): Observable<Message, mixed> {
   const uidsPromise = promises.lift1(cb => conn.search(criteria, cb))
   return kefir.fromPromise(uidsPromise)
-    .flatMap(uids => fetchMessages(uids, {
-      envelope: true,
-      struct: true,
-    }, conn))
-    .flatMap(getAttributes)
+    .flatMap(uids => fetchMetadata(uids, conn))
 }
 
 export function searchUids(criteria: mixed[], box: Box, conn: Connection): Observable<UID[], mixed> {
@@ -59,14 +56,56 @@ export function fetchRecent(since: Date, box: Box, conn: Connection): Observable
 
 // TODO: Use 'changedsince' option defined by RFC4551
 // TODO: should we require an open box here?
-export function fetchMessages(source: MessageSource, opts: FetchOptions, conn: Connection): Observable<ImapMessage,mixed> {
-  return fromEventsWithEnd(conn.fetch(source, opts), 'message', (msg, seqno) => msg)
+export function fetch(source: MessageSource, opts: FetchOptions, conn: Connection): Observable<ImapMessage,mixed> {
+  return kefirutil.fromEventsWithEnd(
+    conn.fetch(source, opts),
+    'message',
+    (msg, seqno) => msg,
+  )
 }
 
+export function fetchMetadata(source: MessageSource, conn: Connection): Observable<Message, mixed> {
+  const respStream = fetch(source, {
+    bodies:   headersSelection,
+    envelope: true,
+    struct:   true,
+  }, conn)
+
+  return respStream.flatMap(imapMsg => {
+    const attrStream    = getAttributes(imapMsg)
+    const headersStream = getHeaders(imapMsg)
+    return kefir.zip(
+      [attrStream, headersStream],
+      (imapMsg, headers) => new Message(imapMsg, headers),
+    )
+  })
+}
+
+// TODO: this might come in multiple chunks
 function messageBodyStream(msg: ImapMessage): Observable<ReadStream, mixed> {
-  return fromEventsWithEnd(msg, 'body', (stream, info) => stream)
+  return kefirutil.fromEventsWithEnd(msg, 'body', (stream, info) => stream)
 }
 
 export function getAttributes(message: ImapMessage): Observable<MessageAttributes,mixed> {
-  return fromEventsWithEnd(message, 'attributes')
+  return kefirutil.fromEventsWithEnd(message, 'attributes')
+}
+
+// native Javascript Map
+type Headers = Map<string, HeaderValue>
+type HeaderValue = string | string[] | {
+  value: string,
+  params: { charset: string },
+}
+
+function getHeaders(message: ImapMessage): Observable<Headers, mixed> {
+  const bodies = kefirutil.fromEventsWithEnd(message, 'body', (stream, info) => [stream, info])
+  return bodies.flatMap(([stream, info]) => {
+    if (info.which !== headersSelection) {
+      return kefir.never()
+    }
+    return kefirutil.collectData(stream).flatMap(data => {
+      const headers = simpleParser(data).then(mail => mail.headers)
+      return kefir.fromPromise(headers)
+    })
+  })
 }

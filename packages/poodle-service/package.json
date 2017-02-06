@@ -33,6 +33,7 @@
     "imap": "^0.8.18",
     "kefir": "^3.6.0",
     "libqp": "^1.1.0",
+    "mailparser": "^2.0.1",
     "node-fetch": "^1.6.3",
     "pouchdb-node": "^6.1.1",
     "xoauth2": "^1.2.0"
