@@ -106,6 +106,8 @@ declare module "imap" {
   //
   // `which` corresponds to single `bodies` element in FetchOptions
 
+  declare export type MessageId = string // unique message ID in angle brackets
+
   declare export type MessageAttributes = {
     uid:    number,
     flags:  Flag[],
@@ -120,10 +122,10 @@ declare module "imap" {
       to:        Address[],
       cc:        ?Address[],
       bcc:       ?Address[],
-      inReplyTo: ?Address[],
-      messageId: string,  // unique message ID in angle brackets
+      inReplyTo: ?MessageId,
+      messageId: MessageId,
     },
-    size:   number,
+    size?: number,
     'x-gm-labels'?: string[],
     'x-gm-thrid'?:  string,
     'x-gm-msgid'?:  string,
