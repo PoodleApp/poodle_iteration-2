@@ -1,6 +1,5 @@
 /* @flow */
 
-import { Buffer } from 'buffer'
 import * as kefir from 'kefir'
 
 import type { Observable } from 'kefir'

@@ -32,7 +32,7 @@ export function fetchMessagePart(msg: Message, partId: string, conn: Connection)
 
   const encoding = part.encoding
 
-  return fetch([msg.uid], { bodies: `${partId}` }, conn)
+  return fetch(([msg.uid]: number[]), { bodies: `${partId}` }, conn)
   .flatMap(messageBodyStream)
   .map(body => encoding ? decode(encoding, body) : body)
   .toPromise()

@@ -8,15 +8,17 @@ import {
 } from 'graphql'
 import GraphQLDateTime from 'graphql-custom-datetype'
 
-import * as arfethread                          from 'arfe/models/thread'
-import * as arfeconv                            from 'arfe/conversation'
+import ArfeMessage                              from 'arfe/lib/models/Message'
+import * as Conv                                from 'arfe/lib/models/Conversation'
 import Connection                               from 'imap'
-import { fetchRecent }                          from '../actions'
+import { fetchMessagePart, fetchRecent }        from '../actions'
 import { fetchMessage, search, searchByThread } from '../actions/google'
 import * as kefirutil                           from '../util/kefir'
+import { Conversation }                         from './conversation'
 import { Message }                              from './message'
 import { Thread }                               from './thread'
 
+import type { ReadStream }     from 'fs'
 import type { Box as ImapBox } from 'imap'
 
 const Conversations = new GraphQLList(new GraphQLNonNull(Conversation))
@@ -39,10 +41,19 @@ export const Box = new GraphQLObjectType({
       async resolve([conn, box]: [Connection, ImapBox], args, context) {
         const query: ?string = args.search
         if (query) {
-          const messages = await kefirutil.takeAll(
+          const threads = await kefirutil.takeAll(
             searchByThread(query, box, conn)
           ).toPromise()
-          const thread = arfethread.buildThread(messages)
+
+          function f(msg: ArfeMessage, partId: string): Promise<ReadStream> {
+            return fetchMessagePart(msg, partId, conn)
+          }
+
+          const conversations = await Promise.all(threads.map(
+            thread => Conv.messagesToConversation(f, thread.messages)
+          ))
+
+          return conversations
         }
       }
     },

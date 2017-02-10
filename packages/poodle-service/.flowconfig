@@ -1,5 +1,7 @@
 [ignore]
+.*/arfe/test/.*
 .*/graphql-imap/lib/.*
+.*/node_modules/mailcomposer/.*
 
 [include]
 
@@ -7,3 +9,4 @@
 ./types/
 
 [options]
+unsafe.enable_getters_and_setters=true
