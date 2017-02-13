@@ -45,7 +45,7 @@
     "babel-preset-node7": "^1.2.0",
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-3": "^6.17.0",
-    "flow-bin": "^0.38.0",
+    "flow-bin": "^0.39.0",
     "format-json": "^1.0.3",
     "in-publish": "^2.0.0",
     "watch": "^1.0.1"
