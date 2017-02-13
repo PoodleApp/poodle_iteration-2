@@ -2,9 +2,13 @@
 .*/arfe/test/.*
 .*/graphql-imap/test/.*
 .*/mailcomposer/.*
+.*/poodle-electron/lib/.*
 
 [include]
+/home/jesse/.config/yarn/global/node_modules/
 
 [libs]
+./types/
 
 [options]
+unsafe.enable_getters_and_setters=true
