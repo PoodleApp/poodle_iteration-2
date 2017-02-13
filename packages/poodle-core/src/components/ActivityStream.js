@@ -1,42 +1,23 @@
 /* @flow */
 
-import * as Conv    from 'arfe/conversation'
-import * as Act     from 'arfe/derivedActivity'
-import * as Thrd    from 'arfe/models/thread'
-import gql          from 'graphql-tag'
 import RaisedButton from 'material-ui/RaisedButton'
 import React        from 'react'
 import * as apollo  from 'react-apollo'
 import * as redux   from 'react-redux'
 import { search }   from '../actions/activityStream'
+import * as q       from '../queries/searchConversations'
 
-import typeof { ApolloError }       from 'apollo-client'
-import type   { ApolloQueryResult } from 'apollo-client'
-import type   { Message }           from 'graphql-imap/lib/models/Message'
-import type   { State }             from '../reducers'
+import type { SearchConversationsData } from '../queries/searchConversations'
+import type { State }                   from '../reducers'
 
 type ActivityStreamProps = {
-  data: {
-    error:    ?ApolloError,
-    loading:  boolean,
-    allMail: {
-      threads: {
-        messages: ?Message[],
-      }[],
-    },
-
-    // mixins from Apollo's `ObservableQuery` type:
-    fetchMore:    Function,
-    refetch:      (variables: any) => Promise<ApolloQueryResult>,
-    stopPolling:  () => void,
-    startPolling: (pollInterval: number) => void,
-  },
+  data:         q.SearchConversationsData,
   dispatch:     (action: Object) => void,
   pollInterval: number,
   query:        string,
 }
 
-export function ActivityStream(props: ActivityStreamProps): React.Element<*> {
+export function ActivityStream(props: ActivityStreamProps) {
   let queryInput: HTMLInputElement
   const { allMail, error, loading } = props.data
 
@@ -50,18 +31,14 @@ export function ActivityStream(props: ActivityStreamProps): React.Element<*> {
     </div>
   }
 
-  const activities = allMail.threads.map(({ messages }) => {
-    const thread = Thrd.buildThread(messages)
-    const conversation = Conv.threadToConversation(thread)
-    return <ActivityRow activity={Conv.getLatestActivity(conversation)} />
-  })
+  const { conversations } = props.data.allMail
 
   return <div>
     <form onSubmit={onSearch.bind(null, queryInput, props)}>
       <input type="text" ref={input => { queryInput = input }} defaultValue={props.query} />
       <input type="submit" value="search" />
     </form>
-    {activities}
+    {conversations}
   </div>
 
 }
@@ -75,38 +52,20 @@ function onSearch(input: ?HTMLInputElement, props: ActivityStreamProps, event: E
 }
 
 type ActivityRowProps = {
-  activity: Act.DerivedActivity,
+  conversation: q.Conversation,
 }
 
-function ActivityRow({ activity }: ActivityRowProps): React.Element<*> {
-  const title = Act.getTitle(activity)
-  const types = Act.getTypes(activity)
+function ActivityRow({ conversation }: ActivityRowProps) {
+  const subject = conversation.subject.get || '[no subject]'
+  const ppl = conversation.participants.map(p => p.displayName).join(', ')
 
   return <div>
-    {title ? title.get() : '[no title]'} ({types.join(' ')})
+    {subject} ({ppl})
     <hr/>
   </div>
 }
 
-const SearchThreads = gql`query SearchThreads($query: String!) {
-  allMail: box(attribute: "\\\\All") {
-    threads(search: $query) {
-      id
-      messages {
-        flags
-        date
-        envelope {
-          messageId
-          subject
-          from { name }
-          to { name }
-        }
-      }
-    }
-  }
-}`
-
-const ComponentWithData = apollo.graphql(SearchThreads, {
+const ComponentWithData = apollo.graphql(q.searchConversations, {
   options: ({ query, pollInterval }: ActivityStreamProps) => ({
     variables: { query },
     pollInterval,
