@@ -9,8 +9,10 @@ import Connection           from 'imap'
 import * as m               from 'mori'
 import toString             from 'stream-to-string'
 import { fetchMessagePart } from '../actions'
+import Actor                from './Actor'
 
-import type { Seqable } from 'mori'
+import type { Seqable }   from 'mori'
+import type { ActorData } from './Actor'
 
 export type ActivityData = {
   activity: DerivedActivity,
@@ -44,6 +46,13 @@ export default new graphql.GraphQLObjectType({
   name: 'Activity',
   description: 'Structured Activitystrea.ms 2.0 data carried by an email message',
   fields: {
+    actor: {
+      type: Actor,
+      description: 'Person or entity performing the activity',
+      resolve({ activity }: ActivityData): ?ActorData {
+        return activity.actor && { actor: activity.actor }
+      },
+    },
     content: {
       type: Content,
       description: 'Content of linked object',
