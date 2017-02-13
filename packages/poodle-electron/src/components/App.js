@@ -2,7 +2,7 @@
 
 import * as authActions   from 'poodle-core/lib/actions/auth'
 import * as chromeActions from 'poodle-core/lib/actions/chrome'
-import * as chrome        from 'poodle-core/lib/reducers/chrome'
+import * as chromeState   from 'poodle-core/lib/reducers/chrome'
 import React              from 'react'
 import * as redux         from 'react-redux'
 import ActivityStream     from './ActivityStream'
@@ -10,9 +10,11 @@ import ActivityStream     from './ActivityStream'
 import type { State } from 'poodle-core/lib/reducers'
 
 type AppProps = {
-  account:  ?authActions.Account,
-  dispatch: Function,
-  loggedIn: boolean,
+  account:        ?authActions.Account,
+  dispatch:       Function,
+  error:          ?Error,
+  loadingMessage: ?string,
+  loggedIn:       boolean,
 }
 
 export function App(props: AppProps) {
@@ -32,6 +34,8 @@ export function App(props: AppProps) {
       <div className="App-header">
         <h2>Poodle</h2>
       </div>
+      {props.error          ? <div class="error">{props.error.message}</div>    : ''}
+      {props.loadingMessage ? <div class="loading">{props.loadingMessage}</div> : ''}
       <div>
         {content}
       </div>
@@ -72,8 +76,10 @@ function onLogin({ dispatch }: LoginFormProps, emailInput: ?HTMLInputElement, ev
 
 function mapStateToProps({ auth, chrome }: State): $Shape<AppProps> {
   return {
-    account:  auth.account,
-    loggedIn: !!auth.creds,
+    account:        auth.account,
+    error:          chrome.error,
+    loadingMessage: chromeState.loadingMessage(chrome),
+    loggedIn:       !!auth.creds,
   }
 }
 
