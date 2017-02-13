@@ -38,6 +38,9 @@ function* initAccount({ account }: Object): Generator<Effect, void, any> {
   }
   if (token) {
     yield put(auth.accessToken(account.email, token))
+
+    // persist account info on successful login
+    saveAccount(account)
   }
 }
 
