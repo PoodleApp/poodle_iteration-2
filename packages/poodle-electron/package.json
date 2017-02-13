@@ -26,9 +26,12 @@
     "apollo-client": "^0.7.3",
     "graphql-imap": "PoodleApp/graphql-imap",
     "keytar": "^3.0.2",
+    "material-ui": "^0.17.0",
     "react": "^15.4.2",
     "react-apollo": "^0.8.1",
     "react-dom": "^15.4.2",
+    "react-redux": "^5.0.2",
+    "react-tap-event-plugin": "^2.0.1",
     "redux-saga": "^0.14.3"
   },
   "devDependencies": {
