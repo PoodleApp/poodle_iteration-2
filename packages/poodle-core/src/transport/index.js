@@ -1,10 +1,7 @@
 /* @flow */
 
 import * as graphqlimap from 'graphql-imap'
-
-// TODO
-import * as google     from 'graphql-imap/lib/oauth/google'
-import * as googletest from './temp_hack'
+import * as google      from 'graphql-imap/lib/oauth/google'
 
 import type { DocumentNode, ExecutionResult } from 'graphql'
 import type { IMAPConnection }                from 'graphql-imap'
@@ -18,24 +15,48 @@ type Request = {
   [additionalKey: string]: any,
 }
 
-export class GraphQLImapInterface {
-  connectionFactory: ?(() => Promise<IMAPConnection>)
+const client_id     = '550977579314-ot07bt4ljs7pqenefen7c26nr80e492p.apps.googleusercontent.com'
+const client_secret = 'ltQpgi6ce3VbWgxCXzCgKEEG'
 
-  constructor() {
-    googletest.getTokenGenerator()
-      .then(tokGen => {
-        const connectionFactory = () => google.getConnection(tokGen)
-        this.connectionFactory = connectionFactory
-      })
+// Ugly static variables
+let credentials: ?google.OauthCredentials
+let email: ?string
+let connectionFactory: ?(() => Promise<IMAPConnection>)
+
+export function setCredentials(email: string, creds: google.OauthCredentials) {
+  credentials = creds
+  email = email
+  connectionFactory = null
+}
+
+async function getTokenGenerator(): Promise<google.XOAuth2Generator> {
+  if (!credentials || !email) {
+    return Promise.reject(new Error('cannot instantiate token generator without access token'))
   }
+  return google.getTokenGenerator({
+    email,
+    credentials,
+    client_id,
+    client_secret,
+  })
+}
 
-  query({ query, variables, operationName }: Request): Promise<ExecutionResult> {
+async function getConnectionFactory(): Promise<() => Promise<IMAPConnection>> {
+  if (!connectionFactory) {
+    const tokGen = await getTokenGenerator()
+    connectionFactory = () => google.getConnection(tokGen)
+  }
+  return connectionFactory
+}
+
+export class GraphQLImapInterface {
+
+  async query({ query, variables, operationName }: Request): Promise<ExecutionResult> {
+    const cf = await getConnectionFactory()
     if (!query) {
       return Promise.reject(new Error("`query` must be defined"))
     }
-    if (!this.connectionFactory) {
-      return Promise.reject(new Error("IMAP connection is not ready"))
-    }
-    return graphqlimap.execute(query, this.connectionFactory, variables, operationName)
+    return graphqlimap.execute(query, cf, variables, operationName)
   }
+
 }
