@@ -7,6 +7,7 @@ import Connection         from 'imap'
 import * as m             from 'mori'
 import { searchByThread } from '../actions/google'
 import Activity           from './Activity'
+import Address            from './Address'
 import LanguageValue      from './LanguageValue'
 
 import type { Seqable }      from 'mori'
@@ -16,31 +17,6 @@ export type ConversationData = {
   conn:         Connection,
   conversation: ArfeConversation,
 }
-
-const URI = new graphql.GraphQLNonNull(graphql.GraphQLString)
-
-const Address = new graphql.GraphQLObjectType({
-  name: 'Address',
-  description: 'Email address and name',
-  fields: {
-    displayName: {
-      type: graphql.GraphQLString,
-      description: 'Name, or email address if no name is available',
-    },
-    email: {
-      type: graphql.GraphQLString,
-      description: 'Email address',
-    },
-    host: {
-      type: graphql.GraphQLString,
-      description: 'Host portion of email address',
-    },
-    uri: {
-      type: URI,
-      description: '`mailto:` URI constructed from email address',
-    },
-  },
-})
 
 export default new graphql.GraphQLObjectType({
   name: 'Conversation',

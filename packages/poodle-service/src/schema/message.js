@@ -6,27 +6,9 @@ import {
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
-} from 'graphql'
+}                      from 'graphql'
 import GraphQLDateTime from 'graphql-custom-datetype'
-
-const Address = new GraphQLObjectType({
-  name: 'Address',
-  description: 'Represents data in email header fields, `to`, `from`, etc.',
-  fields: {
-    name: {
-      type: GraphQLString,
-      description: "E.g., person's full name",
-    },
-    mailbox: {
-      type: GraphQLString,
-      description: 'Username portion of email address',
-    },
-    host: {
-      type: GraphQLString,
-      description: 'host portion of email address',
-    },
-  },
-})
+import Address         from './Address'
 
 const AddressList = new GraphQLList(new GraphQLNonNull(Address))
 
