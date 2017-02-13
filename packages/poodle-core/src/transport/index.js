@@ -1,7 +1,8 @@
 /* @flow */
 
-import * as graphqlimap from 'graphql-imap'
-import * as google      from 'graphql-imap/lib/oauth/google'
+import * as graphqlimap             from 'graphql-imap'
+import * as google                  from 'graphql-imap/lib/oauth/google'
+import { client_id, client_secret } from '../constants'
 
 import type { DocumentNode, ExecutionResult } from 'graphql'
 import type { IMAPConnection }                from 'graphql-imap'
@@ -14,9 +15,6 @@ type Request = {
   operationName?: string,
   [additionalKey: string]: any,
 }
-
-const client_id     = '550977579314-ot07bt4ljs7pqenefen7c26nr80e492p.apps.googleusercontent.com'
-const client_secret = 'ltQpgi6ce3VbWgxCXzCgKEEG'
 
 // Ugly static variables
 let credentials: ?google.OauthCredentials
