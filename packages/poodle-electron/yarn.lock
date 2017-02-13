@@ -1850,13 +1850,9 @@ ms@0.7.2:
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-0.7.2.tgz#ae25cf2512b3885a1d95d7f037868d8431124765"
 
-nan@2.3.2:
+nan@2.3.2, nan@^2.3.0:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.3.2.tgz#4d4ecf17e1da4e989efb4f273d8d00201cad087e"
-
-nan@^2.3.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.5.0.tgz#aa8f1e34531d807e9e27755b234b4a6ec0c152a8"
 
 nan@~2.4.0:
   version "2.4.0"
@@ -2335,6 +2331,10 @@ redent@^1.0.0:
   dependencies:
     indent-string "^2.1.0"
     strip-indent "^1.0.1"
+
+redux-saga@^0.14.3:
+  version "0.14.3"
+  resolved "https://registry.yarnpkg.com/redux-saga/-/redux-saga-0.14.3.tgz#28cd2c5b49cf780a1de25875765724150c630513"
 
 redux@^3.4.0:
   version "3.6.0"
