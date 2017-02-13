@@ -17,9 +17,6 @@
   "homepage": "https://github.com/PoodleApp/poodle-core#readme",
   "main": "lib/index.js",
   "scripts": {
-    "start": "react-scripts start",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
     "prepublishOnly": "yarn test && yarn run build",
@@ -38,12 +35,6 @@
     "arfe": "PoodleApp/arfe",
     "graphql-imap": "PoodleApp/graphql-imap",
     "graphql-tag": "^1.2.3",
-    "material-ui": "^0.16.7",
-    "react": "^15.4.2",
-    "react-apollo": "^0.8.1",
-    "react-dom": "^15.4.2",
-    "react-redux": "^5.0.2",
-    "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.6.0"
   },
   "devDependencies": {
@@ -53,7 +44,6 @@
     "babel-preset-stage-3": "^6.17.0",
     "flow-bin": "^0.39.0",
     "in-publish": "^2.0.0",
-    "react-scripts": "0.8.5",
     "watch": "^1.0.1"
   }
 }
