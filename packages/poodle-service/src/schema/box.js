@@ -14,12 +14,13 @@ import Connection                               from 'imap'
 import { fetchMessagePart, fetchRecent }        from '../actions'
 import { fetchMessage, search, searchByThread } from '../actions/google'
 import * as kefirutil                           from '../util/kefir'
-import { Conversation }                         from './conversation'
+import Conversation                             from './Conversation'
 import { Message }                              from './message'
 import { Thread }                               from './thread'
 
-import type { ReadStream }     from 'fs'
-import type { Box as ImapBox } from 'imap'
+import type { ReadStream }       from 'fs'
+import type { Box as ImapBox }   from 'imap'
+import type { ConversationData } from './Conversation'
 
 const Conversations = new GraphQLList(new GraphQLNonNull(Conversation))
 const Messages      = new GraphQLList(new GraphQLNonNull(Message))
@@ -38,23 +39,28 @@ export const Box = new GraphQLObjectType({
           description: 'Gmail search query',
         },
       },
-      async resolve([conn, box]: [Connection, ImapBox], args, context) {
+      async resolve([conn, box]: [Connection, ImapBox], args): Promise<ConversationData[]> {
         const query: ?string = args.search
-        if (query) {
-          const threads = await kefirutil.takeAll(
-            searchByThread(query, box, conn)
-          ).toPromise()
-
-          function f(msg: ArfeMessage, partId: string): Promise<ReadStream> {
-            return fetchMessagePart(msg, partId, conn)
-          }
-
-          const conversations = await Promise.all(threads.map(
-            thread => Conv.messagesToConversation(f, thread.messages)
-          ))
-
-          return conversations
+        if (!query) {
+          return Promise.reject(new Error('a `search` argument is required'))
         }
+
+        const threads = await kefirutil.takeAll(
+          searchByThread(query, box, conn)
+        ).toPromise()
+
+        function f(msg: ArfeMessage, partId: string): Promise<ReadStream> {
+          return fetchMessagePart(msg, partId, conn)
+        }
+
+        const conversations = await Promise.all(threads.map(
+          thread => Conv.messagesToConversation(f, thread.messages)
+        ))
+
+        return conversations.map(conversation => ({
+          conversation,
+          conn,
+        }))
       }
     },
 
