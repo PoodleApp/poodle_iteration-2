@@ -2,9 +2,12 @@
 .*/arfe/test/.*
 .*/graphql-imap/test/.*
 .*/mailcomposer/.*
+.*/poodle-core/lib/.*
 
 [include]
 
 [libs]
+./types/
 
 [options]
+unsafe.enable_getters_and_setters=true
