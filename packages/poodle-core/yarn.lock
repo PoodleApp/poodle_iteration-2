@@ -2478,9 +2478,9 @@ flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
 
-flow-bin@^0.37.4:
-  version "0.37.4"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.37.4.tgz#3d8da2ef746e80e730d166e09040f4198969b76b"
+flow-bin@^0.39.0:
+  version "0.39.0"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.39.0.tgz#b1012a14460df1aa79d3a728e10f93c6944226d0"
 
 follow-redirects@0.0.3:
   version "0.0.3"
@@ -2754,11 +2754,7 @@ graphql-imap@PoodleApp/graphql-imap:
     pouchdb-node "^6.1.1"
     xoauth2 "^1.2.0"
 
-graphql-tag@^1.1.1:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-1.2.2.tgz#b25d081332bc5323f03b32d4c5e7bfec753efc7a"
-
-graphql-tag@^1.2.3:
+graphql-tag@^1.1.1, graphql-tag@^1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-1.2.3.tgz#74c62443fbf3e693647426d7359f7e3e6ce7dace"
 
