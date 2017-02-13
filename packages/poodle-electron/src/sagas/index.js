@@ -1,12 +1,12 @@
 /* @flow */
 
-import * as oauth                     from 'graphql-imap/lib/oauth/google'
 import keytar                         from 'keytar'
 import * as auth                      from 'poodle-core/lib/actions/auth'
 import * as chrome                    from 'poodle-core/lib/actions/chrome'
 import { setCredentials }             from 'poodle-core/lib/transport'
 import { takeLatest }                 from 'redux-saga'
 import { call, cancelled, fork, put } from 'redux-saga/effects'
+import * as oauth                     from '../oauth'
 
 import type { Effect } from 'redux-saga'
 
@@ -56,7 +56,7 @@ function loadAccessToken(account: auth.Account): ?oauth.OauthCredentials {
 function* fetchNewAccessToken(account: auth.Account): Generator<Effect, ?oauth.OauthCredentials, any> {
   try {
     yield put(chrome.indicateLoading('google-account', 'Authorizing with Google'))
-    return yield call(ipc.request, 'google-account')
+    return yield call(oauth.getAccessToken, account)
   }
   catch (err) {
     yield put(chrome.showError(err))
