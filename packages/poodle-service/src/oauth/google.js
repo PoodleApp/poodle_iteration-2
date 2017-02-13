@@ -84,7 +84,7 @@ export function getAccessToken(openWindow: () => BrowserWindow, opts: AccessToke
 
 
 export function getTokenGenerator(opts: TokenGeneratorOpts): Promise<XOAuth2Generator> {
-  const { email, credentials: creds, client_id, client_secret } = opts
+  const { credentials: creds } = opts
   if (creds && creds.refresh_token) {
     return Promise.resolve(tokenGenerator(opts))
   }
