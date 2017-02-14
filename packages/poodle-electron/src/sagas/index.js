@@ -12,7 +12,7 @@ import type { Effect } from 'redux-saga'
 
 // Generator type parameters are of the form: `Generator<+Yield,+Return,-Next>`
 
-function* loadAccount(): Generator<Effect, void, any> {
+function* lookupAccount(): Generator<Effect, void, any> {
   try {
     const account = yield call(loadAccount)
     yield put(auth.setAccount(account))
@@ -37,6 +37,8 @@ function* initAccount({ account }: Object): Generator<Effect, void, any> {
     token = yield* fetchNewAccessToken(account)
   }
   if (token) {
+    // TODO: clear Apollo cache when we get new credentials
+    yield call(setCredentials, account.email, token)
     yield put(auth.accessToken(account.email, token))
 
     // persist account info on successful login
@@ -66,15 +68,9 @@ function* fetchNewAccessToken(account: auth.Account): Generator<Effect, ?oauth.O
   }
 }
 
-function* initSession({ email, creds }: Object): Generator<Effect, void, any> {
-  // TODO: clear Apollo cache when we get new credentials
-  yield call(setCredentials, email, creds)
-}
-
 export default function* root(): Generator<Effect, void, any> {
   yield [
     fork(takeLatest, 'auth/setAccount',  initAccount),
-    fork(takeLatest, 'auth/accessToken', initSession),
-    fork(loadAccount),
+    fork(lookupAccount),
   ]
 }
