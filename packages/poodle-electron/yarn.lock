@@ -820,9 +820,9 @@ electron-download@^3.0.1:
     semver "^5.3.0"
     sumchecker "^1.2.0"
 
-electron@^1.4.14:
-  version "1.4.14"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-1.4.14.tgz#e374b76ccdc432bccad9bb3ce1add453bf5648b4"
+electron@1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-1.5.1.tgz#14916269396c0c1e9f4ac1141ba6b87025ddb628"
   dependencies:
     electron-download "^3.0.1"
     extract-zip "^1.0.3"
