@@ -17,34 +17,34 @@ type Request = {
 }
 
 // Ugly static variables
-let credentials: ?google.OauthCredentials
-let email: ?string
-let connectionFactory: ?(() => Promise<IMAPConnection>)
+let _credentials: ?google.OauthCredentials
+let _email: ?string
+let _connectionFactory: ?(() => Promise<IMAPConnection>)
 
 export function setCredentials(email: string, creds: google.OauthCredentials) {
-  credentials = creds
-  email = email
-  connectionFactory = null
+  _credentials = creds
+  _email = email
+  _connectionFactory = null
 }
 
 async function getTokenGenerator(): Promise<google.XOAuth2Generator> {
-  if (!credentials || !email) {
+  if (!_credentials || !_email) {
     return Promise.reject(new Error('cannot instantiate token generator without access token'))
   }
   return google.getTokenGenerator({
-    email,
-    credentials,
+    email: _email,
+    credentials: _credentials,
     client_id,
     client_secret,
   })
 }
 
 async function getConnectionFactory(): Promise<() => Promise<IMAPConnection>> {
-  if (!connectionFactory) {
+  if (!_connectionFactory) {
     const tokGen = await getTokenGenerator()
-    connectionFactory = () => google.getConnection(tokGen)
+    _connectionFactory = () => google.getConnection(tokGen)
   }
-  return connectionFactory
+  return _connectionFactory
 }
 
 export class GraphQLImapInterface {
