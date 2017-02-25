@@ -86,7 +86,7 @@ export default new graphql.GraphQLObjectType({
     publishTime: {
       type: GraphQLDateTime,
       description: 'Time and date when the activity was received',
-      resolve({ activity }: ActivityData) { return activity.publishTime },
+      resolve({ activity }: ActivityData) { return activity.publishTime.toDate() },
     },
     types: {
       type: new graphql.GraphQLList(URI),

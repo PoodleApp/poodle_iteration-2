@@ -31,7 +31,7 @@ export default new graphql.GraphQLObjectType({
       type: GraphQLDateTime,
       description: 'Time and date of latest activity in the conversation',
       resolve({ conversation }: ConversationData) {
-        return conversation.lastActiveTime
+        return conversation.lastActiveTime.toDate()
       },
     },
     participarts: {
