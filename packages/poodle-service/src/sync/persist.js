@@ -26,7 +26,8 @@ export async function persistMessage(db: PouchDB, message: Message): Promise<voi
 }
 
 export async function persistPart(db: PouchDB, message: Message, part: MessagePart, data: ReadStream): Promise<void> {
-  const existing = await db.get(message.id).catch(err => {
+  const _id = message.uriForPart(part)
+  const existing = await db.get(_id).catch(err => {
     if (err.status !== 404) { return Promise.reject(err) }
   })
   if (existing) { return }
@@ -39,7 +40,7 @@ export async function persistPart(db: PouchDB, message: Message, part: MessagePa
   }
 
   const record: PartRecord = {
-    _id: message.uriForPart(part),
+    _id,
     _attachments: {
       content: {
         content_type: `${type}/${subtype}`,
