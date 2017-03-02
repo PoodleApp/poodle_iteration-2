@@ -18,9 +18,10 @@ export function queryConversations(params: QueryParams, db: PouchDB): Observable
   return kefir.fromPromise(db.find({
     selector: buildSelector(params),
     fields:   ['messageIds'],
+    limit:    params.limit || 100,
   }))
     .flatMap(matchingMessages => {
-      const threads = matchingMessages.map(
+      const threads = matchingMessages.docs.map(
         message => kefir.fromPromise(getThread(message, db))
       )
       return kefir.merge(threads)  // build convs in parallel
@@ -48,6 +49,7 @@ function getThread(message: MessageRecord, db: PouchDB): Promise<MessageRecord[]
     },
     sort: ['_id'],
   })
+    .then(result => result.docs)
 }
 
 function fetchPartContent(db: PouchDB, msg: Message, partId: string): Promise<ReadStream> {
@@ -85,10 +87,6 @@ function buildSelector(params: QueryParams): Object {
       ...(selector.message || {})
     }
     selector['message.date'] = { $gte: since }
-  }
-
-  if (Object.keys(selector).length < 2) {
-    throw new Error('cannot query with no selectors')
   }
 
   return selector
