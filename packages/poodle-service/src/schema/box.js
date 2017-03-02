@@ -6,7 +6,7 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql'
-import GraphQLDateTime from 'graphql-custom-datetype'
+import { GraphQLDateTime } from 'graphql-iso-date'
 
 import ArfeMessage                              from 'arfe/lib/models/Message'
 import * as Conv                                from 'arfe/lib/models/Conversation'

@@ -1,14 +1,14 @@
 /* @flow */
 
-import ArfeConversation   from 'arfe/lib/models/Conversation'
-import * as graphql       from 'graphql'
-import GraphQLDateTime    from 'graphql-custom-datetype'
-import Connection         from 'imap'
-import * as m             from 'mori'
-import { searchByThread } from '../actions/google'
-import Activity           from './Activity'
-import Address            from './Address'
-import LanguageValue      from './LanguageValue'
+import ArfeConversation    from 'arfe/lib/models/Conversation'
+import * as graphql        from 'graphql'
+import { GraphQLDateTime } from 'graphql-iso-date'
+import Connection          from 'imap'
+import * as m              from 'mori'
+import { searchByThread }  from '../actions/google'
+import Activity            from './Activity'
+import Address             from './Address'
+import LanguageValue       from './LanguageValue'
 
 import type { Seqable }      from 'mori'
 import type { ActivityData } from './Activity'

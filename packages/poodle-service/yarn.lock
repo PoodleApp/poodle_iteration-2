@@ -1275,9 +1275,9 @@ graceful-fs@^4.1.2, graceful-fs@^4.1.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/graceful-readlink/-/graceful-readlink-1.0.1.tgz#4cafad76bc62f02fa039b2f94e9a3dd3a391a725"
 
-graphql-custom-datetype@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/graphql-custom-datetype/-/graphql-custom-datetype-0.3.0.tgz#6849d8fa6f3d685110b93bec753e7561c7fc720f"
+graphql-iso-date@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/graphql-iso-date/-/graphql-iso-date-3.1.0.tgz#117d8ebdc9a08e49ab3a0730ffb6f52e9bd6080b"
 
 graphql@^0.8.2:
   version "0.8.2"
@@ -2101,13 +2101,7 @@ object.omit@^2.0.0:
     for-own "^0.1.4"
     is-extendable "^0.1.1"
 
-once@^1.3.0, once@^1.3.1:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/once/-/once-1.4.0.tgz#583b1aa775961d4b113ac17d9c50baef9dd76bd1"
-  dependencies:
-    wrappy "1"
-
-once@~1.3.0, once@~1.3.3:
+once@^1.3.0, once@^1.3.1, once@~1.3.0, once@~1.3.3:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/once/-/once-1.3.3.tgz#b2e261557ce4c314ec8304f3fa82663e4297ca20"
   dependencies:

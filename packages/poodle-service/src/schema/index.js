@@ -1,7 +1,7 @@
 /* @flow */
 
 import * as graphql           from 'graphql'
-import GraphQLDateTime        from 'graphql-custom-datetype'
+import { GraphQLDateTime }    from 'graphql-iso-date'
 import Connection             from 'imap'
 import Sync                   from '../sync'
 import { queryConversations } from '../sync/query'

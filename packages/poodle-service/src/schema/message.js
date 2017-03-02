@@ -6,9 +6,9 @@ import {
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
-}                      from 'graphql'
-import GraphQLDateTime from 'graphql-custom-datetype'
-import Address         from './Address'
+}                          from 'graphql'
+import { GraphQLDateTime } from 'graphql-iso-date'
+import Address             from './Address'
 
 const AddressList = new GraphQLList(new GraphQLNonNull(Address))
 
