@@ -118,7 +118,7 @@ function fetchParts(message: Message, box: Box, conn: Connection, db: PouchDB): 
     .filter(part => !!part.partID)  // TODO: skip parts with no ID
     .filter(part => !part.subtype)  // skip multipart parts
     .flatMap(part => kefir.fromPromise(
-      actions.fetchMessagePart(message, part.partID || '', conn)
+      actions.fetchMessagePart(message, part.partID || '', box, conn)
       .then(data => persist.persistPart(db, message, part, data))
       .then(_ => message.uriForPart(part))
     ))

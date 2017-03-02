@@ -23,8 +23,7 @@ import type { Observable } from 'kefir'
 
 const headersSelection = 'HEADER'
 
-// TODO: should we require an open box here?
-export function fetchMessagePart(msg: Message, partId: string, conn: Connection): Promise<ReadStream> {
+export function fetchMessagePart(msg: Message, partId: string, box: Box, conn: Connection): Promise<ReadStream> {
   const part = msg.getPart(partId)
   if (!part) {
     return Promise.reject(new Error(`partId ${partId} does not exist in message ${msg.uid}`))
