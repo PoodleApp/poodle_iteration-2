@@ -1,15 +1,16 @@
 /* @flow */
 
-import {
-  GraphQLNonNull,
-  GraphQLObjectType,
-  GraphQLSchema,
-  GraphQLString,
-} from 'graphql'
+import * as graphql           from 'graphql'
+import GraphQLDateTime        from 'graphql-custom-datetype'
+import Connection             from 'imap'
+import Sync                   from '../sync'
+import { queryConversations } from '../sync/query'
+import * as imaputil          from '../util/imap'
+import { Box }                from './box'
+import Conversation           from './Conversation'
 
-import Connection    from 'imap'
-import * as imaputil from '../util/imap'
-import { Box }       from './box'
+const Conversations = new graphql.GraphQLList(new graphql.GraphQLNonNull(Conversation))
+const ListOfStrings = new graphql.GraphQLList(new graphql.GraphQLNonNull(graphql.GraphQLString))
 
 /*
  * GraphQL schema for IMAP interface
@@ -20,8 +21,8 @@ import { Box }       from './box'
  *     () => Promise<Connection>
  *
  */
-export default new GraphQLSchema({
-  query: new GraphQLObjectType({
+export default new graphql.GraphQLSchema({
+  query: new graphql.GraphQLObjectType({
     name: 'Root',
     fields: {
       box: {
@@ -29,7 +30,7 @@ export default new GraphQLSchema({
         description: 'An individual mailbox on an IMAP server',
         args: {
           attribute: {
-            type: new GraphQLNonNull(GraphQLString),
+            type: new graphql.GraphQLNonNull(graphql.GraphQLString),
             description: 'Find a box with a given attribute - e.g. `\\All`',
           }
         },
@@ -44,6 +45,20 @@ export default new GraphQLSchema({
             )
             return [conn, box]  // pass connection with box
           }
+        },
+      },
+      conversations: {
+        type: Conversations,
+        descriptions: 'Activities derived from message threads according to the ARFE protocol',
+        args: {
+          since:        GraphQLDateTime,
+          labels:       ListOfStrings,
+          limit:        graphql.GraphQLInt,
+          mailingList:  graphql.GraphQLString,
+          participants: ListOfStrings,
+        },
+        async resolve(sync: Sync, args, context) {
+          sync.queryConversations(args)
         },
       },
     },
