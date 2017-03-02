@@ -2,16 +2,15 @@
 
 import RaisedButton from 'material-ui/RaisedButton'
 import { search }   from 'poodle-core/lib/actions/activityStream'
-import * as q       from 'poodle-core/lib/queries/searchConversations'
+import * as q       from 'poodle-core/lib/queries/localConversations'
 import React        from 'react'
 import * as apollo  from 'react-apollo'
 import * as redux   from 'react-redux'
 
-import type { SearchConversationsData } from 'poodle-core/lib/queries/searchConversations'
-import type { State }                   from 'poodle-core/lib/reducers'
+import type { State } from 'poodle-core/lib/reducers'
 
 type ActivityStreamProps = {
-  data:         q.SearchConversationsData,
+  data:         q.LocalConversations,
   dispatch:     (action: Object) => void,
   pollInterval: number,
   query:        string,
@@ -19,7 +18,7 @@ type ActivityStreamProps = {
 
 export function ActivityStream(props: ActivityStreamProps) {
   let queryInput: HTMLInputElement
-  const { allMail, error, loading } = props.data
+  const { conversations, error, loading } = props.data
 
   if (loading) {
     return <div>Loading...</div>
@@ -31,14 +30,14 @@ export function ActivityStream(props: ActivityStreamProps) {
     </div>
   }
 
-  const { conversations } = props.data.allMail
+  console.log('conversations', props)
 
   return <div>
     <form onSubmit={onSearch.bind(null, queryInput, props)}>
       <input type="text" ref={input => { queryInput = input }} defaultValue={props.query} />
       <input type="submit" value="search" />
     </form>
-    {conversations}
+    {conversations.map(conv => <ActivityRow conversation={conv} />)}
   </div>
 
 }
@@ -65,7 +64,7 @@ function ActivityRow({ conversation }: ActivityRowProps) {
   </div>
 }
 
-const ComponentWithData = apollo.graphql(q.searchConversations, {
+const ComponentWithData = apollo.graphql(q.localConversations, {
   options: ({ query, pollInterval }: ActivityStreamProps) => ({
     variables: { query },
     pollInterval,
