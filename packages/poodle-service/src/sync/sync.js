@@ -13,6 +13,7 @@ import PouchDB    from 'pouchdb-node'
 
 import * as actions  from '../actions'
 import * as imaputil from '../util/imap'
+import * as promises from '../util/promises'
 import * as persist  from './persist'
 
 import type { ReadStream }        from 'fs'
@@ -57,7 +58,9 @@ export function startBackgroundSync({ boxes, connectionFactory, db, ...opts }: O
 
     pending = setTimeout(() => {
       lastFetchTime = new Date
-      fetch(boxes, timeFrame, connectionFactory, db).onEnd(onNewMail)
+      fetch(boxes, timeFrame, connectionFactory, db)
+        .onError(console.error)
+        .onEnd(onNewMail)
       schedule()
     }, delay)
   }
@@ -73,24 +76,41 @@ export function startBackgroundSync({ boxes, connectionFactory, db, ...opts }: O
 function fetch(boxes: Boxes, timeFrame: number, cf: ConnectionFactory, db: PouchDB): Observable<void, mixed> {
   const now   = new Date()
   const since = new Date(Number(now) - timeFrame)
-  const bs    = boxes.map(async boxAttr => {
-    const conn = await cf()
-    const box  = await imaputil.openBox(imaputil.boxByAttribute(boxAttr), true, conn)
-    return [box, conn]
-  })
 
-  // TODO: avoid downloading messages that have already been downloaded
-  return kefir.merge(bs.map(kefir.fromPromise))
-    .flatMap(([box, conn]) => {
+  const connObs = kefir.fromPromise(cf())
+
+  // Queue up a fetch operation for each box - but make sure these don't start
+  // yet, because we are reusing one connection for everything,
+  // and AFAIK we cannot open multiple boxes at the same time.
+  const boxsObss = boxes.map(box => connObs.flatMap(
+    conn => fetchFromBox(box, since, conn, db).map(_ => conn)  // forward reference to `conn`
+  ))
+
+  // Run the fetches for each box, one box at a time.
+  return kefir.concat(boxsObss)
+    .last()
+    .map(conn => conn.end())  // close the connection after all fetches are complete
+}
+
+function fetchFromBox(boxAttr: string, since: Date, conn: Connection, db: PouchDB): Observable<void, mixed> {
+  // TODO: fetch any messages referenced by recent messages
+  return kefir.fromPromise(
+    imaputil.openBox(imaputil.boxByAttribute(boxAttr), true, conn)
+  )
+    .flatMap(box => {
       return actions.fetchRecent(since, box, conn)
-        .flatMap(message => kefir.fromPromise(
-          persist.persistMessage(db, message)
-        )
+        .flatMap(message => (
+          kefir.fromPromise(
+            persist.persistMessage(db, message)
+          )
           .flatMap(_ => fetchParts(message, box, conn, db))
-        )
+        ))
     })
-    // TODO: fetch any messages referenced by recent messages
-    .map(_ => undefined)  // yield `undefined` until we settle on the contract that we really want
+    .beforeEnd(() => kefir.fromPromise(
+      promises.lift0(cb => conn.closeBox(false, cb))
+    ))
+    .last()
+    .map(_ => undefined)
 }
 
 function fetchParts(message: Message, box: Box, conn: Connection, db: PouchDB): Observable<string, mixed> {
