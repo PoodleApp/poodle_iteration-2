@@ -116,7 +116,7 @@ function fetchFromBox(boxAttr: string, since: Date, conn: Connection, db: PouchD
 function fetchParts(message: Message, box: Box, conn: Connection, db: PouchDB): Observable<string, mixed> {
   return kefir.sequentially(0, message.parts)
     .filter(part => !!part.partID)  // TODO: skip parts with no ID
-    .filter(part => !part.subtype)  // skip multipart parts
+    .filter(part => !!part.subtype)  // skip multipart parts
     .flatMap(part => kefir.fromPromise(
       actions.fetchMessagePart(message, part.partID || '', box, conn)
       .then(data => persist.persistPart(db, message, part, data))
