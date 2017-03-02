@@ -29,6 +29,8 @@ export async function persistPart(db: PouchDB, message: Message, part: MessagePa
   const existing = await db.get(message.id).catch(err => {
     if (err.status !== 404) { return Promise.reject(err) }
   })
+  if (existing) { return }
+
   const buffer = await streamToPromise(data)
 
   const { type, subtype } = part
@@ -44,10 +46,8 @@ export async function persistPart(db: PouchDB, message: Message, part: MessagePa
         data: buffer,
       },
     },
+    part,
     type: 'PartContent',
-  }
-  if (existing) {
-    record._rev = existing._rev
   }
   return db.put(record)
 }

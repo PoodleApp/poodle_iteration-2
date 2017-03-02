@@ -2,7 +2,7 @@
 
 import Connection from 'imap'
 
-import type { MessageAttributes } from 'imap'
+import type { MessageAttributes, MessagePart } from 'imap'
 
 export type QueryParams       = { [key: string]: any }
 export type ConnectionFactory = () => Promise<Connection>
@@ -27,5 +27,6 @@ export type PartRecord = {
       stub?:        true,
     },
   },
+  part: MessagePart,
   type: 'PartContent',
 }
