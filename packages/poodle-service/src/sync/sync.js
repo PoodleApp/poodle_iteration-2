@@ -54,7 +54,7 @@ export function startBackgroundSync({ boxes, connectionFactory, db, ...opts }: O
     const nextFetchTime = lastFetchTime
       ? Number(lastFetchTime) + fetchInterval
       : Number(now)
-    const delay = Math.min(0, nextFetchTime - now)
+    const delay = Math.max(0, nextFetchTime - now)
 
     pending = setTimeout(() => {
       lastFetchTime = new Date
