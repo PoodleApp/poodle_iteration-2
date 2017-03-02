@@ -6,6 +6,7 @@ import Connection             from 'imap'
 import Sync                   from '../sync'
 import { queryConversations } from '../sync/query'
 import * as imaputil          from '../util/imap'
+import * as kefirutil         from '../util/kefir'
 import { Box }                from './box'
 import Conversation           from './Conversation'
 
@@ -51,14 +52,32 @@ export default new graphql.GraphQLSchema({
         type: Conversations,
         descriptions: 'Activities derived from message threads according to the ARFE protocol',
         args: {
-          since:        GraphQLDateTime,
-          labels:       ListOfStrings,
-          limit:        graphql.GraphQLInt,
-          mailingList:  graphql.GraphQLString,
-          participants: ListOfStrings,
+          since: {
+            type: GraphQLDateTime,
+            description: 'Show messages received after this time',
+          },
+          labels: {
+            type: ListOfStrings,
+            description: 'Show messages with any of the given labels (Gmail only)',
+          },
+          limit: {
+            type: graphql.GraphQLInt,
+            description: 'Limit number of conversations returned',
+          },
+          mailingLists: {
+            type: ListOfStrings,
+            description: 'Show conversations from these mailing lists',
+          },
+          participants: {
+            type: ListOfStrings,
+            description: 'Show messages to or from these people',
+          },
         },
         async resolve(sync: Sync, args, context) {
-          sync.queryConversations(args)
+          return kefirutil.takeAll(
+            sync.queryConversations(args)
+          )
+          .toPromise()
         },
       },
     },
