@@ -2,6 +2,7 @@
 
 import * as graphqlimap             from 'graphql-imap'
 import * as google                  from 'graphql-imap/lib/oauth/google'
+import Sync                         from 'graphql-imap/lib/sync'
 import { client_id, client_secret } from '../constants'
 
 import type { DocumentNode, ExecutionResult } from 'graphql'
@@ -20,11 +21,14 @@ type Request = {
 let _credentials: ?google.OauthCredentials
 let _email: ?string
 let _connectionFactory: ?(() => Promise<IMAPConnection>)
+let _sync: ?Sync
 
 export function setCredentials(email: string, creds: google.OauthCredentials) {
   _credentials = creds
   _email = email
   _connectionFactory = null
+  if (_sync) { _sync.terminate() }
+  _sync = null
 }
 
 async function getTokenGenerator(): Promise<google.XOAuth2Generator> {
@@ -47,14 +51,30 @@ async function getConnectionFactory(): Promise<() => Promise<IMAPConnection>> {
   return _connectionFactory
 }
 
+async function getSync(): Promise<Sync> {
+  if (!_sync) {
+    _sync = new Sync({
+      boxes:             ['\\All'],
+      connectionFactory: await getConnectionFactory(),
+      dbname:            `poodle-${_email || ''}`,
+    })
+  }
+  return _sync
+}
+
 export class GraphQLImapInterface {
 
   async query({ query, variables, operationName }: Request): Promise<ExecutionResult> {
-    const cf = await getConnectionFactory()
     if (!query) {
       return Promise.reject(new Error("`query` must be defined"))
     }
-    return graphqlimap.execute(query, cf, variables, operationName)
+    return graphqlimap.execute(
+      query,
+      await getConnectionFactory(),
+      await getSync(),
+      variables,
+      operationName
+    )
   }
 
 }
