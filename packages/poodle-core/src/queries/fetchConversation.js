@@ -38,7 +38,7 @@ type Activity = {
 
 export const fetchConversation = gql`query FetchConversation($query: String!) {
   allMail: box(attribute: "\\\\All") {
-    conversations(search: $query) {
+    conversations(search: $query, limit: 30) {
       id
       subject {
         default: get
