@@ -36,8 +36,9 @@ export function ActivityStream(props: ActivityStreamProps) {
     <form onSubmit={onSearch.bind(null, queryInput, props)}>
       <input type="text" ref={input => { queryInput = input }} defaultValue={props.query} />
       <input type="submit" value="search" />
+      <RaisedButton label="Refresh" onClick={props.data.refetch} />
     </form>
-    {conversations.map(conv => <ActivityRow conversation={conv} />)}
+    {conversations.map(conv => <ActivityRow key={conv.id} conversation={conv} />)}
   </div>
 
 }
@@ -66,7 +67,7 @@ function ActivityRow({ conversation }: ActivityRowProps) {
 
 const ComponentWithData = apollo.graphql(q.localConversations, {
   options: ({ query, pollInterval }: ActivityStreamProps) => ({
-    variables: { query },
+    variables: { lang: navigator.language },
     pollInterval,
   })
 })(ActivityStream)
