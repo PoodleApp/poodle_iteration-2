@@ -21,7 +21,7 @@ export type LocalConversations = ApolloData & {
   conversations: Conversation[],
 }
 
-export const localConversations = gql`query LocalConvesations {
+export const localConversations = gql`query LocalConvesations($lang: String!) {
   conversations(limit: 30) {
     id
     lastActiveTime
@@ -29,7 +29,7 @@ export const localConversations = gql`query LocalConvesations {
       displayName
     }
     subject {
-      default: get
+      get(lang: $lang)
     }
   }
 }`
