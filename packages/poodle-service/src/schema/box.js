@@ -8,9 +8,10 @@ import {
 } from 'graphql'
 import { GraphQLDateTime } from 'graphql-iso-date'
 
-import ArfeMessage                              from 'arfe/lib/models/Message'
+import ArfeMessage, * as Msg                    from 'arfe/lib/models/Message'
 import * as Conv                                from 'arfe/lib/models/Conversation'
 import Connection                               from 'imap'
+import * as m                                   from 'mori'
 import { fetchMessagePart, fetchRecent }        from '../actions'
 import { fetchMessage, search, searchByThread } from '../actions/google'
 import * as kefirutil                           from '../util/kefir'
@@ -19,6 +20,7 @@ import { Message }                              from './message'
 import { Thread }                               from './thread'
 
 import type { Box as ImapBox }   from 'imap'
+import type { Seqable }          from 'mori'
 import type { Readable }         from 'stream'
 import type { ConversationData } from './Conversation'
 
@@ -50,17 +52,18 @@ export const Box = new GraphQLObjectType({
         ).toPromise()
 
         function f(msg: ArfeMessage, partId: string): Promise<Readable> {
-          return fetchMessagePart(msg, partId, conn)
+          return fetchMessagePart(msg, partId, box, conn)
         }
 
-        const conversations = await Promise.all(threads.map(
-          thread => Conv.messagesToConversation(f, thread.messages)
+        return Promise.all(threads.map(
+          async thread => {
+            const conversation = await Conv.messagesToConversation(f, thread.messages)
+            return {
+              conversation,
+              fetchContent: fetchContent.bind(null, box, conn, thread.messages),
+            }
+          }
         ))
-
-        return conversations.map(conversation => ({
-          conversation,
-          conn,
-        }))
       }
     },
 
@@ -127,3 +130,28 @@ export const Box = new GraphQLObjectType({
     },
   },
 })
+
+// TODO: Support content that is not embedded within a message (e.g., `https:` URI)
+async function fetchContent(
+  box:     ImapBox,
+  conn:    Connection,
+  context: Seqable<ArfeMessage>,
+  uri:     string
+): Promise<Readable> {
+  const parsed = Msg.parseMidUri(uri)
+  if (!parsed) {
+    return Promise.reject(new Error(`error looking up part content at ${uri}`))
+  }
+
+  const { messageId, partId } = parsed
+  if (!messageId || !partId) {
+    return Promise.reject(new Error(`content URI must be a non-relative mid URI: ${uri}`))
+  }
+
+  const msg = m.first(m.filter(m => m.id === messageId, context))
+  if (!msg) {
+    return Promise.reject(new Error(`could not find message in conversation context: ${messageId}`))
+  }
+
+  return fetchMessagePart(msg, partId, box, conn)
+}

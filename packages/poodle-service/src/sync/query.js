@@ -61,6 +61,15 @@ function fetchPartContent(db: PouchDB, msg: Message, partId: string): Promise<Re
     })
 }
 
+export function fetchContentByUri(db: PouchDB, uri: string): Promise<Readable> {
+  return db.getAttachment(uri, 'content')
+    .then(buffer => {
+      const rs = new stream.PassThrough()
+      rs.end(buffer)
+      return rs
+    })
+}
+
 function buildSelector(params: QueryParams): Object {
   const { labels, mailingList, since } = params
   const selector: { [key: string]: any } = {

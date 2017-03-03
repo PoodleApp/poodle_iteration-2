@@ -1,22 +1,21 @@
 /* @flow */
 
 import ArfeConversation    from 'arfe/lib/models/Conversation'
+import ArfeMessage         from 'arfe/lib/models/Message'
 import * as graphql        from 'graphql'
 import { GraphQLDateTime } from 'graphql-iso-date'
-import Connection          from 'imap'
 import * as m              from 'mori'
 import { searchByThread }  from '../actions/google'
 import Activity            from './Activity'
 import Address             from './Address'
 import LanguageValue       from './LanguageValue'
 
-import type { Seqable }      from 'mori'
 import type { Readable }     from 'stream'
 import type { ActivityData } from './Activity'
 
 export type ConversationData = {
-  conn:         Connection,
   conversation: ArfeConversation,
+  fetchContent: (uri: string) => Promise<Readable>,
 }
 
 export default new graphql.GraphQLObjectType({
@@ -50,13 +49,9 @@ export default new graphql.GraphQLObjectType({
     activities: {
       type: new graphql.GraphQLList(new graphql.GraphQLNonNull(Activity)),
       description: 'Activities in activitystrea.ms 2.0 format',
-      resolve({ conversation, conn }: ConversationData): ActivityData[] {
+      resolve({ conversation, fetchContent }: ConversationData): ActivityData[] {
         return m.intoArray(m.map(
-          activity => ({
-            activity,
-            conn,
-            context: conversation.messages,
-          }),
+          activity => ({ activity, fetchContent }),
           conversation.activities
         ))
       },

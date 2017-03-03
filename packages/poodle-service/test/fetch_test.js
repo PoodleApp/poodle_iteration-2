@@ -37,7 +37,7 @@ async function testFetchMessagePart() {
   const conn   = await google.getConnection(tokGen)
   const box    = await imaputil.openAllMail(true, conn)
   const msg    = await googleactions.fetchMessage(msgId, box, conn)
-  const part   = await actions.fetchMessagePart(msg, '1.2', conn)
+  const part   = await actions.fetchMessagePart(msg, '1.2', box, conn)
 
   console.log('message part:')
   part.pipe(process.stdout)

@@ -41,6 +41,10 @@ export default class Sync {
     return query.queryConversations(params, this._db)
   }
 
+  fetchPartContent(uri: string): Promise<Readable> {
+    return query.fetchContentByUri(this._db, uri)
+  }
+
   terminate() {
     this._stopSync()
   }

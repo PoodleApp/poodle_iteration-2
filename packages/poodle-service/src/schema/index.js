@@ -10,6 +10,8 @@ import * as kefirutil         from '../util/kefir'
 import { Box }                from './box'
 import Conversation           from './Conversation'
 
+import type { ConversationData } from './Conversation'
+
 const Conversations = new graphql.GraphQLList(new graphql.GraphQLNonNull(Conversation))
 const ListOfStrings = new graphql.GraphQLList(new graphql.GraphQLNonNull(graphql.GraphQLString))
 
@@ -73,11 +75,17 @@ export default new graphql.GraphQLSchema({
             description: 'Show messages to or from these people',
           },
         },
-        async resolve(sync: Sync, args, context) {
-          return kefirutil.takeAll(
+        async resolve(sync: Sync, args, context): Promise<ConversationData[]> {
+          const convs = await kefirutil.takeAll(
             sync.queryConversations(args)
           )
           .toPromise()
+
+          const fetchContent = sync.fetchPartContent.bind(sync)
+
+          return convs.map(
+            conversation => ({ conversation, fetchContent })
+          )
         },
       },
     },
