@@ -34,7 +34,7 @@ export default new graphql.GraphQLObjectType({
         return conversation.lastActiveTime.toDate()
       },
     },
-    participarts: {
+    participants: {
       type: new graphql.GraphQLList(Address),
       description: 'People or entities who have sent or received activities in the conversation',
       resolve({ conversation }: ConversationData) {
