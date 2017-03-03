@@ -18,7 +18,7 @@ export default new graphql.GraphQLObjectType({
       description: 'Get a translation for the given language, if one exists',
       args: langArgs,
       resolve(lv, args) {
-        return lv.get(args.lang)
+        return lv.get(args.lang) || lv.get()
       },
     },
     has: {
