@@ -4,8 +4,8 @@ import Message         from 'arfe/lib/models/Message'
 import PouchDB         from 'pouchdb-node'
 import streamToPromise from 'stream-to-promise'
 
-import type { ReadStream }                from 'fs'
 import type { MessagePart }               from 'imap'
+import type { Readable }                  from 'stream'
 import type { MessageRecord, PartRecord } from './types'
 
 export async function persistMessage(db: PouchDB, message: Message): Promise<void> {
@@ -25,7 +25,7 @@ export async function persistMessage(db: PouchDB, message: Message): Promise<voi
   return db.put(record).then(_ => undefined)
 }
 
-export async function persistPart(db: PouchDB, message: Message, part: MessagePart, data: ReadStream): Promise<void> {
+export async function persistPart(db: PouchDB, message: Message, part: MessagePart, data: Readable): Promise<void> {
   const _id = message.uriForPart(part)
   const existing = await db.get(_id).catch(err => {
     if (err.status !== 404) { return Promise.reject(err) }

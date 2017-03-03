@@ -11,6 +11,7 @@ import Address             from './Address'
 import LanguageValue       from './LanguageValue'
 
 import type { Seqable }      from 'mori'
+import type { Readable }     from 'stream'
 import type { ActivityData } from './Activity'
 
 export type ConversationData = {

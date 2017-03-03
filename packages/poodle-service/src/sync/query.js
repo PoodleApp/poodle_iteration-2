@@ -6,8 +6,8 @@ import * as kefir              from 'kefir'
 import PouchDB                 from 'pouchdb-node'
 import stream                  from 'stream'
 
-import type { ReadStream }                 from 'fs'
 import type { Observable }                 from 'kefir'
+import type { Readable }                   from 'stream'
 import type { MessageRecord, QueryParams } from './types'
 
 // export function createIndexes(db: PouchDB) {
@@ -52,7 +52,7 @@ function getThread(message: MessageRecord, db: PouchDB): Promise<MessageRecord[]
     .then(result => result.docs)
 }
 
-function fetchPartContent(db: PouchDB, msg: Message, partId: string): Promise<ReadStream> {
+function fetchPartContent(db: PouchDB, msg: Message, partId: string): Promise<Readable> {
   return db.getAttachment(msg.uriForPartId(partId), 'content')
     .then(buffer => {
       const rs = new stream.PassThrough()

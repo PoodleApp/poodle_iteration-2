@@ -12,6 +12,7 @@ import { fetchMessagePart } from '../actions'
 import Actor                from './Actor'
 
 import type { Seqable }   from 'mori'
+import type { Readable }  from 'stream'
 import type { ActorData } from './Actor'
 
 export type ActivityData = {

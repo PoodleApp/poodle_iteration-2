@@ -10,7 +10,6 @@ import * as imap        from '../util/imap'
 import * as kefirutil   from '../util/kefir'
 import * as promises    from '../util/promises'
 
-import type { ReadStream } from 'fs'
 import type {
   Box,
   FetchOptions,
@@ -19,11 +18,12 @@ import type {
   MessageSource,
   UID,
 } from 'imap'
+import type { Readable }   from 'stream'
 import type { Observable } from 'kefir'
 
 const headersSelection = 'HEADER'
 
-export function fetchMessagePart(msg: Message, partId: string, box: Box, conn: Connection): Promise<ReadStream> {
+export function fetchMessagePart(msg: Message, partId: string, box: Box, conn: Connection): Promise<Readable> {
   const part = msg.getPart(partId)
   if (!part) {
     return Promise.reject(new Error(`partId ${partId} does not exist in message ${msg.uid}`))
@@ -81,7 +81,7 @@ export function fetchMetadata(source: MessageSource, conn: Connection): Observab
 }
 
 // TODO: this might come in multiple chunks
-function messageBodyStream(msg: ImapMessage): Observable<ReadStream, mixed> {
+function messageBodyStream(msg: ImapMessage): Observable<Readable, mixed> {
   return kefirutil.fromEventsWithEnd(msg, 'body', (stream, info) => stream)
 }
 

@@ -18,8 +18,8 @@ import Conversation                             from './Conversation'
 import { Message }                              from './message'
 import { Thread }                               from './thread'
 
-import type { ReadStream }       from 'fs'
 import type { Box as ImapBox }   from 'imap'
+import type { Readable }         from 'stream'
 import type { ConversationData } from './Conversation'
 
 const Conversations = new GraphQLList(new GraphQLNonNull(Conversation))
@@ -49,7 +49,7 @@ export const Box = new GraphQLObjectType({
           searchByThread(query, box, conn)
         ).toPromise()
 
-        function f(msg: ArfeMessage, partId: string): Promise<ReadStream> {
+        function f(msg: ArfeMessage, partId: string): Promise<Readable> {
           return fetchMessagePart(msg, partId, conn)
         }
 

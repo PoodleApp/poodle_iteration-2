@@ -9,6 +9,7 @@ import * as query              from './query'
 import { startBackgroundSync } from './sync'
 
 import type { Observable }                     from 'kefir'
+import type { Readable }                       from 'stream'
 import type { QueryParams, ConnectionFactory } from './types'
 
 PouchDB.plugin(findPlugin)

@@ -16,7 +16,6 @@ import * as imaputil from '../util/imap'
 import * as promises from '../util/promises'
 import * as persist  from './persist'
 
-import type { ReadStream }        from 'fs'
 import type { Box }               from 'imap'
 import type { Observable }        from 'kefir'
 import type { ConnectionFactory } from './types'
