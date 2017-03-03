@@ -10,19 +10,26 @@ import type { Observable }                 from 'kefir'
 import type { Readable }                   from 'stream'
 import type { MessageRecord, QueryParams } from './types'
 
-// export function createIndexes(db: PouchDB) {
-//   TODO
-// }
+export function createIndexes(db: PouchDB): Promise<void> {
+  const indexes = [
+    db.createIndex({
+      index: {
+        fields: ['messageIds', 'type'],
+      }
+    }),
+  ]
+  return Promise.all(indexes).then(_ => undefined)
+}
 
 export function queryConversations(params: QueryParams, db: PouchDB): Observable<Conversation, mixed> {
   return kefir.fromPromise(db.find({
     selector: buildSelector(params),
     fields:   ['messageIds'],
-    limit:    params.limit || 100,
+    limit:    params.limit || 30,
   }))
     .flatMap(matchingMessages => {
       const threads = matchingMessages.docs.map(
-        message => kefir.fromPromise(getThread(message, db))
+        ({ messageIds }) => kefir.fromPromise(getThread(messageIds, db))
       )
       return kefir.merge(threads)  // build convs in parallel
     })
@@ -39,11 +46,11 @@ export function queryConversations(params: QueryParams, db: PouchDB): Observable
  * Get all messages that reference or are referenced by the given message
  * (including the input message itself).
  */
-function getThread(message: MessageRecord, db: PouchDB): Promise<MessageRecord[]> {
+function getThread(messageIds: string[], db: PouchDB): Promise<MessageRecord[]> {
   return db.find({
     selector: {
       messageIds: {
-        $elemMatch: { $in: message.messageIds },
+        $elemMatch: { $in: messageIds },
       },
       type: 'Message',
     },

@@ -35,6 +35,7 @@ export default class Sync {
     this._connectionFactory = opts.connectionFactory
     this._db                = initDb(opts)
     this._stopSync          = startBackgroundSync({ ...opts, db: this._db })
+    query.createIndexes(this._db).catch(err => console.error(err))
   }
 
   queryConversations(params: QueryParams): Observable<Conversation, mixed> {
