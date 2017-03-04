@@ -12,6 +12,7 @@ import * as redux               from 'redux'
 import sagaMiddleware           from 'redux-saga'
 import App                      from './components/App'
 import sagas                    from './sagas'
+import poodleTheme              from './themes/poodle'
 
 import type { Store } from 'redux'
 
@@ -38,7 +39,7 @@ saga.run(sagas)
 
 export function RootComponent(): React.Element<*> {
   return <ApolloProvider store={store} client={client}>
-    <MuiThemeProvider>
+    <MuiThemeProvider muiTheme={poodleTheme}>
       <App />
     </MuiThemeProvider>
   </ApolloProvider>
