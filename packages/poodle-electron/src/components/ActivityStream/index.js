@@ -1,12 +1,12 @@
 /* @flow */
 
-import AppBar      from 'material-ui/AppBar'
-import spacing     from 'material-ui/styles/spacing'
-import { search }  from 'poodle-core/lib/actions/activityStream'
-import * as q      from 'poodle-core/lib/queries/localConversations'
-import React       from 'react'
-import * as apollo from 'react-apollo'
-import * as redux  from 'react-redux'
+import AppBar       from 'material-ui/AppBar'
+import RaisedButton from 'material-ui/RaisedButton'
+import spacing      from 'material-ui/styles/spacing'
+import * as q       from 'poodle-core/lib/queries/localConversations'
+import React        from 'react'
+import * as apollo  from 'react-apollo'
+import * as redux   from 'react-redux'
 
 import ChannelListSidebar from './ChannelListSidebar'
 
@@ -21,20 +21,21 @@ type ActivityStreamProps = {
 
 const styles = {
   body: {
-    padding: '16px',
-    paddingTop: 0,
-    whiteSpace: 'pre-wrap',
+    display: 'flex',
+    flex: 1,
   },
   content: {
-    boxSizing: 'border-box',
+    flex: 1,
     padding: spacing.desktopGutter + 'px',
-    // maxWidth: (spacing.desktopKeylineIncrement * 14) + 'px',
-    minHeight: '800px',
+  },
+  leftNav: {
+    flex: '0 0 12em',
+    order: -1,
   },
   root: {
-    paddingTop: spacing.desktopKeylineIncrement + 'px',
-    paddingBottom: '25em',
-    position: 'relative',
+    display: 'flex',
+    minHeight: '100vh',
+    flexDirection: 'column',
   },
   title: {
     cursor: 'pointer',
@@ -45,42 +46,37 @@ export function ActivityStream(props: ActivityStreamProps) {
   let queryInput: HTMLInputElement
   const { conversations, error, loading } = props.data
 
+  let content
   if (loading) {
-    return <div>Loading...</div>
+    content = <div>Loading...</div>
   }
   else if (error) {
-    return <div>
+    content = <div>
       <p>{String(error)}</p>
       <RaisedButton label="Retry" onClick={props.data.refetch} />
     </div>
   }
+  else {
+    content = conversations.map(
+      conv => <ActivityRow key={conv.id} conversation={conv} />
+    )
+  }
 
-  return <div>
+  return <div style={styles.root}>
+    <header>
       <AppBar
         title={<span style={styles.title}>Poodle</span>}
+        iconClassNameRight="muidocs-icon-navigation-refresh"
+        onRightIconButtonTouchTap={props.data.refetch}
       />
-
-    <ChannelListSidebar />
-    <div style={{paddingTop: 64, minHeight: 400, paddingLeft: 256}}>
-
-      {conversations.map(conv => <ActivityRow key={conv.id} conversation={conv} />)}
+    </header>
+    <div style={styles.body}>
+      <main style={styles.main}>{content}</main>
+      <nav style={styles.leftNav}>
+        <ChannelListSidebar />
+      </nav>
     </div>
-
-    <form onSubmit={onSearch.bind(null, queryInput, props)}>
-      <input type="text" ref={input => { queryInput = input }} defaultValue={props.query} />
-      <input type="submit" value="search" />
-      <RaisedButton label="Refresh" onClick={props.data.refetch} />
-    </form>
   </div>
-
-}
-
-function onSearch(input: ?HTMLInputElement, props: ActivityStreamProps, event: Event) {
-  event.preventDefault()
-  if (input) {
-    const query = input.value
-    props.dispatch(search(query))
-  }
 }
 
 type ActivityRowProps = {

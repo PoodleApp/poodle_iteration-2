@@ -1,15 +1,14 @@
 /* @flow */
 
-import Drawer   from 'material-ui/Drawer'
 import MenuItem from 'material-ui/MenuItem'
 import React    from 'react'
 
 type Props = {}
 
 export function ChannelListSidebar(props: Props) {
-  return <Drawer open={true}>
+  return <div>
     <MenuItem>Channel</MenuItem>
-  </Drawer>
+  </div>
 }
 
 export default ChannelListSidebar

@@ -29,18 +29,7 @@ export function App(props: AppProps) {
     content = <LoginForm dispatch={props.dispatch} />
   }
 
-  return (
-    <div className="App">
-      <div className="App-header">
-        <h2>Poodle</h2>
-      </div>
-      {props.error          ? <div class="error">{props.error.message}</div>    : ''}
-      {props.loadingMessage ? <div class="loading">{props.loadingMessage}</div> : ''}
-      <div>
-        {content}
-      </div>
-    </div>
-  )
+  return content
 }
 
 type LoginFormProps = {
