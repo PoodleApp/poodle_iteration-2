@@ -1,6 +1,7 @@
 /* @flow */
 
 import AppBar       from 'material-ui/AppBar'
+import IconButton   from 'material-ui/IconButton'
 import RaisedButton from 'material-ui/RaisedButton'
 import spacing      from 'material-ui/styles/spacing'
 import * as q       from 'poodle-core/lib/queries/localConversations'
@@ -66,7 +67,9 @@ export function ActivityStream(props: ActivityStreamProps) {
     <header>
       <AppBar
         title={<span style={styles.title}>Poodle</span>}
-        iconClassNameRight="muidocs-icon-navigation-refresh"
+        iconElementRight={
+          <IconButton iconClassName="material-icons">refresh</IconButton>
+        }
         onRightIconButtonTouchTap={props.data.refetch}
       />
     </header>
