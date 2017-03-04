@@ -1,11 +1,14 @@
 /* @flow */
 
-import RaisedButton from 'material-ui/RaisedButton'
-import { search }   from 'poodle-core/lib/actions/activityStream'
-import * as q       from 'poodle-core/lib/queries/localConversations'
-import React        from 'react'
-import * as apollo  from 'react-apollo'
-import * as redux   from 'react-redux'
+import AppBar      from 'material-ui/AppBar'
+import spacing     from 'material-ui/styles/spacing'
+import { search }  from 'poodle-core/lib/actions/activityStream'
+import * as q      from 'poodle-core/lib/queries/localConversations'
+import React       from 'react'
+import * as apollo from 'react-apollo'
+import * as redux  from 'react-redux'
+
+import ChannelListSidebar from './ChannelListSidebar'
 
 import type { State } from 'poodle-core/lib/reducers'
 
@@ -14,6 +17,28 @@ type ActivityStreamProps = {
   dispatch:     (action: Object) => void,
   pollInterval: number,
   query:        string,
+}
+
+const styles = {
+  body: {
+    padding: '16px',
+    paddingTop: 0,
+    whiteSpace: 'pre-wrap',
+  },
+  content: {
+    boxSizing: 'border-box',
+    padding: spacing.desktopGutter + 'px',
+    // maxWidth: (spacing.desktopKeylineIncrement * 14) + 'px',
+    minHeight: '800px',
+  },
+  root: {
+    paddingTop: spacing.desktopKeylineIncrement + 'px',
+    paddingBottom: '25em',
+    position: 'relative',
+  },
+  title: {
+    cursor: 'pointer',
+  },
 }
 
 export function ActivityStream(props: ActivityStreamProps) {
@@ -30,15 +55,22 @@ export function ActivityStream(props: ActivityStreamProps) {
     </div>
   }
 
-  console.log('conversations', props)
-
   return <div>
+      <AppBar
+        title={<span style={styles.title}>Poodle</span>}
+      />
+
+    <ChannelListSidebar />
+    <div style={{paddingTop: 64, minHeight: 400, paddingLeft: 256}}>
+
+      {conversations.map(conv => <ActivityRow key={conv.id} conversation={conv} />)}
+    </div>
+
     <form onSubmit={onSearch.bind(null, queryInput, props)}>
       <input type="text" ref={input => { queryInput = input }} defaultValue={props.query} />
       <input type="submit" value="search" />
       <RaisedButton label="Refresh" onClick={props.data.refetch} />
     </form>
-    {conversations.map(conv => <ActivityRow key={conv.id} conversation={conv} />)}
   </div>
 
 }
