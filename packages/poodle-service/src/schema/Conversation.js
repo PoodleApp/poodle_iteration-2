@@ -34,6 +34,16 @@ export default new graphql.GraphQLObjectType({
         return conversation.lastActiveTime.toDate()
       },
     },
+    latestActivity: {
+      type: Activity,
+      description: 'Most recent activity in the conversation',
+      resolve({ conversation, fetchContent }: ConversationData): ActivityData {
+        return {
+          activity: conversation.latestActivity,
+          fetchContent,
+        }
+      }
+    },
     participants: {
       type: new graphql.GraphQLList(Address),
       description: 'People or entities who have sent or received activities in the conversation',
