@@ -12,10 +12,14 @@ type Props = {
 
 type URI = string
 
-export default function Avatar({ name, id }: Props) {
+export default function Avatar({ name, id, ...rest }: Props) {
   const [color, backgroundColor] = getColors(id)
   const letter = getLetter(name)
-  return <MuiAvatar color={color} backgroundColor={backgroundColor}>{letter}</MuiAvatar>
+  return <MuiAvatar
+    color={color}
+    backgroundColor={backgroundColor}
+    {...rest}
+  >{letter}</MuiAvatar>
 }
 
 const primaryColors = Object.keys(colors).filter(k => k.match(/500$/))

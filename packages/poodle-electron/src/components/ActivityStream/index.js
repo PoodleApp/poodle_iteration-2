@@ -66,9 +66,9 @@ export function ActivityStream(props: ActivityStreamProps) {
   }
   else {
     const convs = conversations.map(
-      conv => <div key={conv.id}>
-        <ActivityRow conversation={conv} />
-        <Divider inset={true} />
+      (conv, i) => <div key={conv.id}>
+        <ConversationRow conversation={conv} />
+        {i == conversations.length - 1 ? '' : <Divider inset={true} /> }
       </div>
     )
     content = <List>{convs}</List>
@@ -93,11 +93,11 @@ export function ActivityStream(props: ActivityStreamProps) {
   </div>
 }
 
-type ActivityRowProps = {
+type ConversationRowProps = {
   conversation: q.Conversation,
 }
 
-function ActivityRow({ conversation }: ActivityRowProps) {
+function ConversationRow({ conversation }: ConversationRowProps) {
   const subject  = conversation.subject || '[no subject]'
   const activity = conversation.latestActivity
   const actor    = activity.actor
