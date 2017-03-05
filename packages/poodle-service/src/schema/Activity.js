@@ -48,7 +48,7 @@ export default new graphql.GraphQLObjectType({
       type: Actor,
       description: 'Person or entity performing the activity',
       resolve({ activity }: ActivityData): ?ActorData {
-        return activity.actor && { actor: activity.actor }
+        return activity.actor
       },
     },
     content: {

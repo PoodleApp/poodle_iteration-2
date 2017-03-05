@@ -4,9 +4,7 @@ import * as AS       from 'activitystrea.ms'
 import * as graphql  from 'graphql'
 import LanguageValue from './LanguageValue'
 
-export type ActorData = {
-  actor: AS.models.Object,
-}
+export type ActorData = AS.models.Object
 
 const URI = new graphql.GraphQLNonNull(graphql.GraphQLString)
 
