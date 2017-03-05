@@ -1,14 +1,18 @@
 /* @flow */
 
-import AppBar       from 'material-ui/AppBar'
-import IconButton   from 'material-ui/IconButton'
-import RaisedButton from 'material-ui/RaisedButton'
-import spacing      from 'material-ui/styles/spacing'
-import * as q       from 'poodle-core/lib/queries/localConversations'
-import React        from 'react'
-import * as apollo  from 'react-apollo'
-import * as redux   from 'react-redux'
+import AppBar             from 'material-ui/AppBar'
+import Divider            from 'material-ui/Divider'
+import IconButton         from 'material-ui/IconButton'
+import { List, ListItem } from 'material-ui/List'
+import RaisedButton       from 'material-ui/RaisedButton'
+import * as colors        from 'material-ui/styles/colors'
+import spacing            from 'material-ui/styles/spacing'
+import * as q             from 'poodle-core/lib/queries/localConversations'
+import React              from 'react'
+import * as apollo        from 'react-apollo'
+import * as redux         from 'react-redux'
 
+import Avatar             from '../Avatar'
 import ChannelListSidebar from './ChannelListSidebar'
 
 import type { State } from 'poodle-core/lib/reducers'
@@ -21,6 +25,9 @@ type ActivityStreamProps = {
 }
 
 const styles = {
+  authorName: {
+    color: colors.darkBlack,
+  },
   body: {
     display: 'flex',
     flex: 1,
@@ -58,9 +65,13 @@ export function ActivityStream(props: ActivityStreamProps) {
     </div>
   }
   else {
-    content = conversations.map(
-      conv => <ActivityRow key={conv.id} conversation={conv} />
+    const convs = conversations.map(
+      conv => <div key={conv.id}>
+        <ActivityRow conversation={conv} />
+        <Divider inset={true} />
+      </div>
     )
+    content = <List>{convs}</List>
   }
 
   return <div style={styles.root}>
@@ -74,7 +85,7 @@ export function ActivityStream(props: ActivityStreamProps) {
       />
     </header>
     <div style={styles.body}>
-      <main style={styles.main}>{content}</main>
+      <main style={styles.content}>{content}</main>
       <nav style={styles.leftNav}>
         <ChannelListSidebar />
       </nav>
@@ -87,13 +98,21 @@ type ActivityRowProps = {
 }
 
 function ActivityRow({ conversation }: ActivityRowProps) {
-  const subject = conversation.subject.get || '[no subject]'
-  const ppl = conversation.participants.map(p => p.displayName).join(', ')
+  const subject  = conversation.subject || '[no subject]'
+  const activity = conversation.latestActivity
+  const actor    = activity.actor
+  const snippet  = activity.contentSnippet
 
-  return <div>
-    {subject} ({ppl})
-    <hr/>
-  </div>
+  return <ListItem
+    leftAvatar={<Avatar name={actor.name} id={actor.id} />}
+    primaryText={subject}
+    secondaryText={
+      <p>
+        <span style={styles.authorName}>{actor.name}</span> &mdash; {snippet}
+      </p>
+    }
+    secondaryTextLines={2}
+  />
 }
 
 const ComponentWithData = apollo.graphql(q.localConversations, {
