@@ -58,6 +58,22 @@ export default new graphql.GraphQLObjectType({
         return fetchActivityContent(activity, fetchContent)
       },
     },
+    contentSnippet: {
+      type: graphql.GraphQLString,
+      description: 'A short preview of activity content',
+      args: {
+        length: {
+          type: graphql.GraphQLInt,
+          description: 'Number of characters to grab for snippet',
+        },
+      },
+      async resolve({ activity, fetchContent }: ActivityData, args): Promise<string> {
+        const content = await fetchActivityContent(
+          activity, fetchContent, ['text/plain', 'text/html']
+        )
+        return content.asString.slice(0, args.length || 100)
+      },
+    },
     isEdited: {
       type: graphql.GraphQLBoolean,
       description: 'Indicates whether this activity has been edited',
@@ -96,13 +112,15 @@ export default new graphql.GraphQLObjectType({
 
 async function fetchActivityContent(
   activity: DerivedActivity,
-  fetchContent: (uri: string) => Promise<Readable>
+  fetchContent: (uri: string) => Promise<Readable>,
+  preferences: string[] = ['text/html', 'text/plain']
 ): Promise<ContentData> {
-  const links = activity.objectLinks
-  const html  = m.first(m.filter(l => l.mediaType === 'text/html', links))
-  const text  = m.first(m.filter(l => l.mediaType === 'text/plain', links))
+  const links = m.mapcat(
+    pref => m.filter(l => l.mediaType === pref, activity.objectLinks),
+    preferences
+  )
+  const link = m.first(links)
 
-  const link  = html || text
   if (!link) {
     throw new Error(`could not find html or text content for activity ${activity.id}`)
   }
