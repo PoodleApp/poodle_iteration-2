@@ -1,8 +1,10 @@
 /* @flow */
 
-import * as AS       from 'activitystrea.ms'
-import * as graphql  from 'graphql'
-import * as lang     from './LanguageValue'
+import * as AS      from 'activitystrea.ms'
+import * as graphql from 'graphql'
+import * as lang    from './LanguageValue'
+
+import type { ValueIterator } from 'activitystrea.ms'
 
 export type ActorData = AS.models.Object
 
@@ -20,9 +22,20 @@ export default new graphql.GraphQLObjectType({
       type: graphql.GraphQLString,
       description: 'Display name of the actor',
       args: lang.args,
-      resolver: function(actor, args) {
-        return lang.resolver(actor.name, args)
+      resolve(actor, args) {
+        const name = oneFromIterable(actor.name)
+        return name
+          ? lang.resolver(name, args)
+          : emailFromId(actor.id)
       },
     },
   }
 })
+
+function oneFromIterable<T>(iter: ?ValueIterator<T>): ?T {
+  return iter && iter.first
+}
+
+function emailFromId(id: string): string {
+  return id.replace(/^[a-z]+:/, '')
+}
