@@ -11,10 +11,18 @@ import type {
 export type Conversation = {
   id: URI,
   lastActiveTime: string,
+  latestActivity: {
+    actor: {
+      id: URI,
+      name: string,
+    },
+    contentSnippet: string,
+  },
   participants: {
     displayName: string,
+    email:       string,
   }[],
-  subject: LanguageValue,
+  subject: string,
 }
 
 export type LocalConversations = ApolloData & {
@@ -25,11 +33,17 @@ export const localConversations = gql`query LocalConvesations($lang: String!) {
   conversations(limit: 30) {
     id
     lastActiveTime
+    latestActivity {
+      actor {
+        id
+        name(lang: $lang)
+      }
+      contentSnippet(length: 200)
+    }
     participants {
       displayName
+      email
     }
-    subject {
-      get(lang: $lang)
-    }
+    subject(lang: $lang)
   }
 }`
