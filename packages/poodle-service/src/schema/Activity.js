@@ -132,7 +132,7 @@ async function fetchActivityContent(
 
   const stream = await fetchContent(link.href)
   return {
-    asString:  toString(stream, 'utf8'),  // TODO: check charset
+    asString:  await toString(stream, 'utf8'),  // TODO: check charset
     mediaType: link.mediaType,
   }
 }
