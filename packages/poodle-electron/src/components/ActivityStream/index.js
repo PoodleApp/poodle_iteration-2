@@ -21,7 +21,6 @@ type ActivityStreamProps = {
   data:         q.LocalConversations,
   dispatch:     (action: Object) => void,
   pollInterval: number,
-  query:        string,
 }
 
 const styles = {
@@ -37,7 +36,7 @@ const styles = {
     padding: spacing.desktopGutter + 'px',
   },
   leftNav: {
-    flex: '0 0 12em',
+    flex: `0 0 ${spacing.desktopKeylineIncrement * 3}px`,
     order: -1,
   },
   root: {
@@ -51,7 +50,6 @@ const styles = {
 }
 
 export function ActivityStream(props: ActivityStreamProps) {
-  let queryInput: HTMLInputElement
   const { conversations, error, loading } = props.data
 
   let content
@@ -116,18 +114,19 @@ function ConversationRow({ conversation }: ConversationRowProps) {
 }
 
 const ComponentWithData = apollo.graphql(q.localConversations, {
-  options: ({ query, pollInterval }: ActivityStreamProps) => ({
+  options: ({ pollInterval }: ActivityStreamProps) => ({
     variables: { lang: navigator.language },
     pollInterval,
   })
 })(ActivityStream)
 
-const ComponentWithDataAndState = redux.connect(mapStateToProps)(ComponentWithData)
+// const ComponentWithDataAndState = redux.connect(mapStateToProps)(ComponentWithData)
 
-function mapStateToProps({ activityStream }: State): $Shape<ActivityStreamProps> {
-  return {
-    query: activityStream.query,
-  }
-}
+// function mapStateToProps({ activityStream }: State): $Shape<ActivityStreamProps> {
+//   return {
+//     query: activityStream.query,
+//   }
+// }
 
-export default ComponentWithDataAndState
+// export default ComponentWithDataAndState
+export default ComponentWithData
