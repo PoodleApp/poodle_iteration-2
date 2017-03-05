@@ -23,7 +23,7 @@ export default new graphql.GraphQLObjectType({
       description: 'Display name of the actor',
       args: lang.args,
       resolve(actor, args) {
-        const name = oneFromIterable(actor.name)
+        const name = actor.name
         return name
           ? lang.resolver(name, args)
           : emailFromId(actor.id)
@@ -31,10 +31,6 @@ export default new graphql.GraphQLObjectType({
     },
   }
 })
-
-function oneFromIterable<T>(iter: ?ValueIterator<T>): ?T {
-  return iter && iter.first
-}
 
 function emailFromId(id: string): string {
   return id.replace(/^[a-z]+:/, '')
