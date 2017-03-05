@@ -2,7 +2,7 @@
 
 import * as AS       from 'activitystrea.ms'
 import * as graphql  from 'graphql'
-import LanguageValue from './LanguageValue'
+import * as lang     from './LanguageValue'
 
 export type ActorData = AS.models.Object
 
@@ -17,8 +17,12 @@ export default new graphql.GraphQLObjectType({
       description: 'Unique identifier',
     },
     name: {
-      type: LanguageValue,
+      type: graphql.GraphQLString,
       description: 'Display name of the actor',
+      args: lang.args,
+      resolver: function(actor, args) {
+        return lang.resolver(actor.name, args)
+      },
     },
   }
 })

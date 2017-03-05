@@ -8,7 +8,7 @@ import * as m              from 'mori'
 import { searchByThread }  from '../actions/google'
 import Activity            from './Activity'
 import Address             from './Address'
-import LanguageValue       from './LanguageValue'
+import * as lang           from './LanguageValue'
 
 import type { Readable }     from 'stream'
 import type { ActivityData } from './Activity'
@@ -42,9 +42,12 @@ export default new graphql.GraphQLObjectType({
       }
     },
     subject: {
-      type: LanguageValue,
+      type: graphql.GraphQLString,
       description: 'Subject line of the message thread',
-      resolve({ conversation }: ConversationData) { return conversation.subject },
+      args: lang.args,
+      resolve({ conversation }: ConversationData, args): string {
+        return lang.resolver(conversation.subject, args)
+      },
     },
     activities: {
       type: new graphql.GraphQLList(new graphql.GraphQLNonNull(Activity)),
