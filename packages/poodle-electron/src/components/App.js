@@ -5,9 +5,10 @@ import * as chromeActions from 'poodle-core/lib/actions/chrome'
 import * as chromeState   from 'poodle-core/lib/reducers/chrome'
 import React              from 'react'
 import * as redux         from 'react-redux'
+import { Route, Switch }  from 'react-router-dom'
 import ActivityStream     from './ActivityStream'
 
-import type { State } from 'poodle-core/lib/reducers'
+import type { State } from '../reducers'
 
 type AppProps = {
   account:        ?authActions.Account,
@@ -18,18 +19,18 @@ type AppProps = {
 }
 
 export function App(props: AppProps) {
-  let content
-  if (props.loggedIn) {
-    content = <ActivityStream pollInterval={300000} />
+  if (!props.loggedIn) {
+    return <LoginForm dispatch={props.dispatch} />
   }
-  else if (props.account) {
-    content = <p>Waiting for authorization from your email provider...</p>
-  }
-  else {
-    content = <LoginForm dispatch={props.dispatch} />
+  else if (!props.account) {
+    return <p>Waiting for authorization from your email provider...</p>
   }
 
-  return content
+  return <Switch>
+    <Route path="/activity"                 component={ActivityStream} />
+    <Route path="/conversations/:channelId" component={Conversation}   />
+    <Route                                  render={() => <p>not found</p>} />
+  </Switch>
 }
 
 type LoginFormProps = {

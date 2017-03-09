@@ -11,6 +11,7 @@ import * as q             from 'poodle-core/lib/queries/localConversations'
 import React              from 'react'
 import * as apollo        from 'react-apollo'
 import * as redux         from 'react-redux'
+import { Link }           from 'react-router-dom'
 
 import Avatar             from '../Avatar'
 import ChannelListSidebar from './ChannelListSidebar'
@@ -110,6 +111,7 @@ function ConversationRow({ conversation }: ConversationRowProps) {
       </p>
     }
     secondaryTextLines={2}
+    containerElement={<Link to={{ pathname: `/conversations/${conversation.id}` }} />}
   />
 }
 

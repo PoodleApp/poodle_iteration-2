@@ -38,6 +38,8 @@ function* initAccount({ account }: Object): Generator<Effect, void, any> {
   }
   if (token) {
     // TODO: clear Apollo cache when we get new credentials
+    // TODO: construct apollo transport with a store subscriber instead of
+    // pushing credentials here
     yield call(setCredentials, account.email, token)
     yield put(auth.accessToken(account.email, token))
 
