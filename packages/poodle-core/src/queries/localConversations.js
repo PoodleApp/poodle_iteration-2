@@ -4,7 +4,6 @@ import gql from 'graphql-tag'
 
 import type {
   ApolloData,
-  LanguageValue,
   URI,
 } from './types'
 
