@@ -9,6 +9,7 @@ import * as m               from 'mori'
 import toString             from 'stream-to-string'
 import { fetchMessagePart } from '../actions'
 import Actor                from './Actor'
+import AsObject             from './AsObject'
 
 import type { Readable }  from 'stream'
 import type { ActorData } from './Actor'
@@ -40,7 +41,22 @@ const Content = new graphql.GraphQLObjectType({
   },
 })
 
-export default new graphql.GraphQLObjectType({
+const Revision = new graphql.GraphQLObjectType({
+  name: 'Revision',
+  description: 'A snapshot of some revision of an activity, paired with the activity that produced the revision',
+  fields: () => ({
+    revision: {
+      type: new graphql.GraphQLNonNull(Activity),
+      description: 'The activity itself at a particular revision',
+    },
+    updateActivity: {
+      type: new graphql.GraphQLNonNull(Activity),
+      description: 'The activity of type `Update` that produced the revision',
+    },
+  }),
+})
+
+const Activity = new graphql.GraphQLObjectType({
   name: 'Activity',
   description: 'Structured Activitystrea.ms 2.0 data carried by an email message',
   fields: {
@@ -92,15 +108,30 @@ export default new graphql.GraphQLObjectType({
         return activity.hasType(args.type)
       },
     },
+    latestEditTime: {
+      type: GraphQLDateTime,
+      description: 'Time and date when the activity was last edited',
+      resolve({ activity }: ActivityData) { return activity.latestEditTime },
+    },
     likeCount: {
       type: graphql.GraphQLInt,
       description: 'Number of likes on an activity',
       resolve({ activity }: ActivityData) { return activity.likeCount },
     },
+    object: {
+      type: AsObject,
+      description: 'Object with properties defined by activitystrea.ms v2 spec',
+      resolve({ activity }: ActivityData) { return activity.object },
+    },
     publishTime: {
       type: GraphQLDateTime,
       description: 'Time and date when the activity was received',
       resolve({ activity }: ActivityData) { return activity.publishTime.toDate() },
+    },
+    revisions: {
+      type: new graphql.GraphQLList(new graphql.GraphQLNonNull(Revision)),
+      description: 'Previous revisions of this activity (if it has been updated) ordered from most recent to original',
+      resolve({ activity }: ActivityData) { return m.intoArray(activity.revisions) },
     },
     types: {
       type: new graphql.GraphQLList(URI),
@@ -109,6 +140,8 @@ export default new graphql.GraphQLObjectType({
     },
   },
 })
+
+export default Activity
 
 async function fetchActivityContent(
   activity: DerivedActivity,
