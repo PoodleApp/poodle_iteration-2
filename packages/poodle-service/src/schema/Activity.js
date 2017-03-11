@@ -131,6 +131,13 @@ const Activity = new graphql.GraphQLObjectType({
       description: 'Number of likes on an activity',
       resolve({ activity }: ActivityData) { return activity.likeCount },
     },
+    likedBy: {
+      type: new graphql.GraphQLList(graphql.GraphQLString),
+      description: 'List of URIs of actors who like this activity',
+      resolve({ activity }: ActivityData) {
+        return m.intoArray(m.keys(activity.likes))
+      },
+    },
     object: {
       type: AsObject,
       description: 'Object with properties defined by activitystrea.ms v2 spec',
