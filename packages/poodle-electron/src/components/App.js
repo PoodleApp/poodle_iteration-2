@@ -28,9 +28,11 @@ export function App(props: AppProps) {
   }
 
   return <Switch>
-    <Route path="/activity"                 component={ActivityStream} />
-    <Route path="/conversations/:channelId" component={Conversation}   />
-    <Route render={() => {
+    <Route path="/activity" component={ActivityStream} />
+    <Route path="/conversations/:id" render={({ match }) => {
+      return <Conversation conversationId={decodeURIComponent(match.params.id)} />
+    }} />
+    <Route render={props => {
       return <Redirect to="/activity" />
     }} />
   </Switch>

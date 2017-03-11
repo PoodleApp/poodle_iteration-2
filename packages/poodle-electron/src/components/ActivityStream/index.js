@@ -110,7 +110,7 @@ function ConversationRow({ conversation }: ConversationRowProps) {
       </p>
     }
     secondaryTextLines={2}
-    containerElement={<Link to={{ pathname: `/conversations/${conversation.id}` }} />}
+    containerElement={<Link to={{ pathname: `/conversations/${encodeURIComponent(conversation.id)}` }} />}
   />
 }
 

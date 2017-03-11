@@ -17,13 +17,12 @@ import type { Match } from 'react-router-dom'
 import type { State } from '../../reducers'
 
 type ConversationProps = {
-  data:      q.LocalConversation,
-  dispatch:  Dispatch<any>,
-  editing:   ?ActivityId,
-  loading:   boolean,
-  match:     Match,
-  username:  string,
-  useremail: string,
+  conversationId: string,
+  data:           q.LocalConversation,
+  dispatch:       Dispatch<any>,
+  editing:        ?ActivityId,
+  username:       string,
+  useremail:      string,
 }
 
 type ActivityId = string
@@ -98,9 +97,9 @@ export function Conversation(props: ConversationProps) {
 }
 
 const ComponentWithData = apollo.graphql(q.localConversation, {
-  options: ({ match }: ConversationProps) => ({
+  options: ({ conversationId }: ConversationProps) => ({
     variables: {
-      id:   match.params.conversationId,
+      id:   conversationId,
       lang: navigator.language,
     },
     pollInterval: 300000,
@@ -111,7 +110,6 @@ function mapStateToProps({ auth }: State): $Shape<ConversationProps> {
   const account = auth.account
   return {
     editing:   null,   // TODO
-    loading:   false,  // TODO
     useremail: account ? account.email : '',
     username:  account ? account.email : '',  // TODO
   }
