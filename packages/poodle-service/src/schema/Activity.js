@@ -124,7 +124,7 @@ const Activity = new graphql.GraphQLObjectType({
     latestEditTime: {
       type: GraphQLDateTime,
       description: 'Time and date when the activity was last edited',
-      resolve({ activity }: ActivityData) { return activity.latestEditTime },
+      resolve({ activity }: ActivityData) { return activity.latestEditTime.toDate() },
     },
     likeCount: {
       type: graphql.GraphQLInt,
