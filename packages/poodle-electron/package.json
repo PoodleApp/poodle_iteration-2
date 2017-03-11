@@ -26,7 +26,9 @@
     "apollo-client": "^0.7.3",
     "graphql-imap": "PoodleApp/graphql-imap",
     "keytar": "^3.0.2",
+    "marked": "^0.3.6",
     "material-ui": "^0.17.0",
+    "moment": "^2.17.1",
     "react": "^15.4.2",
     "react-apollo": "^0.8.1",
     "react-dom": "^15.4.2",
@@ -35,7 +37,9 @@
     "react-tap-event-plugin": "^2.0.1",
     "redux-logger": "^2.8.2",
     "redux-saga": "^0.14.3",
-    "string-hash": "^1.1.3"
+    "repa": "^1.0.0",
+    "string-hash": "^1.1.3",
+    "vocabs-as": "^2.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",

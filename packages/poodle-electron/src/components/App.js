@@ -7,6 +7,7 @@ import React              from 'react'
 import * as redux         from 'react-redux'
 import { Route, Switch }  from 'react-router-dom'
 import ActivityStream     from './ActivityStream'
+import Conversation       from './Conversation'
 
 import type { State } from '../reducers'
 

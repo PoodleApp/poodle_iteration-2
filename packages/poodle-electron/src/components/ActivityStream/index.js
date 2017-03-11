@@ -21,7 +21,6 @@ import type { State } from 'poodle-core/lib/reducers'
 type ActivityStreamProps = {
   data:         q.LocalConversations,
   dispatch:     (action: Object) => void,
-  pollInterval: number,
 }
 
 const styles = {
@@ -116,9 +115,9 @@ function ConversationRow({ conversation }: ConversationRowProps) {
 }
 
 const ComponentWithData = apollo.graphql(q.localConversations, {
-  options: ({ pollInterval }: ActivityStreamProps) => ({
-    variables: { lang: navigator.language },
-    pollInterval,
+  options: ({}: ActivityStreamProps) => ({
+    variables:    { lang: navigator.language },
+    pollInterval: 300000,
   })
 })(ActivityStream)
 
