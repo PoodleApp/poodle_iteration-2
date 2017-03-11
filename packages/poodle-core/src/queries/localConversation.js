@@ -10,12 +10,15 @@ import type {
 export type Activity = {
   id: URI,
   actor: Actor,
+  aside: ?Conversation,
   content: {
     asString: string,
     mediaType: string,
   },
   isEdited: boolean,
   latestEditTime: string,  // ISO 8601 date
+  likedBy: URI[],
+  likeCount: number,
   object: {
     types: URI[],
   },
@@ -25,6 +28,7 @@ export type Activity = {
       actor: Actor,
     },
   }[],
+  types: URI[],
 }
 
 export type Conversation = {
@@ -46,38 +50,57 @@ export type LocalConversation = ApolloData & {
   conversations: Conversation[],
 }
 
-export const localConversations = gql`query LocalConvesation($id: String!, $lang: String!) {
+export const localConversation = gql`
+query LocalConvesation($id: String!, $lang: String!) {
   conversation(id: $id) {
-    id
-    activities {
-      id
-      actor {
-        id
-        name(lang: $lang)
-      }
-      content {
-        asString
-        mediaType
-      }
-      isEdited
-      latestEditTime
-      object {
-        types
-      }
-      publishTime
-      revisions {
-        updateActivity {
-          actor {
-            id
-            name(lang: $lang)
-          }
-        }
-      }
-    }
-    participants {
-      displayName
-      email
-    }
-    subject(lang: $lang)
+    ...conversationFields
   }
-}`
+}
+
+fragment activityFields on Activity {
+  id
+  actor {
+    ...actorFields
+  }
+  aside {
+    ...conversationFields
+  }
+  content {
+    asString
+    mediaType
+  }
+  isEdited
+  latestEditTime
+  likedBy
+  likeCount
+  object {
+    types
+  }
+  publishTime
+  revisions {
+    updateActivity {
+      actor {
+        ...actorFields
+      }
+    }
+  }
+  types
+}
+
+fragment actorFields on Actor {
+  id
+  name(lang: $lang)
+}
+
+fragment conversationFields on Conversation {
+  id
+  activities {
+    ...activityFields
+  }
+  participants {
+    displayName
+    email
+  }
+  subject(lang: $lang)
+}
+`
