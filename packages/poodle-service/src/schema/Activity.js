@@ -1,18 +1,21 @@
 /* @flow */
 
-import DerivedActivity      from 'arfe/lib/models/DerivedActivity'
-import Message, * as Msg    from 'arfe/lib/models/Message'
-import * as AS              from 'activitystrea.ms'
-import * as graphql         from 'graphql'
-import { GraphQLDateTime }  from 'graphql-iso-date'
-import * as m               from 'mori'
-import toString             from 'stream-to-string'
-import { fetchMessagePart } from '../actions'
-import Actor                from './Actor'
-import AsObject             from './AsObject'
+import * as Conv                 from 'arfe/lib/models/Conversation'
+import DerivedActivity, * as Drv from 'arfe/lib/models/DerivedActivity'
+import Message, * as Msg         from 'arfe/lib/models/Message'
+import * as AS                   from 'activitystrea.ms'
+import * as graphql              from 'graphql'
+import { GraphQLDateTime }       from 'graphql-iso-date'
+import * as m                    from 'mori'
+import toString                  from 'stream-to-string'
+import { fetchMessagePart }      from '../actions'
+import Actor                     from './Actor'
+import AsObject                  from './AsObject'
+import Conversation              from './Conversation'
 
-import type { Readable }  from 'stream'
-import type { ActorData } from './Actor'
+import type { Readable }         from 'stream'
+import type { ActorData }        from './Actor'
+import type { ConversationData } from './Conversation'
 
 export type ActivityData = {
   activity:     DerivedActivity,
@@ -59,12 +62,22 @@ const Revision = new graphql.GraphQLObjectType({
 const Activity = new graphql.GraphQLObjectType({
   name: 'Activity',
   description: 'Structured Activitystrea.ms 2.0 data carried by an email message',
-  fields: {
+  fields: () => ({
     actor: {
       type: Actor,
       description: 'Person or entity performing the activity',
       resolve({ activity }: ActivityData): ?ActorData {
         return activity.actor
+      },
+    },
+    aside: {
+      type: Conversation,
+      description: 'Nested conversation between a subset of participants',
+      resolve({ activity, fetchContent }: ActivityData): ?ConversationData {
+        if (activity.hasType(Drv.syntheticTypes.Aside)) {
+          const conversation = Conv.asideToConversation(activity)
+          return { conversation, fetchContent }
+        }
       },
     },
     content: {
@@ -138,7 +151,7 @@ const Activity = new graphql.GraphQLObjectType({
       description: 'Type or types of activity that this data represents',
       resolve({ activity }: ActivityData) { return activity.types },
     },
-  },
+  }),
 })
 
 export default Activity
