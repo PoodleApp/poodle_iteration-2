@@ -49,6 +49,21 @@ export default new graphql.GraphQLSchema({
           }
         },
       },
+      conversation: {
+        type: Conversation,
+        descriptions: 'Activities derived from message threads according to the ARFE protocol',
+        args: {
+          id: {
+            type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+            description: 'ID of conversation to load',
+          },
+        },
+        async resolve(sync: Sync, args): Promise<ConversationData> {
+          const conversation = await sync.getConversation(args.id)
+          const fetchContent = sync.fetchPartContent.bind(sync)
+          return { conversation, fetchContent }
+        },
+      },
       conversations: {
         type: Conversations,
         descriptions: 'Activities derived from message threads according to the ARFE protocol',

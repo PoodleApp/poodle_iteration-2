@@ -42,6 +42,12 @@ export function queryConversations(params: QueryParams, db: PouchDB): Observable
     })
 }
 
+export async function getConversation(id: string, db: PouchDB): Promise<Conversation> {
+  const messageRecords = await getThread([id], db)
+  const messages       = messageRecords.map(asMessage)
+  return Conv.messagesToConversation(fetchPartContent.bind(null, db), messages)
+}
+
 /*
  * Get all messages that reference or are referenced by the given message
  * (including the input message itself).

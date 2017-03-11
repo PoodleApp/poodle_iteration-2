@@ -38,6 +38,10 @@ export default class Sync {
     query.createIndexes(this._db).catch(err => console.error(err))
   }
 
+  getConversation(id: string): Promise<Conversation> {
+    return query.getConversation(id, this._db)
+  }
+
   queryConversations(params: QueryParams): Observable<Conversation, mixed> {
     return query.queryConversations(params, this._db)
   }
