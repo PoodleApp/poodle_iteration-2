@@ -1,13 +1,13 @@
 /* @flow */
 
-import * as authActions   from 'poodle-core/lib/actions/auth'
-import * as chromeActions from 'poodle-core/lib/actions/chrome'
-import * as chromeState   from 'poodle-core/lib/reducers/chrome'
-import React              from 'react'
-import * as redux         from 'react-redux'
-import { Route, Switch }  from 'react-router-dom'
-import ActivityStream     from './ActivityStream'
-import Conversation       from './Conversation'
+import * as authActions            from 'poodle-core/lib/actions/auth'
+import * as chromeActions          from 'poodle-core/lib/actions/chrome'
+import * as chromeState            from 'poodle-core/lib/reducers/chrome'
+import React                       from 'react'
+import * as redux                  from 'react-redux'
+import { Redirect, Route, Switch } from 'react-router-dom'
+import ActivityStream              from './ActivityStream'
+import Conversation                from './Conversation'
 
 import type { State } from '../reducers'
 
@@ -30,7 +30,9 @@ export function App(props: AppProps) {
   return <Switch>
     <Route path="/activity"                 component={ActivityStream} />
     <Route path="/conversations/:channelId" component={Conversation}   />
-    <Route                                  render={() => <p>not found</p>} />
+    <Route render={() => {
+      return <Redirect to="/activity" />
+    }} />
   </Switch>
 }
 
