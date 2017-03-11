@@ -53,7 +53,7 @@ const Revision = new graphql.GraphQLObjectType({
       description: 'The activity itself at a particular revision',
     },
     updateActivity: {
-      type: new graphql.GraphQLNonNull(Activity),
+      type: Activity,
       description: 'The activity of type `Update` that produced the revision',
     },
   }),
