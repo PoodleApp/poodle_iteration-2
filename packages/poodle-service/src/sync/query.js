@@ -1,7 +1,7 @@
 /* @flow */
 
 import Conversation, * as Conv from 'arfe/lib/models/Conversation'
-import Message                 from 'arfe/lib/models/Message'
+import Message, * as Msg       from 'arfe/lib/models/Message'
 import * as kefir              from 'kefir'
 import PouchDB                 from 'pouchdb-node'
 import stream                  from 'stream'
@@ -42,13 +42,15 @@ export function queryConversations(params: QueryParams, db: PouchDB): Observable
     })
 }
 
-export async function getConversation(id: string, db: PouchDB): Promise<Conversation> {
-  const messageRecords = await getThread([id], db)
-  if (messageRecords.length < 1) {
-    throw new Error(`conversation not found: ${id}`)
+export async function getConversation(uri: string, db: PouchDB): Promise<Conversation> {
+  const parsed = Msg.parseMidUri(uri)
+  if (!parsed) {
+    throw new Error('cannot parse conversation URI according to `mid:` scheme: ' + uri)
   }
-
-  const messages = messageRecords.map(asMessage)
+  const messageId      = parsed.messageId
+  const messageRecord  = await db.get(messageId)
+  const messageRecords = await getThread(messageRecord.messageIds, db)
+  const messages       = messageRecords.map(asMessage)
   return Conv.messagesToConversation(fetchPartContent.bind(null, db), messages)
 }
 
