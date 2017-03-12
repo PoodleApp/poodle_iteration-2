@@ -2,9 +2,11 @@
 
 import * as authActions    from 'poodle-core/lib/actions/auth'
 import React               from 'react'
+import * as redux          from 'react-redux'
 import { Redirect, Route } from 'react-router-dom'
 
 import type { ContextRouter } from 'react-router-dom'
+import type { State }         from '../reducers'
 
 type Props = {
   account:    ?authActions.Account,
@@ -16,7 +18,7 @@ type Props = {
   strict?:    bool,
 }
 
-export default function AuthenticatedRoute({ children, component, render, ...rest }: Props) {
+export function AuthenticatedRoute({ children, component, render, ...rest }: Props) {
   const account = rest.account
 
   return <Route {...rest} render={props => {
@@ -35,3 +37,11 @@ export default function AuthenticatedRoute({ children, component, render, ...res
     throw new Error('`AuthenticatedRoute` requires either a `component` or a `render` prop')
   }} />
 }
+
+function mapStateToProps({ auth }: State): $Shape<Props> {
+  return {
+    account: auth.account,
+  }
+}
+
+export default redux.connect(mapStateToProps)(AuthenticatedRoute)
