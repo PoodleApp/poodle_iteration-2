@@ -17,6 +17,7 @@ type AppProps = {
   dispatch:       Function,
   error:          ?Error,
   loadingMessage: ?string,
+  location:       Object,
   loggedIn:       boolean,
 }
 
@@ -65,11 +66,12 @@ function onLogin({ dispatch }: LoginFormProps, emailInput: ?HTMLInputElement, ev
   }
 }
 
-function mapStateToProps({ auth, chrome }: State): $Shape<AppProps> {
+function mapStateToProps({ auth, chrome, router }: State): $Shape<AppProps> {
   return {
     account:        auth.account,
     error:          chrome.error,
     loadingMessage: chromeState.loadingMessage(chrome),
+    location:       router.location,  // TODO: hack to encourage re-render on location change
     loggedIn:       !!auth.creds,
   }
 }

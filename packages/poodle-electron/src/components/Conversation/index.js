@@ -75,7 +75,13 @@ export function Conversation(props: ConversationProps) {
   }
   else {
     const activities = conversation.activities.map(
-      act => <ActivityView key={act.id} activity={act} conversation={conversation} {...props} />
+      act => <ActivityView
+        key={act.id}
+        activity={act}
+        conversation={conversation}
+        loading={false}
+        {...props}
+      />
     )
     content = <div>{activities}</div>
   }

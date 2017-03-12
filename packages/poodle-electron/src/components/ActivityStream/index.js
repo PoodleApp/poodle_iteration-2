@@ -7,6 +7,7 @@ import { List, ListItem } from 'material-ui/List'
 import RaisedButton       from 'material-ui/RaisedButton'
 import * as colors        from 'material-ui/styles/colors'
 import spacing            from 'material-ui/styles/spacing'
+import * as authActions   from 'poodle-core/lib/actions/auth'
 import * as q             from 'poodle-core/lib/queries/localConversations'
 import React              from 'react'
 import * as apollo        from 'react-apollo'
@@ -19,6 +20,7 @@ import ChannelListSidebar from './ChannelListSidebar'
 import type { State } from '../../reducers'
 
 type ActivityStreamProps = {
+  account:      authActions.Account,
   data:         q.LocalConversations,
   dispatch:     (action: Object) => void,
 }
@@ -115,7 +117,8 @@ function ConversationRow({ conversation }: ConversationRowProps) {
 }
 
 const ComponentWithData = apollo.graphql(q.localConversations, {
-  options: ({}: ActivityStreamProps) => ({
+  options: ({ account }: ActivityStreamProps) => ({
+    account,
     variables:    { lang: navigator.language },
     pollInterval: 300000,
   })

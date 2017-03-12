@@ -11,12 +11,17 @@ export type State = {
   apollo: Object,
   auth:   AuthState,
   chrome: ChromeState,
+  router: Object,
 }
 
-export default function buildRootReducer(client: ApolloClient): Reducer<State, *> {
+export default function buildRootReducer(
+  client: ApolloClient,
+  routerReducer: Reducer<Object, any>
+): Reducer<State, *> {
   return combineReducers({
     apollo: client.reducer(),
     auth,
     chrome,
+    router: routerReducer,
   })
 }

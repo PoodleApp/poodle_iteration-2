@@ -1,12 +1,14 @@
 /* @flow */
 
 import ApolloClient             from 'apollo-client'
+import createHistory            from 'history/createHashHistory'
 import MuiThemeProvider         from 'material-ui/styles/MuiThemeProvider'
 import { GraphQLImapInterface } from 'poodle-core/lib/transport'
 import React                    from 'react'
 import { ApolloProvider }       from 'react-apollo'
 import * as ReactDOM            from 'react-dom'
-import { HashRouter as Router } from 'react-router-dom'
+import { ConnectedRouter }      from 'react-router-redux'
+import * as r3                  from 'react-router-redux'
 import injectTapEventPlugin     from 'react-tap-event-plugin'
 import * as redux               from 'redux'
 import createLogger             from 'redux-logger'
@@ -25,6 +27,8 @@ const client = new ApolloClient({
   networkInterface: new GraphQLImapInterface()
 })
 
+const history = createHistory()
+
 const saga = sagaMiddleware()
 
 const enhancer = redux.compose(
@@ -32,6 +36,7 @@ const enhancer = redux.compose(
     createLogger(),
     saga,
     client.middleware(),
+    r3.routerMiddleware(history),
   ),
   typeof window.devToolsExtension !== 'undefined'
     ? window.devToolsExtension()
@@ -39,20 +44,20 @@ const enhancer = redux.compose(
 )
 
 const store = redux.createStore(
-  buildRootReducer(client),
+  buildRootReducer(client, r3.routerReducer),
   enhancer
 )
 
 saga.run(sagas)
 
 function RootComponent(): React.Element<*> {
-  return <ApolloProvider store={store} client={client}>
-    <MuiThemeProvider muiTheme={poodleTheme}>
-      <Router>
+  return <MuiThemeProvider muiTheme={poodleTheme}>
+    <ApolloProvider store={store} client={client}>
+      <ConnectedRouter history={history}>
         <App />
-      </Router>
-    </MuiThemeProvider>
-  </ApolloProvider>
+      </ConnectedRouter>
+    </ApolloProvider>
+  </MuiThemeProvider>
 }
 
 
