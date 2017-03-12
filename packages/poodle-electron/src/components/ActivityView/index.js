@@ -129,7 +129,7 @@ function DocumentView(props: ActivityViewProps) {
 }
 
 function ConflictView(props: ActivityViewProps) {
-  const { activity, nestLevel, useremail } = props
+  const { account, activity, nestLevel } = props
 
   // const { palette } = (this.context: any).muiTheme.baseTheme  // TODO
   // const backgroundColor = palette.borderColor
@@ -232,10 +232,10 @@ type LikeButtonProps = ActivityViewProps & {
 }
 
 function LikeButton(props: LikeButtonProps) {
-  const { activity, loading, useremail, style } = props
-  const me           = URI.mailtoUri(useremail)
+  const { account, activity, loading, style } = props
+  const me           = URI.mailtoUri(account.email)
   const alreadyLiked = activity.likedBy.some(uri => URI.equals(uri, me))
-  const mine         = helpers.myContent(activity, useremail)
+  const mine         = helpers.myContent(activity, account.email)
 
   function like() {
     // TODO:

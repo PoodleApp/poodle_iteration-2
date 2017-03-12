@@ -1,5 +1,6 @@
 /* @flow */
 
+import type { Account } from 'poodle-core/lib/actions/auth'
 import type {
   Activity     as GraphQLActivity,
   Conversation as GraphQLConversation,
@@ -10,13 +11,12 @@ export type Activity     = GraphQLActivity
 export type Conversation = GraphQLConversation
 
 export type ActivityViewProps = {
+  account:      Account,
   activity:     Activity,
   conversation: Conversation,
   dispatch:     Dispatch<any>,
   editing:      ?ActivityId,
   loading:      boolean,
-  username:     string,
-  useremail:    string,
   nestLevel?:   number,
 }
 

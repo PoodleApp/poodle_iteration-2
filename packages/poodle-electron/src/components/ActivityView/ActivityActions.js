@@ -7,7 +7,7 @@ import * as helpers       from './helpers'
 import type { ActivityViewProps  } from './types'
 
 export default function ActivityActions(props: ActivityViewProps) {
-  const { activity, dispatch, useremail } = props
+  const { activity, dispatch } = props
 
   return <List subheader='Actions'>
     <ListItem

@@ -13,7 +13,7 @@ import type { Activity }           from 'poodle-core/lib/queries/localConversati
 import type { ActivityViewProps  } from './types'
 
 export default function ActivityOptsMenu(props: ActivityViewProps) {
-  const { activity, dispatch, useremail } = props
+  const { account, activity, dispatch } = props
 
   function onMenuAction(event: Event, item: React.Element<any>) {
     const { value } = item.props
@@ -39,7 +39,7 @@ export default function ActivityOptsMenu(props: ActivityViewProps) {
       primaryText='Edit'
       checked={helpers.editing(props, activity)}
       style={{ boxSizing: 'content-box' }}
-      disabled={!helpers.myContent(activity, useremail)}
+      disabled={!helpers.myContent(activity, account.email)}
       />
 
   const link =

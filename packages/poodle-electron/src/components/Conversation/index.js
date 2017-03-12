@@ -1,16 +1,17 @@
 /* @flow */
 
-import AppBar       from 'material-ui/AppBar'
-import Divider      from 'material-ui/Divider'
-import IconButton   from 'material-ui/IconButton'
-import RaisedButton from 'material-ui/RaisedButton'
-import * as colors  from 'material-ui/styles/colors'
-import spacing      from 'material-ui/styles/spacing'
-import * as q       from 'poodle-core/lib/queries/localConversation'
-import React        from 'react'
-import * as apollo  from 'react-apollo'
-import * as redux   from 'react-redux'
-import * as router  from 'react-router-redux'
+import AppBar           from 'material-ui/AppBar'
+import Divider          from 'material-ui/Divider'
+import IconButton       from 'material-ui/IconButton'
+import RaisedButton     from 'material-ui/RaisedButton'
+import * as colors      from 'material-ui/styles/colors'
+import spacing          from 'material-ui/styles/spacing'
+import * as authActions from 'poodle-core/lib/actions/auth'
+import * as q           from 'poodle-core/lib/queries/localConversation'
+import React            from 'react'
+import * as apollo      from 'react-apollo'
+import * as redux       from 'react-redux'
+import * as router      from 'react-router-redux'
 
 import ActivityView from '../ActivityView'
 
@@ -18,12 +19,11 @@ import type { Match } from 'react-router-dom'
 import type { State } from '../../reducers'
 
 type ConversationProps = {
+  account:        authActions.Account,
   conversationId: string,
   data:           q.LocalConversation,
   dispatch:       Dispatch<any>,
   editing:        ?ActivityId,
-  username:       string,
-  useremail:      string,
 }
 
 type ActivityId = string
@@ -56,8 +56,7 @@ const styles = {
 
 export function Conversation(props: ConversationProps) {
   const dispatch = props.dispatch
-  const { conversations, error, loading } = props.data
-  const conversation = conversations && conversations[0]
+  const { conversation, error, loading } = props.data
 
   let content
   if (loading) {
@@ -114,16 +113,12 @@ const ComponentWithData = apollo.graphql(q.localConversation, {
       id:   conversationId,
       lang: navigator.language,
     },
-    pollInterval: 300000,
   })
 })(Conversation)
 
-function mapStateToProps({ auth }: State): $Shape<ConversationProps> {
-  const account = auth.account
+function mapStateToProps({ apollo }: State): $Shape<ConversationProps> {
   return {
-    editing:   null,   // TODO
-    useremail: account ? account.email : '',
-    username:  account ? account.email : '',  // TODO
+    editing: null, // TODO
   }
 }
 
