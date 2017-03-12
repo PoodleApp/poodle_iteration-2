@@ -71,7 +71,7 @@ export function Conversation(props: ConversationProps) {
   }
   else if (!conversation) {
     content = <div>
-      <p>Conversation not found</p>
+      <p>Conversation not found: {props.conversationId}</p>
       <RaisedButton label="Retry" onClick={props.data.refetch} />
     </div>
   }
