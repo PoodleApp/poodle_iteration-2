@@ -16,7 +16,7 @@ import { Link }           from 'react-router-dom'
 import Avatar             from '../Avatar'
 import ChannelListSidebar from './ChannelListSidebar'
 
-import type { State } from 'poodle-core/lib/reducers'
+import type { State } from '../../reducers'
 
 type ActivityStreamProps = {
   data:         q.LocalConversations,

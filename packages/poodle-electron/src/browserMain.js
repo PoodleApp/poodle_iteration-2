@@ -2,7 +2,6 @@
 
 import ApolloClient             from 'apollo-client'
 import MuiThemeProvider         from 'material-ui/styles/MuiThemeProvider'
-import buildRootReducer         from 'poodle-core/lib/reducers'
 import { GraphQLImapInterface } from 'poodle-core/lib/transport'
 import React                    from 'react'
 import { ApolloProvider }       from 'react-apollo'
@@ -13,8 +12,11 @@ import * as redux               from 'redux'
 import createLogger             from 'redux-logger'
 import sagaMiddleware           from 'redux-saga'
 import App                      from './components/App'
+import buildRootReducer         from './reducers'
 import sagas                    from './sagas'
 import poodleTheme              from './themes/poodle'
+
+import type { State } from './reducers'
 
 // Adds support for `onTouchTap` to React components
 injectTapEventPlugin()
