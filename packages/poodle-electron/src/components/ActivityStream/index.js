@@ -61,7 +61,7 @@ export function ActivityStream(props: ActivityStreamProps) {
   else if (error) {
     content = <div>
       <p>{String(error)}</p>
-      <RaisedButton label="Retry" onClick={props.data.refetch} />
+      <RaisedButton label="Retry" onClick={() => props.data.refetch()} />
     </div>
   }
   else {
@@ -81,7 +81,7 @@ export function ActivityStream(props: ActivityStreamProps) {
         iconElementRight={
           <IconButton iconClassName="material-icons">refresh</IconButton>
         }
-        onRightIconButtonTouchTap={props.data.refetch}
+        onRightIconButtonTouchTap={() => props.data.refetch()}
       />
     </header>
     <div style={styles.body}>

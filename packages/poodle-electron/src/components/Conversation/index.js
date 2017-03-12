@@ -7,9 +7,10 @@ import RaisedButton from 'material-ui/RaisedButton'
 import * as colors  from 'material-ui/styles/colors'
 import spacing      from 'material-ui/styles/spacing'
 import * as q       from 'poodle-core/lib/queries/localConversation'
-import * as apollo  from 'react-apollo'
 import React        from 'react'
+import * as apollo  from 'react-apollo'
 import * as redux   from 'react-redux'
+import * as router  from 'react-router-redux'
 
 import ActivityView from '../ActivityView'
 
@@ -54,6 +55,7 @@ const styles = {
 }
 
 export function Conversation(props: ConversationProps) {
+  const dispatch = props.dispatch
   const { conversations, error, loading } = props.data
   const conversation = conversations && conversations[0]
 
@@ -90,10 +92,14 @@ export function Conversation(props: ConversationProps) {
     <header>
       <AppBar
         title={<span style={styles.title}>Poodle</span>}
+        iconElementLeft={
+          <IconButton iconClassName="material-icons">arrow_back</IconButton>
+        }
         iconElementRight={
           <IconButton iconClassName="material-icons">refresh</IconButton>
         }
-        onRightIconButtonTouchTap={props.data.refetch}
+        onLeftIconButtonTouchTap={() => dispatch(router.goBack())}
+        onRightIconButtonTouchTap={() => props.data.refetch()}
       />
     </header>
     <div style={styles.body}>
