@@ -7,6 +7,7 @@ import React                       from 'react'
 import * as redux                  from 'react-redux'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import ActivityStream              from './ActivityStream'
+import AuthenticatedRoute          from './AuthenticatedRoute'
 import Conversation                from './Conversation'
 
 import type { State } from '../reducers'
@@ -19,22 +20,17 @@ type AppProps = {
   loggedIn:       boolean,
 }
 
-export function App(props: AppProps) {
-  if (!props.loggedIn) {
-    return <LoginForm dispatch={props.dispatch} />
-  }
-  else if (!props.account) {
-    return <p>Waiting for authorization from your email provider...</p>
-  }
-
+export function App({ account, dispatch }: AppProps) {
   return <Switch>
-    <Route path="/activity" component={ActivityStream} />
-    <Route path="/conversations/:id" render={({ match }) => {
-      return <Conversation conversationId={decodeURIComponent(match.params.id)} />
-    }} />
-    <Route render={props => {
-      return <Redirect to="/activity" />
-    }} />
+    <AuthenticatedRoute path="/activity" component={ActivityStream} account={account} />
+    <AuthenticatedRoute path="/conversations/:id"
+      account={account}
+      render={({ match }) => (
+        <Conversation conversationId={decodeURIComponent(match.params.id)} />
+      )}
+    />
+    <Route path="/login" component={LoginForm} dispatch={dispatch} />
+    <Route render={props => <Redirect to="/activity" />} />
   </Switch>
 }
 
