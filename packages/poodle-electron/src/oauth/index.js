@@ -1,6 +1,6 @@
 /* @flow */
 
-import { BrowserWindow }            from 'electron'
+import { remote }                   from 'electron'
 import * as oauth                   from 'graphql-imap/lib/oauth/google'
 import { client_id, client_secret } from 'poodle-core/lib/constants'
 
@@ -22,7 +22,8 @@ export function getAccessToken({ email }: { email: string }): Promise<oauth.Oaut
 }
 
 function openWindow() {
-  return new (BrowserWindow: any)({
-    'use-content-size': true,
+  return new (remote.BrowserWindow: any)({
+    title:          'Authenticate with your email provider',
+    useContentSize: true,
   })
 }

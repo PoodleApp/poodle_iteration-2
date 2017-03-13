@@ -1,6 +1,7 @@
 /* @flow */
 
 import * as authActions from 'poodle-core/lib/actions/auth'
+import * as chromeState from 'poodle-core/lib/reducers/chrome'
 import React            from 'react'
 import * as redux       from 'react-redux'
 import { Redirect }     from 'react-router-dom'
@@ -9,19 +10,26 @@ import type { Dispatch } from 'redux'
 import type { State }    from '../../reducers'
 
 type LoginProps = {
-  account:        ?authActions.Account,
-  dispatch:       Function,
-  error:          ?Error,
-  loadingMessage: ?string,
-  location:       Object,
-  loggedIn:       boolean,
+  account:              ?authActions.Account,
+  dispatch:             Dispatch<any>,
+  error:                ?Error,
+  oauthLoadingMessages: string[],
+  location:             Object,
+  loggedIn:             boolean,
 }
 
-export function Login(props: LoginProps) {
-  if (!props.loggedIn) {
-    return <LoginForm dispatch={props.dispatch} />
+export function Login({ account, dispatch, loggedIn, oauthLoadingMessages }: LoginProps) {
+  if (oauthLoadingMessages.length > 0 && !loggedIn) {
+    return <div>
+      {oauthLoadingMessages.map((msg, idx) => (
+        <p key={idx}>{msg}</p>
+      ))}
+    </div>
   }
-  else if (!props.account) {
+  else if (!account) {
+    return <LoginForm dispatch={dispatch} />
+  }
+  else if (!loggedIn) {
     return <p>Waiting for authorization from your email provider...</p>
   }
   else {
@@ -60,10 +68,12 @@ function onLogin({ dispatch }: LoginFormProps, emailInput: ?HTMLInputElement, ev
   }
 }
 
-function mapStateToProps({ auth }: State): $Shape<LoginProps> {
+function mapStateToProps({ auth, chrome }: State): $Shape<LoginProps> {
   return {
-    account:  auth.account,
-    loggedIn: !!auth.creds,
+    account:              auth.account,
+    error:                chrome.error,
+    oauthLoadingMessages: chromeState.loadingMessagesFor('authentication-flow', chrome),
+    loggedIn:             !!auth.creds,
   }
 }
 

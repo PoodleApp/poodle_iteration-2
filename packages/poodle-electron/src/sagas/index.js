@@ -15,7 +15,9 @@ import type { Effect } from 'redux-saga'
 function* lookupAccount(): Generator<Effect, void, any> {
   try {
     const account = yield call(loadAccount)
-    yield put(auth.setAccount(account))
+    if (account) {
+      yield put(auth.setAccount(account))
+    }
   }
   catch (err) {
     yield put(chrome.showError(err))
@@ -40,6 +42,7 @@ function* initAccount({ account }: Object): Generator<Effect, void, any> {
     // TODO: clear Apollo cache when we get new credentials
     // TODO: construct apollo transport with a store subscriber instead of
     // pushing credentials here
+    yield call(storeAccessToken, token, account)
     yield call(setCredentials, account.email, token)
     yield put(auth.accessToken(account.email, token))
 
@@ -57,16 +60,20 @@ function loadAccessToken(account: auth.Account): ?oauth.OauthCredentials {
   }
 }
 
+function storeAccessToken(token: oauth.OauthCredentials, account: auth.Account) {
+  keytar.replacePassword('Poodle', account.email, JSON.stringify(token))
+}
+
 function* fetchNewAccessToken(account: auth.Account): Generator<Effect, ?oauth.OauthCredentials, any> {
   try {
-    yield put(chrome.indicateLoading('google-account', 'Authorizing with Google'))
+    yield put(chrome.indicateLoading('authentication-flow', 'Authorizing with Google'))
     return yield call(oauth.getAccessToken, account)
   }
   catch (err) {
     yield put(chrome.showError(err))
   }
   finally {
-    yield put(chrome.doneLoading('google-account'))
+    yield put(chrome.doneLoading('authentication-flow'))
   }
 }
 
