@@ -134,7 +134,10 @@ const Activity = new graphql.GraphQLObjectType({
     latestEditTime: {
       type: GraphQLDateTime,
       description: 'Time and date when the activity was last edited',
-      resolve({ activity }: ActivityData) { return activity.latestEditTime.toDate() },
+      resolve({ activity }: ActivityData) {
+        const time = activity.latestEditTime
+        return time && time.toDate()
+      },
     },
     likeCount: {
       type: graphql.GraphQLInt,
@@ -156,7 +159,10 @@ const Activity = new graphql.GraphQLObjectType({
     publishTime: {
       type: GraphQLDateTime,
       description: 'Time and date when the activity was received',
-      resolve({ activity }: ActivityData) { return activity.publishTime.toDate() },
+      resolve({ activity }: ActivityData) {
+        const time = activity.publishTime
+        return time && time.toDate()
+      },
     },
     revisions: {
       type: new graphql.GraphQLList(new graphql.GraphQLNonNull(Revision)),
