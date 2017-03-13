@@ -88,7 +88,7 @@ const Activity = new graphql.GraphQLObjectType({
     content: {
       type: Content,
       description: 'Content of linked object',
-      resolve({ activity, fetchContent }: ActivityData): Promise<ContentData> {
+      resolve({ activity, fetchContent }: ActivityData): Promise<?ContentData> {
         return fetchActivityContent(activity, fetchContent)
       },
     },
@@ -101,11 +101,13 @@ const Activity = new graphql.GraphQLObjectType({
           description: 'Number of characters to grab for snippet',
         },
       },
-      async resolve({ activity, fetchContent }: ActivityData, args): Promise<string> {
+      async resolve({ activity, fetchContent }: ActivityData, args): Promise<?string> {
         const content = await fetchActivityContent(
           activity, fetchContent, ['text/plain', 'text/html']
         )
-        return content.asString.slice(0, args.length || 100)
+        if (content) {
+          return content.asString.slice(0, args.length || 100)
+        }
       },
     },
     id: {
@@ -183,7 +185,7 @@ async function fetchActivityContent(
   activity: DerivedActivity,
   fetchContent: (uri: string) => Promise<Readable>,
   preferences: string[] = ['text/html', 'text/plain']
-): Promise<ContentData> {
+): Promise<?ContentData> {
   const links = m.mapcat(
     pref => m.filter(l => l.mediaType === pref, activity.objectLinks),
     preferences
@@ -191,7 +193,7 @@ async function fetchActivityContent(
   const link = m.first(links)
 
   if (!link) {
-    throw new Error(`could not find html or text content for activity ${activity.id}`)
+    return  // no content
   }
 
   const href = link.href
