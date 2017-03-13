@@ -61,8 +61,9 @@ function displayUnknown(content: ?{ mediaType: string, asString: string }, style
 }
 
 function handleExternalLink(event: Event) {
-  if (event.type === 'click' && event.target && event.target.href) {
+  const target = event.target
+  if (target instanceof HTMLAnchorElement && target.href) {
     event.preventDefault()
-    opn(event.target.href)
+    opn(target.href)
   }
 }
