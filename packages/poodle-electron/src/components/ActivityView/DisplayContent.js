@@ -2,6 +2,7 @@
 
 import marked  from 'marked'
 import spacing from 'material-ui/styles/spacing'
+import opn     from 'opn'
 import React   from 'react'
 import repa    from 'repa'
 
@@ -33,9 +34,10 @@ function displayHtml(text: string, style?: Object) {
     __html: text
   }
   return <div
-    style={style || styles.body}
     className='html-content'
     dangerouslySetInnerHTML={out}
+    onClick={handleExternalLink}
+    style={style || styles.body}
   />
 }
 
@@ -45,9 +47,10 @@ function displayText(text: string, style?: Object) {
     __html: marked(content, { sanitized: true })
   }
   return <div
-    style={style || styles.body}
     className='markdown-content'
     dangerouslySetInnerHTML={out}
+    onClick={handleExternalLink}
+    style={style || styles.body}
   />
 }
 
@@ -55,4 +58,11 @@ function displayUnknown(content: ?{ mediaType: string, asString: string }, style
   return content
     ? <div style={style || styles.body}><p><em>[unknown content type: {content.mediaType}]</em></p></div>
     : <div style={style || styles.body}><p><em>[no content]</em></p></div>
+}
+
+function handleExternalLink(event: Event) {
+  if (event.type === 'click' && event.target && event.target.href) {
+    event.preventDefault()
+    opn(event.target.href)
+  }
 }
