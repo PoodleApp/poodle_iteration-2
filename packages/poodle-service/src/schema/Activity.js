@@ -48,6 +48,11 @@ const Revision = new graphql.GraphQLObjectType({
   name: 'Revision',
   description: 'A snapshot of some revision of an activity, paired with the activity that produced the revision',
   fields: () => ({
+    id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+      description: 'Universally unique ID of revision',
+      resolve({ revision }) { return revision.id },
+    },
     revision: {
       type: new graphql.GraphQLNonNull(Activity),
       description: 'The activity itself at a particular revision',
@@ -102,6 +107,11 @@ const Activity = new graphql.GraphQLObjectType({
         )
         return content.asString.slice(0, args.length || 100)
       },
+    },
+    id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+      description: 'Universally unique ID of activity',
+      resolve({ activity }: ActivityData) { return activity.id },
     },
     isEdited: {
       type: graphql.GraphQLBoolean,
