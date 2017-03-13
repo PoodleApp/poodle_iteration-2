@@ -90,7 +90,7 @@ export function Conversation(props: ConversationProps) {
   return <div style={styles.root}>
     <header>
       <AppBar
-        title={<span style={styles.title}>Poodle</span>}
+        title={<span style={styles.title}>{conversation ? conversation.subject : '...'}</span>}
         iconElementLeft={
           <IconButton iconClassName="material-icons">arrow_back</IconButton>
         }
