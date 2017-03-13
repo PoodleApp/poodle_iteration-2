@@ -121,7 +121,8 @@ const ComponentWithData = apollo.graphql(q.localConversations, {
   options: ({ account }: ActivityStreamProps) => ({
     account,
     variables: {
-      lang:  navigator.language,
+      labels: ['\\Inbox'],
+      lang:   navigator.language,
       // Provide date but not time so that Apollo can cache results
       since: Moment().subtract(30, 'days').toISOString().slice(0, 10),
     },
