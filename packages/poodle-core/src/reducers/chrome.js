@@ -65,6 +65,12 @@ export function loadingMessage(state: State): ?string {
   return l && l.message
 }
 
+export function loadingMessagesFor(key: string, state: State): string[] {
+  const allIndicators = state.loadingIndicators || []
+  const matching      = allIndicators.filter(i => i.key === key)
+  return matching.map(indicator => indicator.message)
+}
+
 function incrementIndicator(action: Indicator, state: State): State {
   const ls = state.loadingIndicators || []
   return {
