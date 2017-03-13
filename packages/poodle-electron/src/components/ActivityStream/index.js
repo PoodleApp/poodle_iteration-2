@@ -7,6 +7,7 @@ import { List, ListItem } from 'material-ui/List'
 import RaisedButton       from 'material-ui/RaisedButton'
 import * as colors        from 'material-ui/styles/colors'
 import spacing            from 'material-ui/styles/spacing'
+import Moment             from 'moment'
 import * as authActions   from 'poodle-core/lib/actions/auth'
 import * as q             from 'poodle-core/lib/queries/localConversations'
 import React              from 'react'
@@ -119,8 +120,11 @@ function ConversationRow({ conversation }: ConversationRowProps) {
 const ComponentWithData = apollo.graphql(q.localConversations, {
   options: ({ account }: ActivityStreamProps) => ({
     account,
-    variables:    { lang: navigator.language },
-    pollInterval: 300000,
+    variables: {
+      lang:  navigator.language,
+      // Provide date but not time so that Apollo can cache results
+      since: Moment().subtract(30, 'days').toISOString().slice(0, 10),
+    },
   })
 })(ActivityStream)
 
