@@ -6,7 +6,7 @@ import * as readline from 'readline'
 export default class IndirectBrowser extends EventEmitter {
   title: ?string;
 
-  loadUrl(url: string) {
+  loadURL(url: string) {
     console.log(`Please open this URL: ${url}`)
     // setTimeout(() => this.emit('page-title-updated'))
     setTimeout(() => this.emitPageTitleUpdated(), 0)

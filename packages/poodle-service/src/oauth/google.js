@@ -40,7 +40,7 @@ export type TokenGeneratorOpts = {
 export interface BrowserWindow extends events$EventEmitter {
   close(): mixed,
   getTitle(): string,
-  loadUrl(url: string): mixed,
+  loadURL(url: string): mixed,
 }
 
 export type XOAuth2Generator = Generator
@@ -157,7 +157,9 @@ export function oauthClient(client_id: string, client_secret: string): OauthClie
 function authorizeApp(openWindow: () => BrowserWindow, url: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const win = openWindow()
-    win.loadUrl(url)
+    setImmediate(() => {
+      win.loadURL(url)
+    })
 
     win.on('closed', () => {
       reject(new Error('User closed the window'))
