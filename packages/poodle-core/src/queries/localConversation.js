@@ -16,14 +16,14 @@ export type Activity = {
     mediaType: string,
   },
   isEdited: boolean,
-  latestEditTime: string,  // ISO 8601 date
+  latestEditTime: ?string,  // ISO 8601 date
   likedBy: URI[],
   likeCount: number,
   object: {
     id:    URI,
     types: URI[],
   },
-  publishTime: string,  // ISO 8601 date
+  publishTime: ?string,  // ISO 8601 date
   revisions: {
     updateActivity: {
       actor: Actor,

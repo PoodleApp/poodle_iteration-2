@@ -15,7 +15,7 @@ export type Conversation = {
       id: URI,
       name: string,
     },
-    contentSnippet: string,
+    contentSnippet: ?string,
   },
   participants: {
     displayName: string,
