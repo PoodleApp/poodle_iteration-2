@@ -17,6 +17,7 @@
   "homepage": "https://github.com/PoodleApp/poodle-core#readme",
   "main": "lib/index.js",
   "scripts": {
+    "test": "tape -r babel-register test/**/*_test.js | tap-summary",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
     "prepublishOnly": "yarn test && yarn run build",
@@ -44,6 +45,8 @@
     "babel-preset-stage-3": "^6.17.0",
     "flow-bin": "^0.41.0",
     "in-publish": "^2.0.0",
+    "tap-summary": "^3.0.1",
+    "tape": "^4.6.3",
     "watch": "^1.0.1"
   }
 }
