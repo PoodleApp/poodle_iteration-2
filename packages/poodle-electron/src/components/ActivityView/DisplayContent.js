@@ -10,8 +10,9 @@ import type { Activity } from 'poodle-core/lib/queries/localConversation'
 
 const styles = {
   body: {
-    padding:   `${spacing.desktopKeylineIncrement * 1}px`,
-    paddingTop: 0,
+    overflowWrap: 'break-word',
+    padding:      `${spacing.desktopKeylineIncrement * 1}px`,
+    paddingTop:   0,
   },
 }
 
