@@ -120,10 +120,7 @@ function buildSelector(params: QueryParams): Object {
   }
 
   if (labels instanceof Array) {
-    selector.message = {
-      ...(selector.message || {}),
-      'x-gm-labels': { $elemMatch: { $in: labels } },
-    }
+    selector['message.x-gm-labels'] = { $elemMatch: { $in: labels } }
   }
 
   // if (typeof mailingList === 'string') {
@@ -134,8 +131,8 @@ function buildSelector(params: QueryParams): Object {
   //   selector['headers'] = { $elemMatch:  }
   // }
 
-  if (since instanceof Date) {
-    selector["message.date"] = { $gte: since.toISOString() }
+  if (typeof since === 'string') {
+    selector['message.date'] = { $gte: since }
   }
 
   return selector
