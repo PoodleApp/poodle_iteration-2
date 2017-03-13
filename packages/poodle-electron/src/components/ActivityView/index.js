@@ -21,7 +21,7 @@ import type { ActivityViewProps  } from './types'
 
 const styles = {
   activityCard: {
-    paddingTop: `${spacing.desktopKeylineIncrement * 1}px`,
+    paddingBottom: `${spacing.desktopGutterLess * 1}px`,
   },
   asideContainer: {
     padding: '1em',
@@ -46,6 +46,10 @@ const styles = {
   menu: {
     float: 'right',
   },
+}
+
+const contextTypes = {
+  muiTheme: React.PropTypes.object.isRequired,
 }
 
 export default function ActivityView(props: ActivityViewProps) {
@@ -145,15 +149,14 @@ function ConflictView(props: ActivityViewProps) {
   )
 }
 
-function JoinView(props: ActivityViewProps) {
+function JoinView(props: ActivityViewProps, context) {
   const { activity, nestLevel } = props
 
   const actor    = activity.actor
   const actorStr = (actor && actor.name) || '[unknown author]'
 
-  // const { palette } = (this.context: any).muiTheme.baseTheme  // TODO
-  // const backgroundColor = palette.borderColor
-  const backgroundColor = 'red'  // TODO
+  const { palette } = context.muiTheme.baseTheme
+  const backgroundColor = palette.borderColor
 
   return <ActivityCard nestLevel={nestLevel} style={{ backgroundColor }}>
     <CardHeader
@@ -164,6 +167,8 @@ function JoinView(props: ActivityViewProps) {
     </CardHeader>
   </ActivityCard>
 }
+
+JoinView.contextTypes = contextTypes
 
 function AsideView(props: ActivityViewProps) {
   const nestLevel = props.nestLevel || 1
