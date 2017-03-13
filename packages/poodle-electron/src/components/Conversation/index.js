@@ -107,19 +107,21 @@ export function Conversation(props: ConversationProps) {
   </div>
 }
 
-const ComponentWithData = apollo.graphql(q.localConversation, {
-  options: ({ conversationId }: ConversationProps) => ({
-    variables: {
-      id:   conversationId,
-      lang: navigator.language,
-    },
-  })
-})(Conversation)
-
 function mapStateToProps({ apollo }: State): $Shape<ConversationProps> {
   return {
     editing: null, // TODO
   }
 }
 
-export default redux.connect(mapStateToProps)(ComponentWithData)
+const withState = redux.connect(mapStateToProps)
+
+const withData = apollo.graphql(q.localConversation, {
+  options: ({ conversationId }: ConversationProps) => ({
+    variables: {
+      id:   conversationId,
+      lang: navigator.language,
+    },
+  })
+})
+
+export default withData(withState(Conversation))
