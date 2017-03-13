@@ -32,10 +32,7 @@ const styles = {
   authorName: {
     color: colors.darkBlack,
   },
-  body: {
-    display: 'flex',
-    flex: 1,
-  },
+  body: {},
   content: {
     flex: 1,
     padding: spacing.desktopGutter + 'px',
