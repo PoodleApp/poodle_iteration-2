@@ -69,8 +69,8 @@ export default new graphql.GraphQLSchema({
         descriptions: 'Activities derived from message threads according to the ARFE protocol',
         args: {
           since: {
-            type: GraphQLDateTime,
-            description: 'Show messages received after this time',
+            type: graphql.GraphQLString,
+            description: 'Show messages received after this time (ISO 8601 format)',
           },
           labels: {
             type: ListOfStrings,

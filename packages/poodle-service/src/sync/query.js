@@ -14,19 +14,43 @@ export function createIndexes(db: PouchDB): Promise<void> {
   const indexes = [
     db.createIndex({
       index: {
-        fields: ['messageIds', 'type'],
-      }
+        fields: [
+          // { 'message.date': 'desc' },
+          'message.date',
+          'message.x-gm-labels',
+          'type',
+        ],
+      },
+    }),
+    db.createIndex({
+      index: {
+        fields: [
+          '_id',
+          'messageIds',
+          'type',
+        ],
+      },
     }),
   ]
   return Promise.all(indexes).then(_ => undefined)
 }
 
 export function queryConversations(params: QueryParams, db: PouchDB): Observable<Conversation, mixed> {
-  return kefir.fromPromise(db.find({
-    selector: buildSelector(params),
+  const selector = buildSelector(params)
+  const query: { [key: string]: any } = {
     fields:   ['messageIds'],
     limit:    params.limit || 30,
-  }))
+    selector,
+  }
+
+  // TODO: sorting currently only works if sorted field is selected according
+  // to an inequality operation. That means the `$exists` operator is not
+  // suffecient. See: https://github.com/pouchdb/pouchdb/issues/6266
+  if (selector['message.date']) {
+    query.sort = [{ 'message.date': 'desc' }]
+  }
+
+  return kefir.fromPromise(db.find(query))
     .flatMap(matchingMessages => {
       const threads = matchingMessages.docs.map(
         ({ messageIds }) => kefir.fromPromise(getThread(messageIds, db))
@@ -111,10 +135,7 @@ function buildSelector(params: QueryParams): Object {
   // }
 
   if (since instanceof Date) {
-    selector.message = {
-      ...(selector.message || {})
-    }
-    selector['message.date'] = { $gte: since }
+    selector["message.date"] = { $gte: since.toISOString() }
   }
 
   return selector
