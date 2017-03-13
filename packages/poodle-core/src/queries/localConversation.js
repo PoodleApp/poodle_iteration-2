@@ -20,6 +20,7 @@ export type Activity = {
   likedBy: URI[],
   likeCount: number,
   object: {
+    id:    URI,
     types: URI[],
   },
   publishTime: string,  // ISO 8601 date
@@ -47,7 +48,7 @@ type Actor = {
 }
 
 export type LocalConversation = ApolloData & {
-  conversations: Conversation[],
+  conversation: ?Conversation,
 }
 
 export const localConversation = gql`
@@ -74,10 +75,12 @@ fragment activityFields on Activity {
   likedBy
   likeCount
   object {
+    id
     types
   }
   publishTime
   revisions {
+    id
     updateActivity {
       actor {
         ...actorFields
