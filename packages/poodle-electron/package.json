@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "apollo-client": "^1.0.0-rc.2",
+    "electron-context-menu": "^0.8.0",
     "graphql-imap": "PoodleApp/graphql-imap",
     "history": "^4.6.0",
     "keytar": "^3.0.2",

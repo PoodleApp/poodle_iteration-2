@@ -814,6 +814,20 @@ ecdsa-sig-formatter@^1.0.0:
     base64url "^2.0.0"
     safe-buffer "^5.0.1"
 
+electron-context-menu@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/electron-context-menu/-/electron-context-menu-0.8.0.tgz#60c4b5e29d5514007be8728a6ebdf3cb694c4e3e"
+  dependencies:
+    electron-dl "^1.2.0"
+    electron-is-dev "^0.1.1"
+
+electron-dl@^1.2.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/electron-dl/-/electron-dl-1.6.0.tgz#ca66e7458fd420d2764f2700265a04ec8fe3997e"
+  dependencies:
+    pupa "^1.0.0"
+    unused-filename "^0.1.0"
+
 electron-download@^3.0.1:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/electron-download/-/electron-download-3.2.0.tgz#d7509b686b77855f2e6fe0014acc9cce6379c4b1"
@@ -827,6 +841,10 @@ electron-download@^3.0.1:
     rc "^1.1.2"
     semver "^5.3.0"
     sumchecker "^1.2.0"
+
+electron-is-dev@^0.1.1:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-0.1.2.tgz#8a1043e32b3a1da1c3f553dce28ce764246167e3"
 
 electron@1.5.1:
   version "1.5.1"
@@ -1915,6 +1933,10 @@ mkdirp@0.5.0:
   dependencies:
     minimist "0.0.8"
 
+modify-filename@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/modify-filename/-/modify-filename-1.1.0.tgz#9a2dec83806fbb2d975f22beec859ca26b393aa1"
+
 moment@^2.17.1:
   version "2.17.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.17.1.tgz#fed9506063f36b10f066c8b59a144d7faebe1d82"
@@ -2149,6 +2171,10 @@ path-exists@^2.0.0, path-exists@^2.1.0:
   dependencies:
     pinkie-promise "^2.0.0"
 
+path-exists@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/path-exists/-/path-exists-3.0.0.tgz#ce0ebeaa5f78cb18925ea7d810d7b59b010fd515"
+
 path-is-absolute@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/path-is-absolute/-/path-is-absolute-1.0.1.tgz#174b9268735534ffbc7ace6bf53a5a9e1b5c5f5f"
@@ -2280,6 +2306,10 @@ pump@^1.0.0:
 punycode@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
+
+pupa@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/pupa/-/pupa-1.0.0.tgz#9a9568a5af7e657b8462a6e9d5328743560ceff6"
 
 qs@~6.2.0:
   version "6.2.1"
@@ -2900,6 +2930,13 @@ ua-parser-js@^0.7.9:
 uid-number@~0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/uid-number/-/uid-number-0.0.6.tgz#0ea10e8035e8eb5b8e4449f06da1c730663baa81"
+
+unused-filename@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/unused-filename/-/unused-filename-0.1.0.tgz#e5f33bc9e4a63f87f64d3c11d31979def5d2e7fb"
+  dependencies:
+    modify-filename "^1.1.0"
+    path-exists "^3.0.0"
 
 unzip-response@^1.0.0:
   version "1.0.2"

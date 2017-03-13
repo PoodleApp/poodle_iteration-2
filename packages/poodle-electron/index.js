@@ -1,6 +1,7 @@
 /* @flow */
 
 const { app, BrowserWindow } = require('electron')
+const contextMenu            = require('electron-context-menu')
 const path                   = require('path')
 const url                    = require('url')
 
@@ -10,6 +11,10 @@ let mainWindow = null
 
 function createWindow() {
   mainWindow = new BrowserWindow({ width: 800, height: 600 })
+
+  contextMenu({
+    window: mainWindow,
+  })
 
   // Load browser portion of app
   mainWindow.loadURL(url.format({
