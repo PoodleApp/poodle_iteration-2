@@ -1,6 +1,6 @@
 {
   "name": "poodle-service",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Abstracts IMAP interactions, such as downloading entire threads; provides transparent caching",
   "main": "lib/index.js",
   "repository": {
