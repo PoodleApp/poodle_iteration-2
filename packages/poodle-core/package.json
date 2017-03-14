@@ -1,7 +1,7 @@
 {
   "name": "poodle-core",
   "version": "0.1.0",
-  "description": "Experimental email client with social features",
+  "description": "Experimental email client with social features (reusable components)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PoodleApp/poodle-core.git"
@@ -48,5 +48,8 @@
     "tap-summary": "^3.0.1",
     "tape": "^4.6.3",
     "watch": "^1.0.1"
-  }
+  },
+  "files": [
+    "lib/"
+  ]
 }
