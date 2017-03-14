@@ -8,7 +8,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "electron .",
-    "test": "babel-node test/index.js",
+    "test": "flow",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
     "prepublishOnly": "yarn test && yarn run build",
