@@ -2236,9 +2236,9 @@ plur@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/plur/-/plur-1.0.0.tgz#db85c6814f5e5e5a3b49efc28d604fec62975156"
 
-poodle-service@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/poodle-service/-/poodle-service-0.1.0.tgz#27bc247d157a955f0ed1cc7a625ca5876723bc4b"
+poodle-service@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/poodle-service/-/poodle-service-0.1.2.tgz#d03d94337a61d9261fa261e617a58b37f3ed1b96"
   dependencies:
     arfe "^0.1.0"
     base64-stream "^0.1.3"
@@ -2424,7 +2424,7 @@ re-emitter@^1.0.0:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/re-emitter/-/re-emitter-1.1.3.tgz#fa9e319ffdeeeb35b27296ef0f3d374dac2f52a7"
 
-readable-stream@1.0.33:
+readable-stream@1.0.33, "readable-stream@>=1.0.33-1 <1.1.0-0":
   version "1.0.33"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-1.0.33.tgz#3a360dd66c1b1d7fd4705389860eda1d0f61126c"
   dependencies:
@@ -2436,15 +2436,6 @@ readable-stream@1.0.33:
 readable-stream@1.1.x, readable-stream@^1.0.33, readable-stream@~1.1.9:
   version "1.1.14"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-1.1.14.tgz#7cf4c54ef648e3813084c636dd2079e166c081d9"
-  dependencies:
-    core-util-is "~1.0.0"
-    inherits "~2.0.1"
-    isarray "0.0.1"
-    string_decoder "~0.10.x"
-
-"readable-stream@>=1.0.33-1 <1.1.0-0":
-  version "1.0.34"
-  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-1.0.34.tgz#125820e34bc842d2f2aaafafe4c2916ee32c157c"
   dependencies:
     core-util-is "~1.0.0"
     inherits "~2.0.1"
