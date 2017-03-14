@@ -1,12 +1,12 @@
 /* @flow */
 
-import * as graphqlimap             from 'graphql-imap'
-import * as google                  from 'graphql-imap/lib/oauth/google'
-import Sync                         from 'graphql-imap/lib/sync'
+import * as poodleservice           from 'poodle-service'
+import * as google                  from 'poodle-service/lib/oauth/google'
+import Sync                         from 'poodle-service/lib/sync'
 import { client_id, client_secret } from '../constants'
 
 import type { DocumentNode, ExecutionResult } from 'graphql'
-import type { IMAPConnection }                from 'graphql-imap'
+import type { IMAPConnection }                from 'poodle-service'
 
 // copied from apollo-client/src/transport/NetworkInterface.ts
 type Request = {
@@ -62,13 +62,13 @@ async function getSync(): Promise<Sync> {
   return _sync
 }
 
-export class GraphQLImapInterface {
+export class PoodleServiceInterface {
 
   async query({ query, variables, operationName }: Request): Promise<ExecutionResult> {
     if (!query) {
       return Promise.reject(new Error("`query` must be defined"))
     }
-    return graphqlimap.execute(
+    return poodleservice.execute(
       query,
       await getConnectionFactory(),
       await getSync(),

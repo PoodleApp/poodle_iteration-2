@@ -33,9 +33,9 @@
   },
   "dependencies": {
     "apollo-client": "^0.7.1",
-    "arfe": "PoodleApp/arfe",
-    "graphql-imap": "PoodleApp/graphql-imap",
+    "arfe": "^0.1.0",
     "graphql-tag": "^1.2.3",
+    "poodle-service": "^0.1.0",
     "redux": "^3.6.0"
   },
   "devDependencies": {

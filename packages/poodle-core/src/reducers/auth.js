@@ -1,6 +1,6 @@
 /* @flow */
 
-import type { OauthCredentials } from 'graphql-imap/lib/oauth/google'
+import type { OauthCredentials } from 'poodle-service/lib/oauth/google'
 import type { Account, Action }  from '../actions/auth'
 
 export type State = {
