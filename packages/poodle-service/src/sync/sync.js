@@ -45,7 +45,12 @@ export function startBackgroundSync({ boxes, connectionFactory, db, ...opts }: O
   const onNewMail     = opts.onNewMail || noop
   const timeFrame     = (opts.timeFrame || 30) * days
 
-  let lastFetchTime: ?Date = new Date()
+  let lastFetchTime: ?Date
+  if (process.env.NODE_ENV !== 'production') {
+    // Avoid running a sync immediately on startup when in development mode
+    lastFetchTime = new Date()
+  }
+
   let pending: number
 
   function schedule() {
