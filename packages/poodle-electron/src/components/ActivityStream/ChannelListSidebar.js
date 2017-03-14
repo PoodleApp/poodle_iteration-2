@@ -7,7 +7,7 @@ type Props = {}
 
 export function ChannelListSidebar(props: Props) {
   return <div>
-    <MenuItem>Channel</MenuItem>
+    <MenuItem>Channels<br/>(coming soon!)</MenuItem>
   </div>
 }
 
