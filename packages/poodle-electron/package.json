@@ -15,6 +15,9 @@
     "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
     "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
   },
+  "bin": {
+    "poodle": "./bin/poodle"
+  },
   "babel": {
     "presets": [
       "react",
@@ -56,5 +59,9 @@
     "flow-bin": "^0.41.0",
     "in-publish": "^2.0.0",
     "watch": "^1.0.1"
-  }
+  },
+  "files": [
+    "bin/",
+    "lib/"
+  ]
 }

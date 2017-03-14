@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+
+process.env.NODE_ENV = 'production'
+
+var electron = require('electron')
+var path     = require('path')
+var proc     = require('child_process')
+
+const poodleDir = path.join(__dirname, '..')
+
+console.log('electron', electron)
+
+var child = proc.spawn(electron, [poodleDir], {stdio: 'inherit'})
+child.on('close', function (code) {
+  process.exit(code)
+})
