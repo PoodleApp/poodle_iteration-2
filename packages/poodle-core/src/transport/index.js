@@ -54,7 +54,7 @@ async function getConnectionFactory(): Promise<() => Promise<IMAPConnection>> {
 async function getSync(): Promise<Sync> {
   if (!_sync) {
     _sync = new Sync({
-      boxes:             ['\\All'],
+      boxes:             ['\\Inbox'],
       connectionFactory: await getConnectionFactory(),
       dbname:            `poodle-${_email || ''}`,
     })
