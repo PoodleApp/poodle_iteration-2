@@ -1,6 +1,6 @@
 {
   "name": "poodle-core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Experimental email client with social features (reusable components)",
   "repository": {
     "type": "git",
