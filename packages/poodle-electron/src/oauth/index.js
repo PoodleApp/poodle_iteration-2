@@ -1,8 +1,8 @@
 /* @flow */
 
 import { remote }                   from 'electron'
-import * as oauth                   from 'graphql-imap/lib/oauth/google'
 import { client_id, client_secret } from 'poodle-core/lib/constants'
+import * as oauth                   from 'poodle-service/lib/oauth/google'
 
 export type OauthCredentials = oauth.OauthCredentials
 

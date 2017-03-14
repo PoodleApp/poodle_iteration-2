@@ -1,22 +1,22 @@
 /* @flow */
 
-import ApolloClient             from 'apollo-client'
-import createHistory            from 'history/createHashHistory'
-import MuiThemeProvider         from 'material-ui/styles/MuiThemeProvider'
-import { GraphQLImapInterface } from 'poodle-core/lib/transport'
-import React                    from 'react'
-import { ApolloProvider }       from 'react-apollo'
-import * as ReactDOM            from 'react-dom'
-import { ConnectedRouter }      from 'react-router-redux'
-import * as r3                  from 'react-router-redux'
-import injectTapEventPlugin     from 'react-tap-event-plugin'
-import * as redux               from 'redux'
-import createLogger             from 'redux-logger'
-import sagaMiddleware           from 'redux-saga'
-import App                      from './components/App'
-import buildRootReducer         from './reducers'
-import sagas                    from './sagas'
-import poodleTheme              from './themes/poodle'
+import ApolloClient               from 'apollo-client'
+import createHistory              from 'history/createHashHistory'
+import MuiThemeProvider           from 'material-ui/styles/MuiThemeProvider'
+import { PoodleServiceInterface } from 'poodle-core/lib/transport'
+import React                      from 'react'
+import { ApolloProvider }         from 'react-apollo'
+import * as ReactDOM              from 'react-dom'
+import { ConnectedRouter }        from 'react-router-redux'
+import * as r3                    from 'react-router-redux'
+import injectTapEventPlugin       from 'react-tap-event-plugin'
+import * as redux                 from 'redux'
+import createLogger               from 'redux-logger'
+import sagaMiddleware             from 'redux-saga'
+import App                        from './components/App'
+import buildRootReducer           from './reducers'
+import sagas                      from './sagas'
+import poodleTheme                from './themes/poodle'
 
 import type { State } from './reducers'
 
@@ -24,7 +24,7 @@ import type { State } from './reducers'
 injectTapEventPlugin()
 
 const client = new ApolloClient({
-  networkInterface: new GraphQLImapInterface()
+  networkInterface: new PoodleServiceInterface()
 })
 
 const history = createHistory()
