@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "apollo-client": "^1.0.0-rc.2",
+    "arfe": "^0.1.0",
     "electron-context-menu": "^0.8.0",
     "history": "^4.6.0",
     "keytar": "^3.0.2",
