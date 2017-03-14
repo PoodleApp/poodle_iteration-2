@@ -1,12 +1,16 @@
 {
-  "name": "graphql-imap",
-  "version": "0.0.1",
+  "name": "poodle-service",
+  "version": "0.1.0",
   "description": "Abstracts IMAP interactions, such as downloading entire threads; provides transparent caching",
   "main": "lib/index.js",
   "repository": {
-    "url": "https://github.com/PoodleApp/graphql-imap",
+    "url": "https://github.com/PoodleApp/poodle-service",
     "type": "git"
   },
+  "bugs": {
+    "url": "https://github.com/PoodleApp/poodle-service/issues"
+  },
+  "homepage": "https://github.com/PoodleApp/poodle-service#readme",
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
   "scripts": {
@@ -54,5 +58,8 @@
     "format-json": "^1.0.3",
     "in-publish": "^2.0.0",
     "watch": "^1.0.1"
-  }
+  },
+  "files": [
+    "lib/"
+  ]
 }

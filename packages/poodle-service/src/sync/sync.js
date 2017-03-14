@@ -1,7 +1,7 @@
 /*
  * Synchronize email in background.
  * We will probably want to split this out into its own library later,
- * and make it usable as a pluggable backend for graphql-imap.
+ * and make it usable as a pluggable backend for poodle-service.
  *
  * @flow
  */
