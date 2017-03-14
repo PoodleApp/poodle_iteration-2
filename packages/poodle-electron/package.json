@@ -1,6 +1,6 @@
 {
   "name": "poodle-electron",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Desktop version of Poodle, an email client with social features",
   "main": "index.js",
   "repository": "git+https://github.com/PoodleApp/poodle-electron.git",
@@ -42,7 +42,7 @@
     "react-dom": "^15.4.2",
     "react-redux": "^5.0.3",
     "react-router-dom": "^4.0.0",
-    "react-router-redux": "^5.0.0",
+    "react-router-redux": "5.0.0-alpha.3",
     "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.6.0",
     "redux-logger": "^2.8.2",
