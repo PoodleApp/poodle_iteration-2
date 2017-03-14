@@ -15,9 +15,7 @@ export function createIndexes(db: PouchDB): Promise<void> {
     db.createIndex({
       index: {
         fields: [
-          // { 'message.date': 'desc' },
           'message.date',
-          'message.x-gm-labels',
           'type',
         ],
       },
@@ -119,9 +117,9 @@ function buildSelector(params: QueryParams): Object {
     type: 'Message'
   }
 
-  if (labels instanceof Array) {
-    selector['message.x-gm-labels'] = { $elemMatch: { $in: labels } }
-  }
+  // if (labels instanceof Array) {
+  //   selector['message.x-gm-labels'] = { $elemMatch: { $in: labels } }
+  // }
 
   // if (typeof mailingList === 'string') {
   //   selector.headers = {
