@@ -29,7 +29,7 @@
     ]
   },
   "dependencies": {
-    "arfe": "PoodleApp/arfe",
+    "arfe": "^0.1.0",
     "base64-stream": "^0.1.3",
     "cache-directory": "^1.1.0",
     "dateformat": "^2.0.0",
