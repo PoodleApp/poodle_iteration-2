@@ -11,6 +11,7 @@
     "test": "flow",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
+    "postinstall": "electron-rebuild",
     "prepublishOnly": "yarn test && yarn run build",
     "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
     "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
@@ -30,6 +31,7 @@
     "arfe": "^0.1.0",
     "electron": "^1.6.2",
     "electron-context-menu": "^0.8.0",
+    "electron-rebuild": "^1.5.7",
     "history": "^4.6.0",
     "keytar": "^3.0.2",
     "marked": "^0.3.6",
