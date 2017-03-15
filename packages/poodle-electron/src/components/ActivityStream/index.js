@@ -4,6 +4,7 @@ import AppBar             from 'material-ui/AppBar'
 import Divider            from 'material-ui/Divider'
 import IconButton         from 'material-ui/IconButton'
 import { List, ListItem } from 'material-ui/List'
+import Paper              from 'material-ui/Paper'
 import RaisedButton       from 'material-ui/RaisedButton'
 import * as colors        from 'material-ui/styles/colors'
 import spacing            from 'material-ui/styles/spacing'
@@ -72,7 +73,7 @@ export function ActivityStream(props: ActivityStreamProps) {
         {i == conversations.length - 1 ? '' : <Divider inset={true} /> }
       </div>
     )
-    content = <List>{convs}</List>
+    content = <Paper><List>{convs}</List></Paper>
   }
 
   return <div style={styles.root}>
