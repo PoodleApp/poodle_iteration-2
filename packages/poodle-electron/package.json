@@ -61,6 +61,7 @@
     "babel-preset-stage-3": "^6.17.0",
     "flow-bin": "^0.41.0",
     "in-publish": "^2.0.0",
+    "prettier-standard": "^5.0.0",
     "watch": "^1.0.1"
   },
   "files": [
