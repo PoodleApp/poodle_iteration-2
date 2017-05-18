@@ -7,3 +7,4 @@ This is a variation of Poodle that targets desktops using Electron Shell
 ### Linux
 
 - `libgnome-keyring-dev`
+- `libsecret-1-dev`
