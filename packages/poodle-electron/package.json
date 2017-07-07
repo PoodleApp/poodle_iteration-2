@@ -62,6 +62,7 @@
     "vocabs-as": "^2.0.0"
   },
   "devDependencies": {
+    "ava": "^0.20.0",
     "babel-cli": "^6.24.1",
     "babel-preset-env": "^1.4.0",
     "babel-preset-react": "^6.24.1",
@@ -69,6 +70,7 @@
     "flow-bin": "^0.46.0",
     "in-publish": "^2.0.0",
     "prettier-standard": "^5.0.0",
+    "react-test-renderer": "^15.6.1",
     "watch": "^1.0.2"
   },
   "files": [
