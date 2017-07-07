@@ -5,10 +5,11 @@
 .*/poodle-electron/lib/.*
 
 [include]
-/home/jesse/.config/yarn/global/node_modules/
+../../node_modules/
 
 [libs]
 ./types/
 
 [options]
+suppress_comment=\\\\(.\\\\|\\n\\\\)*\\\\$ExpectError
 unsafe.enable_getters_and_setters=true
