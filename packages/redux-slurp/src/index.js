@@ -27,6 +27,13 @@ interface Observable<V, E> {
   [typeof symbolObservable]: () => ObservableImpl<V, E>
 }
 
+// TODO: This is a workaround for use until Kefir type definitions are updated
+// with a `[typeof symbolObservable]` method. (The method is already implemented
+// in Kefir, but it is not yet reflected in the type definitions.)
+interface KefirObservable<V, E> {
+  toESObservable(): ObservableImpl<V, E>
+}
+
 type Unsubscribe = () => void
 
 type Opts<OwnProps> = {
@@ -34,7 +41,7 @@ type Opts<OwnProps> = {
 }
 
 // Map an Observable object property to an object containing a value or an error
-type FromObservable = <V, E>(obs: Observable<V, E>) => SingleState<V, E>
+type FromObservable = <V, E>(obs: Observable<V, E> | KefirObservable<V, E>) => SingleState<V, E>
 
 export class SlurpError extends Error {
   mergedProps: Object

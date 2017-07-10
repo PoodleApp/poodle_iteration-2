@@ -1,4 +1,4 @@
-declare class $SymbolObservable extends Symbol {}
+declare class $SymbolObservable mixins Symbol {}
 
 declare module 'symbol-observable' {
   declare export default $SymbolObservable
