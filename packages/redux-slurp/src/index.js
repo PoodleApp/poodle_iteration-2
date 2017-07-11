@@ -193,6 +193,9 @@ function sourceKeys (props: Object): string[] {
 // local component state, then this function should return an object with
 // internal data removed; second the function ensures that there is initial
 // state in place for any recently-subscribed sources.
+//
+// TODO: We should remove stale keys from state in case an observable source is
+// removed on props change
 function slurpPropsFromState (
   state: State,
   sourceKeys: string[]
