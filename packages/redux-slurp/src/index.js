@@ -41,7 +41,9 @@ type Opts<OwnProps> = {
 }
 
 // Map an Observable object property to an object containing a value or an error
-type FromObservable = <V, E>(obs: Observable<V, E> | KefirObservable<V, E>) => SingleState<V, E>
+type FromObservable = <V, E>(
+  obs: Observable<V, E> | KefirObservable<V, E>
+) => SingleState<V, E>
 
 export class SlurpError extends Error {
   mergedProps: Object
@@ -50,11 +52,6 @@ export class SlurpError extends Error {
     this.mergedProps = mergedProps
   }
 }
-
-// TODO: make sure local `dispatch` does not leak through if both `slurp` and
-// `connect` are used
-
-// TODO: if a source is not strictly equal after props are updated, re-subscribe
 
 export default function slurp<OwnProps: Object, SlurpProps: Object> (
   mergeProps: (ownProps: OwnProps) => SlurpProps,
@@ -74,7 +71,7 @@ export default function slurp<OwnProps: Object, SlurpProps: Object> (
   return local({
     key: (options && options.key) || getUniqueKey,
 
-    createStore: (props: OwnProps, existingState, context) => {
+    createStore (props: OwnProps, existingState, context) {
       store = createStore(reducer)
 
       return {
@@ -86,7 +83,7 @@ export default function slurp<OwnProps: Object, SlurpProps: Object> (
       }
     },
 
-    mapStateToProps: (state: State, ownProps: OwnProps) => {
+    mapStateToProps (state: State, ownProps: OwnProps) {
       // We want to re-create subscriptions when props change, but not on every
       // state change
       if (ownProps === prevProps) {
@@ -115,19 +112,26 @@ export default function slurp<OwnProps: Object, SlurpProps: Object> (
       // Recreate subscriptions for all sources unless the source reference for
       // a key is identical to the previous source given for the same key. This
       // is also the point where subscriptions are created for the first time.
-      for (const key of keys) {
-        const newSource = slurpProps[key]
-        const existing = sources[key]
-        if (!existing || newSource !== existing.source) {
-          if (existing) {
-            existing.unsubscribe()
+      setTimeout(() => {
+        for (const key of keys) {
+          const newSource = slurpProps[key]
+          const existing = sources[key]
+          if (!existing || newSource !== existing.source) {
+            if (existing) {
+              existing.unsubscribe()
+            }
+            const unsubscribe = subscribe(store, key, newSource)
+            sources[key] = { source: newSource, unsubscribe }
           }
-          const unsubscribe = subscribe(store, key, newSource)
-          sources[key] = { source: newSource, unsubscribe }
         }
-      }
+      }, 0)
 
       return slurpPropsFromState(state, keys)
+    },
+
+    // Hide `dispatch` from connected components
+    mapDispatchToProps (dispatch) {
+      return {}
     }
   })
 }
