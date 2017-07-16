@@ -2,18 +2,6 @@
 # yarn lockfile v1
 
 
-"@types/async@^2.0.31":
-  version "2.0.37"
-  resolved "https://registry.yarnpkg.com/@types/async/-/async-2.0.37.tgz#7bf2ffba03ae965df99f21d4d41be340d6a322ab"
-
-"@types/graphql@^0.8.0":
-  version "0.8.6"
-  resolved "https://registry.yarnpkg.com/@types/graphql/-/graphql-0.8.6.tgz#b34fb880493ba835b0c067024ee70130d6f9bb68"
-
-"@types/isomorphic-fetch@0.0.30":
-  version "0.0.30"
-  resolved "https://registry.yarnpkg.com/@types/isomorphic-fetch/-/isomorphic-fetch-0.0.30.tgz#a21717624cde9a48c2db53a4e500fc5c32a99bbc"
-
 abbrev@1:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.0.9.tgz#91b4792588a7738c25f35dd6f63752a2f8776135"
@@ -103,20 +91,6 @@ anymatch@^1.3.0:
   dependencies:
     arrify "^1.0.0"
     micromatch "^2.1.5"
-
-apollo-client@^0.7.1:
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/apollo-client/-/apollo-client-0.7.1.tgz#68a5e92cb393368d2f6745c42e54e5af9b6e57ec"
-  dependencies:
-    graphql-anywhere "^2.0.0"
-    graphql-tag "^1.1.1"
-    redux "^3.4.0"
-    symbol-observable "^1.0.2"
-    whatwg-fetch "^2.0.0"
-  optionalDependencies:
-    "@types/async" "^2.0.31"
-    "@types/graphql" "^0.8.0"
-    "@types/isomorphic-fetch" "0.0.30"
 
 aproba@^1.0.3:
   version "1.0.4"
@@ -1324,17 +1298,9 @@ graceful-fs@^4.1.2, graceful-fs@^4.1.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/graceful-readlink/-/graceful-readlink-1.0.1.tgz#4cafad76bc62f02fa039b2f94e9a3dd3a391a725"
 
-graphql-anywhere@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/graphql-anywhere/-/graphql-anywhere-2.0.0.tgz#c20d6e6a901d40fa346d9f2b7845266fc59428bd"
-
 graphql-iso-date@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/graphql-iso-date/-/graphql-iso-date-3.1.0.tgz#117d8ebdc9a08e49ab3a0730ffb6f52e9bd6080b"
-
-graphql-tag@^1.1.1, graphql-tag@^1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-1.2.3.tgz#74c62443fbf3e693647426d7359f7e3e6ce7dace"
 
 graphql@^0.8.2:
   version "0.8.2"
@@ -2520,7 +2486,7 @@ recast@^0.11.17:
     private "~0.1.5"
     source-map "~0.5.0"
 
-redux@^3.4.0, redux@^3.6.0:
+redux@^3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/redux/-/redux-3.6.0.tgz#887c2b3d0b9bd86eca2be70571c27654c19e188d"
   dependencies:
@@ -3095,10 +3061,6 @@ watch@^1.0.1:
   dependencies:
     exec-sh "^0.2.0"
     minimist "^1.2.0"
-
-whatwg-fetch@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-2.0.1.tgz#078b9461bbe91cea73cbce8bb122a05f9e92b772"
 
 which@1:
   version "1.2.12"
