@@ -28,24 +28,30 @@
     "presets": [
       "react",
       "stage-3",
-      "node7"
+      [
+        "env",
+        {
+          "targets": {
+            "electron": "1.6"
+          }
+        }
+      ]
     ]
   },
   "dependencies": {
     "arfe": "^0.1.0",
-    "poodle-service": "^0.1.2",
-    "redux": "^3.6.0"
+    "poodle-service": "link:../poodle-service"
   },
   "devDependencies": {
-    "babel-cli": "^6.18.0",
-    "babel-preset-node7": "^1.4.0",
-    "babel-preset-react": "^6.16.0",
-    "babel-preset-stage-3": "^6.17.0",
+    "babel-cli": "^6",
+    "babel-preset-env": "^1",
+    "babel-preset-react": "^6",
+    "babel-preset-stage-3": "^6",
     "flow-bin": "^0.50.0",
-    "in-publish": "^2.0.0",
+    "in-publish": "^2",
     "tap-summary": "^3.0.1",
     "tape": "^4.6.3",
-    "watch": "^1.0.1"
+    "watch": "^1"
   },
   "files": [
     "lib/"

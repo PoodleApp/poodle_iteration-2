@@ -7,3 +7,7 @@ lib/
 
 # Misc
 .DS_Store
+
+# TODO
+accessToken.json
+env.sh

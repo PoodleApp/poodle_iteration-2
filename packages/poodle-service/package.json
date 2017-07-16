@@ -25,7 +25,14 @@
     "presets": [
       "react",
       "stage-3",
-      "node7"
+      [
+        "env",
+        {
+          "targets": {
+            "electron": "1.6"
+          }
+        }
+      ]
     ]
   },
   "dependencies": {
@@ -35,7 +42,7 @@
     "dateformat": "^2.0.0",
     "googleapis": "^14.2.0",
     "imap": "^0.8.18",
-    "kefir": "^3.6.0",
+    "kefir": "^3",
     "libqp": "^1.1.0",
     "mailparser": "^2.0.1",
     "node-fetch": "^1.6.3",
@@ -46,14 +53,14 @@
     "xoauth2": "^1.2.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.18.0",
-    "babel-preset-node7": "^1.2.0",
-    "babel-preset-react": "^6.16.0",
-    "babel-preset-stage-3": "^6.17.0",
+    "babel-cli": "^6",
+    "babel-preset-env": "^1",
+    "babel-preset-react": "^6",
+    "babel-preset-stage-3": "^6",
     "flow-bin": "^0.50.0",
     "format-json": "^1.0.3",
-    "in-publish": "^2.0.0",
-    "watch": "^1.0.1"
+    "in-publish": "^2",
+    "watch": "^1"
   },
   "files": [
     "lib/"

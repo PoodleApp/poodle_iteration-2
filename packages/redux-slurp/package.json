@@ -41,19 +41,19 @@
   },
   "devDependencies": {
     "ava": "^0.20.0",
-    "babel-cli": "^6.24.1",
-    "babel-preset-env": "^1.4.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-3": "^6.24.1",
+    "babel-cli": "^6",
+    "babel-preset-env": "^1",
+    "babel-preset-react": "^6",
+    "babel-preset-stage-3": "^6",
     "flow-bin": "^0.50.0",
-    "in-publish": "^2.0.0",
-    "kefir": "^3.7.2",
-    "react": "^15.6.1",
-    "react-redux": "^5.0.5",
-    "react-test-renderer": "^15.6.1",
-    "redux": "^3.7.1",
-    "redux-fractal": "^1.7.1",
-    "watch": "^1.0.2"
+    "in-publish": "^2",
+    "kefir": "^3",
+    "react": "^15",
+    "react-redux": "^5",
+    "react-test-renderer": "^15",
+    "redux": "^3",
+    "redux-fractal": "^1",
+    "watch": "^1"
   },
   "files": [
     "lib/"
