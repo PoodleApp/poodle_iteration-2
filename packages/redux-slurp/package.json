@@ -47,7 +47,7 @@
     "babel-preset-stage-3": "^6",
     "flow-bin": "^0.50.0",
     "in-publish": "^2",
-    "kefir": "^3",
+    "kefir": "^3.7.3",
     "react": "^15",
     "react-redux": "^5",
     "react-test-renderer": "^15",

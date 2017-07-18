@@ -14,16 +14,19 @@ import type { Store } from 'redux'
  * It provides interoperability between stream implementations, including Kefir,
  * RxJS, and zen-observable.
  */
-interface ObservableImpl<+V, +E = *> {
-  subscribe(callbacks: {
-    start?: Function,
-    next?: (value: V) => any,
-    error?: (error: E) => any,
-    complete?: () => any
-  }): { unsubscribe: () => void }
+
+export type Observer<-V, -E> = {
+  start?: Function,
+  +next?: (value: V) => any,
+  +error?: (error: E) => any,
+  complete?: () => any
 }
 
-interface Observable<V, E> {
+export type ObservableImpl<+V, +E = *> = {
+  subscribe(callbacks: Observer<V, E>): { unsubscribe: () => void }
+}
+
+interface StandardObservable<V, E> {
   [typeof symbolObservable]: () => ObservableImpl<V, E>
 }
 
@@ -34,6 +37,8 @@ interface KefirObservable<V, E> {
   toESObservable(): ObservableImpl<V, E>
 }
 
+export type Observable<V, E> = StandardObservable<V, E> | KefirObservable<V, E>
+
 type Unsubscribe = () => void
 
 type Opts<OwnProps> = {
@@ -41,9 +46,7 @@ type Opts<OwnProps> = {
 }
 
 // Map an Observable object property to an object containing a value or an error
-type FromObservable = <V, E>(
-  obs: Observable<V, E> | KefirObservable<V, E>
-) => SingleState<V, E>
+type FromObservable = <V, E>(obs: Observable<V, E>) => SingleState<V, E>
 
 export class SlurpError extends Error {
   mergedProps: Object
