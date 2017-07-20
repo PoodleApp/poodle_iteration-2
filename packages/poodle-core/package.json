@@ -39,8 +39,9 @@
     ]
   },
   "dependencies": {
-    "arfe": "^0.1.0",
-    "poodle-service": "link:../poodle-service"
+    "arfe": "link:../../node_modules/arfe",
+    "poodle-service": "link:../poodle-service",
+    "redux-slurp": "link:../redux-slurp"
   },
   "devDependencies": {
     "babel-cli": "^6",

@@ -3,9 +3,10 @@
 .*/graphql-imap/test/.*
 .*/mailcomposer/.*
 .*/poodle-electron/lib/.*
+.*/kefir/test/flow/.*
+.*/redux-slurp/test/.*
 
 [include]
-../../node_modules/
 
 [libs]
 ./types/

@@ -11,17 +11,22 @@ import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
+import Sync from 'poodle-service/lib/sync'
 import React from 'react'
-import * as redux from 'react-redux'
 import { Link } from 'react-router-dom'
+import slurp from 'redux-slurp'
 
 import Avatar from '../Avatar'
 import ChannelListSidebar from './ChannelListSidebar'
 
 import type { State } from '../../reducers'
 
-type ActivityStreamProps = {
+type OwnProps = {
   account: authActions.Account,
+  sync: Sync
+}
+
+type Props = OwnProps & {
   data: Object, // TODO
   dispatch: (action: Object) => void
 }
@@ -52,7 +57,7 @@ const styles = {
   }
 }
 
-export function ActivityStream (props: ActivityStreamProps) {
+export function ActivityStream (props: Props) {
   const { conversations, error, loading } = props.data
 
   let content
@@ -61,18 +66,26 @@ export function ActivityStream (props: ActivityStreamProps) {
   } else if (error) {
     content = (
       <div>
-        <p>{String(error)}</p>
+        <p>
+          {String(error)}
+        </p>
         <RaisedButton label='Retry' onClick={() => props.data.refetch()} />
       </div>
     )
   } else {
-    const convs = conversations.map((conv, i) => (
+    const convs = conversations.map((conv, i) =>
       <div key={conv.id}>
         <ConversationRow conversation={conv} />
         {i == conversations.length - 1 ? '' : <Divider inset={true} />}
       </div>
-    ))
-    content = <Paper><List>{convs}</List></Paper>
+    )
+    content = (
+      <Paper>
+        <List>
+          {convs}
+        </List>
+      </Paper>
+    )
   }
 
   return (
@@ -87,7 +100,9 @@ export function ActivityStream (props: ActivityStreamProps) {
         />
       </header>
       <div style={styles.body}>
-        <main style={styles.content}>{content}</main>
+        <main style={styles.content}>
+          {content}
+        </main>
         <nav style={styles.leftNav}>
           <ChannelListSidebar />
         </nav>
@@ -139,4 +154,12 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
 //   })
 // })(ActivityStream)
 
-export default ActivityStream
+const ActivityStreamWithData = slurp(({ sync }: OwnProps) => ({
+  conversations: sync.queryConversations({
+    labels: ['\\Inbox'],
+    limit: 30,
+    since: Moment().subtract(30, 'days').toISOString().slice(0, 10)
+  })
+}))(ActivityStream)
+
+export default ActivityStreamWithData

@@ -172,19 +172,9 @@ are-we-there-yet@~1.1.2:
     delegates "^1.0.0"
     readable-stream "^2.0.6"
 
-arfe@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/arfe/-/arfe-0.1.0.tgz#525604bb960ebf2821482ecb62743046d6ed0c20"
-  dependencies:
-    activitystrea.ms hallettj/activitystrea.ms#fix/template-idempotency
-    activitystreams-context "^1.0.0"
-    email-addresses "^2.0.2"
-    moment "^2.17.1"
-    mori "^0.3.2"
-    safety-lens "^1.4.0"
-    stream-to-string "^1.1.0"
-    traverse "^0.6.6"
-    vocabs-as "^1.0.0"
+"arfe@link:../../node_modules/arfe":
+  version "0.0.0"
+  uid ""
 
 argparse@^1.0.7:
   version "1.0.9"
@@ -1228,6 +1218,18 @@ buffer-from@0.1.1:
 buffer-shims@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/buffer-shims/-/buffer-shims-1.0.0.tgz#9978ce317388c649ad8793028c3477ef044a8b51"
+
+buildmail@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/buildmail/-/buildmail-4.0.1.tgz#877f7738b78729871c9a105e3b837d2be11a7a72"
+  dependencies:
+    addressparser "1.0.1"
+    libbase64 "0.1.0"
+    libmime "3.0.0"
+    libqp "1.1.0"
+    nodemailer-fetch "1.6.0"
+    nodemailer-shared "1.1.0"
+    punycode "1.4.1"
 
 builtin-modules@^1.0.0:
   version "1.1.1"
@@ -3040,12 +3042,6 @@ jws@^3.0.0, jws@~3.0.0:
     base64url "~1.0.4"
     jwa "~1.0.0"
 
-kefir@^3:
-  version "3.7.2"
-  resolved "https://registry.yarnpkg.com/kefir/-/kefir-3.7.2.tgz#fb713ecc0b24d741964e0b3e308026fae5c0806d"
-  dependencies:
-    symbol-observable "1.0.4"
-
 kefir@^3.7.3:
   version "3.7.3"
   resolved "https://registry.yarnpkg.com/kefir/-/kefir-3.7.3.tgz#c1d4e0a7a9f63cfd73720ae38e0630c14784ed97"
@@ -3146,6 +3142,14 @@ levelup@1.3.5:
 libbase64@0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/libbase64/-/libbase64-0.1.0.tgz#62351a839563ac5ff5bd26f12f60e9830bb751e6"
+
+libmime@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/libmime/-/libmime-3.0.0.tgz#51a1a9e7448ecbd32cda54421675bb21bc093da6"
+  dependencies:
+    iconv-lite "0.4.15"
+    libbase64 "0.1.0"
+    libqp "1.1.0"
 
 libmime@3.1.0:
   version "3.1.0"
@@ -3604,6 +3608,16 @@ node-pre-gyp@^0.6.29:
 node-uuid@^1.4.7, node-uuid@~1.4.7:
   version "1.4.8"
   resolved "https://registry.yarnpkg.com/node-uuid/-/node-uuid-1.4.8.tgz#b040eb0923968afabf8d32fb1f17f1167fdab907"
+
+nodemailer-fetch@1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/nodemailer-fetch/-/nodemailer-fetch-1.6.0.tgz#79c4908a1c0f5f375b73fe888da9828f6dc963a4"
+
+nodemailer-shared@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/nodemailer-shared/-/nodemailer-shared-1.1.0.tgz#cf5994e2fd268d00f5cf0fa767a08169edb07ec0"
+  dependencies:
+    nodemailer-fetch "1.6.0"
 
 noop-logger@^0.1.0:
   version "0.1.1"
@@ -4145,7 +4159,7 @@ pump@^1.0.0:
     end-of-stream "^1.1.0"
     once "^1.3.1"
 
-punycode@^1.4.1:
+punycode@1.4.1, punycode@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
 
@@ -4829,6 +4843,10 @@ sshpk@^1.7.0:
 stack-utils@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/stack-utils/-/stack-utils-1.0.1.tgz#d4f33ab54e8e38778b0ca5cfd3b3afb12db68620"
+
+stream-from-promise@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/stream-from-promise/-/stream-from-promise-1.0.0.tgz#763687f7dd777e4c894f6408333fc6b3fc8a61bb"
 
 stream-to-array@~2.3.0:
   version "2.3.0"

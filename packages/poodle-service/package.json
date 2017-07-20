@@ -36,7 +36,7 @@
     ]
   },
   "dependencies": {
-    "arfe": "^0.1.0",
+    "arfe": "link:../../node_modules/arfe",
     "base64-stream": "^0.1.3",
     "cache-directory": "^1.1.0",
     "dateformat": "^2.0.0",
