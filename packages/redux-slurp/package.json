@@ -2,7 +2,7 @@
   "name": "redux-slurp",
   "version": "0.0.0",
   "description": "Redux helper to stream data from an observable to a React component",
-  "main": "index.js",
+  "main": "lib/index.js",
   "repository": "git+https://github.com/PoodleApp/poodle.git",
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
