@@ -11,6 +11,7 @@ import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
+import queryConversations from 'poodle-core/lib/queries/conversations'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -19,6 +20,11 @@ import slurp from 'redux-slurp'
 import Avatar from '../Avatar'
 import ChannelListSidebar from './ChannelListSidebar'
 
+import type {
+  ListViewConversation,
+  ListViewActivity,
+  Actor
+} from 'poodle-core/lib/queries/conversations'
 import type { State } from '../../reducers'
 
 type OwnProps = {
@@ -27,8 +33,12 @@ type OwnProps = {
 }
 
 type Props = OwnProps & {
-  data: Object, // TODO
-  dispatch: (action: Object) => void
+  conversations: {
+    value?: ListViewConversation[],
+    error?: Error,
+    latest?: ListViewConversation[] | Error,
+    complete: boolean
+  }
 }
 
 const styles = {
@@ -58,20 +68,23 @@ const styles = {
 }
 
 export function ActivityStream (props: Props) {
-  const { conversations, error, loading } = props.data
+  const { value: conversations, error, latest, complete } = props.conversations
 
   let content
-  if (loading) {
-    content = <div>Loading...</div>
-  } else if (error) {
+  if (error && latest === error) {
     content = (
       <div>
         <p>
           {String(error)}
         </p>
-        <RaisedButton label='Retry' onClick={() => props.data.refetch()} />
+        <RaisedButton
+          label='Retry'
+          onClick={() => alert('TODO: implement retry action')}
+        />
       </div>
     )
+  } else if (!conversations) {
+    content = <div>Loading...</div>
   } else {
     const convs = conversations.map((conv, i) =>
       <div key={conv.id}>
@@ -96,7 +109,8 @@ export function ActivityStream (props: Props) {
           iconElementRight={
             <IconButton iconClassName='material-icons'>refresh</IconButton>
           }
-          onRightIconButtonTouchTap={() => props.data.refetch()}
+          onRightIconButtonTouchTap={() =>
+            alert('TODO: implement refresh action')}
         />
       </header>
       <div style={styles.body}>
@@ -112,22 +126,22 @@ export function ActivityStream (props: Props) {
 }
 
 type ConversationRowProps = {
-  conversation: Conversation
+  conversation: ListViewConversation
 }
 
 function ConversationRow ({ conversation }: ConversationRowProps) {
   const subject = conversation.subject || '[no subject]'
   const activity = conversation.latestActivity
-  const actor = activity.actor
+  const actor = activity.actor || { displayName: 'unknown', email: '' }
   const snippet = activity.contentSnippet
 
   return (
     <ListItem
-      leftAvatar={<Avatar name={actor.name} id={actor.id} />}
+      leftAvatar={<Avatar name={actor.displayName} id={actor.email} />}
       primaryText={subject}
       secondaryText={
         <p>
-          <span style={styles.authorName}>{actor.name}</span> — {snippet}
+          <span style={styles.authorName}>{actor.displayName}</span> — {snippet}
         </p>
       }
       secondaryTextLines={2}
@@ -142,20 +156,8 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
   )
 }
 
-// const ComponentWithData = apollo.graphql(q.localConversations, {
-//   options: ({ account }: ActivityStreamProps) => ({
-//     account,
-//     variables: {
-//       labels: ['\\Inbox'],
-//       lang: navigator.language,
-//       // Provide date but not time so that Apollo can cache results
-//       since: Moment().subtract(30, 'days').toISOString().slice(0, 10)
-//     }
-//   })
-// })(ActivityStream)
-
 const ActivityStreamWithData = slurp(({ sync }: OwnProps) => ({
-  conversations: sync.queryConversations({
+  conversations: queryConversations(sync, navigator.languages, {
     labels: ['\\Inbox'],
     limit: 30,
     since: Moment().subtract(30, 'days').toISOString().slice(0, 10)

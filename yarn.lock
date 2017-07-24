@@ -20,7 +20,7 @@ acorn@^5.0.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.1.1.tgz#53fe161111f912ab999ee887a90a0bc52822fd75"
 
-"activitystrea.ms@github:hallettj/activitystrea.ms#fix/template-idempotency":
+activitystrea.ms@hallettj/activitystrea.ms#fix/template-idempotency:
   version "1.0.0"
   resolved "https://codeload.github.com/hallettj/activitystrea.ms/tar.gz/1b47a0a9454c088691d0776ef9324c6a1ab60f5d"
   dependencies:
@@ -228,9 +228,9 @@ bitcore-lib@^0.13.7:
     inherits "=2.0.1"
     lodash "=3.10.1"
 
-"bitcore-message@github:comakery/bitcore-message#dist":
+"bitcore-message@github:CoMakery/bitcore-message#dist":
   version "1.0.2"
-  resolved "https://codeload.github.com/comakery/bitcore-message/tar.gz/8799cc327029c3d34fc725f05b2cf981363f6ebf"
+  resolved "https://codeload.github.com/CoMakery/bitcore-message/tar.gz/8799cc327029c3d34fc725f05b2cf981363f6ebf"
   dependencies:
     bitcore-lib "^0.13.7"
 
@@ -1462,6 +1462,10 @@ redent@^1.0.0:
   dependencies:
     indent-string "^2.1.0"
     strip-indent "^1.0.1"
+
+redux-saga@^0.15.4:
+  version "0.15.4"
+  resolved "https://registry.yarnpkg.com/redux-saga/-/redux-saga-0.15.4.tgz#27982a947280053b7ecbb5d3170c837a5fe6b261"
 
 regenerator-runtime@^0.10.0:
   version "0.10.5"

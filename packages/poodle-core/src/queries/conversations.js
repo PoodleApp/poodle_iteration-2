@@ -39,18 +39,18 @@ export type Actor = {
 
 export default function queryConversations (
   sync: Sync,
-  lang: string,
+  langs: string[],
   queryParams: * = { labels: ['\\Inbox'], limit: 30 }
 ): Observable<ListViewConversation[], *> {
   return sync
     .queryConversations(queryParams)
-    .flatMap(processConversation.bind(null, sync, lang))
+    .flatMap(processConversation.bind(null, sync, langs))
     .scan((cs, conv) => cs.concat(conv), [])
 }
 
 function processConversation (
   sync: Sync,
-  lang: string,
+  langs: string[],
   conv: Conversation
 ): kefir.Observable<ListViewConversation, *> {
   const activity = conv.latestActivity
@@ -64,7 +64,7 @@ function processConversation (
         contentSnippet
       },
       participants: m.intoArray(conv.flatParticipants),
-      subject: conv.subject && resolveLanguageValue(lang, conv.subject)
+      subject: conv.subject && resolveLanguageValue(langs, conv.subject)
     }))
 }
 
@@ -111,10 +111,10 @@ async function fetchActivityContent (
   }
 }
 
-function processActor (lang: string, actor: AS.models.Object): Actor {
+function processActor (langs: string[], actor: AS.models.Object): Actor {
   const email = emailFromId(actor.id)
   const displayName = actor.name
-    ? resolveLanguageValue(lang, actor.name)
+    ? resolveLanguageValue(langs, actor.name)
     : email
   return { displayName, email }
 }
@@ -124,8 +124,14 @@ function emailFromId (id: string): string {
 }
 
 function resolveLanguageValue (
-  lang: string,
+  langs: string[],
   lv: AS.models.LanguageValue
 ): string {
-  return lv.get(lang) || lv.get()
+  for (const lang of langs) {
+    const v = lv.get(lang)
+    if (v) {
+      return v
+    }
+  }
+  return lv.get()
 }
