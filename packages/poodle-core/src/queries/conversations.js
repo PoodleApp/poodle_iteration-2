@@ -7,41 +7,38 @@
  * @flow
  */
 
-import * as AS from 'activitystrea.ms'
 import Conversation from 'arfe/lib/models/Conversation'
-import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import * as kefir from 'kefir'
 import type Moment from 'moment'
 import * as m from 'mori'
 import Sync from 'poodle-service/lib/sync'
 import type { Observable } from 'redux-slurp'
-import toString from 'stream-to-string'
+import { type Actor, processActor } from './actor'
+import { fetchContentSnippet } from './content'
+import { resolveLanguageValue } from './lang'
+
+export type { Actor } from './actor'
 
 type URI = string
 
-export type ListViewConversation = {
+export type ConversationListItem = {
   id: URI,
   lastActiveTime: Moment,
-  latestActivity: ListViewActivity,
+  latestActivity: ActivityListItem,
   participants: Actor[],
   subject: ?string
 }
 
-export type ListViewActivity = {
+export type ActivityListItem = {
   actor: ?Actor,
   contentSnippet: ?string
 }
 
-export type Actor = {
-  displayName: string,
-  email: string
-}
-
-export default function queryConversations (
+export function fetchConversations (
   sync: Sync,
   langs: string[],
   queryParams: * = { labels: ['\\Inbox'], limit: 30 }
-): Observable<ListViewConversation[], *> {
+): Observable<ConversationListItem[], *> {
   return sync
     .queryConversations(queryParams)
     .flatMap(processConversation.bind(null, sync, langs))
@@ -52,7 +49,7 @@ function processConversation (
   sync: Sync,
   langs: string[],
   conv: Conversation
-): kefir.Observable<ListViewConversation, *> {
+): kefir.Observable<ConversationListItem, *> {
   const activity = conv.latestActivity
   return kefir
     .fromPromise(fetchContentSnippet(sync, activity))
@@ -66,72 +63,4 @@ function processConversation (
       participants: m.intoArray(conv.flatParticipants),
       subject: conv.subject && resolveLanguageValue(langs, conv.subject)
     }))
-}
-
-async function fetchContentSnippet (
-  sync: Sync,
-  activity: DerivedActivity,
-  length: number = 100
-): Promise<?string> {
-  const result = await fetchActivityContent(sync, activity, [
-    'text/plain',
-    'text/html'
-  ])
-  if (result) {
-    return result.content.slice(0, length)
-  }
-}
-
-async function fetchActivityContent (
-  sync: Sync,
-  activity: DerivedActivity,
-  preferences: string[] = ['text/html', 'text/plain']
-): Promise<?{ content: string, mediaType: string }> {
-  const links = m.mapcat(
-    pref => m.filter(l => l.mediaType === pref, activity.objectLinks),
-    preferences
-  )
-  const link = m.first(links)
-
-  if (!link) {
-    return // no content
-  }
-
-  const href = link.href
-  if (!href) {
-    throw new Error(
-      `object link does not have an \`href\` property in activity ${activity.id}`
-    )
-  }
-
-  const stream = await sync.fetchPartContent(link.href)
-  return {
-    content: await toString(stream, 'utf8'), // TODO: check charset
-    mediaType: link.mediaType
-  }
-}
-
-function processActor (langs: string[], actor: AS.models.Object): Actor {
-  const email = emailFromId(actor.id)
-  const displayName = actor.name
-    ? resolveLanguageValue(langs, actor.name)
-    : email
-  return { displayName, email }
-}
-
-function emailFromId (id: string): string {
-  return id.replace(/^[a-z]+:/, '')
-}
-
-function resolveLanguageValue (
-  langs: string[],
-  lv: AS.models.LanguageValue
-): string {
-  for (const lang of langs) {
-    const v = lv.get(lang)
-    if (v) {
-      return v
-    }
-  }
-  return lv.get()
 }

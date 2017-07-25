@@ -1,46 +1,78 @@
 /* @flow */
 
-import * as authActions    from 'poodle-core/lib/actions/auth'
-import React               from 'react'
-import * as redux          from 'react-redux'
+import * as authActions from 'poodle-core/lib/actions/auth'
+import SyncProvider from 'poodle-core/lib/components/SyncProvider'
+import Sync from 'poodle-service/lib/sync'
+import React from 'react'
+import * as redux from 'react-redux'
 import { Redirect, Route } from 'react-router-dom'
 
 import type { ContextRouter } from 'react-router-dom'
-import type { State }         from '../reducers'
+import type { State } from '../reducers'
 
 type Props = {
-  account:    ?authActions.Account,
+  account: ?authActions.Account,
   component?: ReactClass<*>,
-  render?:    (router: ContextRouter) => React.Element<*>,
-  children?:  (router: ContextRouter) => React.Element<*>,
-  path?:      string,
-  exact?:     bool,
-  strict?:    bool,
+  render?: (router: ContextRouter) => React.Element<*>,
+  sync: ?Sync,
+  children?: (router: ContextRouter) => React.Element<*>,
+  path?: string,
+  exact?: boolean,
+  strict?: boolean
 }
 
-export function AuthenticatedRoute({ children, component, render, ...rest }: Props) {
-  const account = rest.account
+export function AuthenticatedRoute ({
+  children,
+  component,
+  render,
+  ...rest
+}: Props) {
+  const { account, sync } = rest
 
-  return <Route {...rest} render={props => {
-    if (!account) {
-      return <Redirect to="/login" />
-    }
+  return (
+    <Route
+      {...rest}
+      render={props => {
+        if (!account) {
+          return <Redirect to='/login' />
+        }
 
-    if (component) {
-      return React.createElement(component, rest)
-    }
+        if (!sync) {
+          return (
+            <div>
+              <p>Logging in...</p>
+            </div>
+          )
+        }
 
-    if (render) {
-      return render(props)
-    }
+        if (component) {
+          return (
+            <SyncProvider sync={sync}>
+              {React.createElement(component, rest)}
+            </SyncProvider>
+          )
+        }
 
-    throw new Error('`AuthenticatedRoute` requires either a `component` or a `render` prop')
-  }} />
+        if (render) {
+          return (
+            <SyncProvider sync={sync}>
+              {render(props)}
+            </SyncProvider>
+          )
+        }
+
+        throw new Error(
+          '`AuthenticatedRoute` requires either a `component` or a `render` prop'
+        )
+      }}
+    />
+  )
 }
 
-function mapStateToProps({ auth }: State): $Shape<Props> {
+function mapStateToProps ({ auth }: State): $Shape<Props> {
   return {
     account: auth.account,
+    sync: auth.sync
   }
 }
 

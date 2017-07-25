@@ -11,7 +11,7 @@ import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
-import queryConversations from 'poodle-core/lib/queries/conversations'
+import * as q from 'poodle-core/lib/queries/conversations'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -20,25 +20,15 @@ import slurp from 'redux-slurp'
 import Avatar from '../Avatar'
 import ChannelListSidebar from './ChannelListSidebar'
 
-import type {
-  ListViewConversation,
-  ListViewActivity,
-  Actor
-} from 'poodle-core/lib/queries/conversations'
+import type { Slurp } from 'redux-slurp'
 import type { State } from '../../reducers'
 
 type OwnProps = {
-  account: authActions.Account,
-  sync: Sync
+  account: authActions.Account
 }
 
 type Props = OwnProps & {
-  conversations: {
-    value?: ListViewConversation[],
-    error?: Error,
-    latest?: ListViewConversation[] | Error,
-    complete: boolean
-  }
+  conversations: Slurp<q.ConversationListItem[]>
 }
 
 const styles = {
@@ -126,7 +116,7 @@ export function ActivityStream (props: Props) {
 }
 
 type ConversationRowProps = {
-  conversation: ListViewConversation
+  conversation: q.ConversationListItem
 }
 
 function ConversationRow ({ conversation }: ConversationRowProps) {
@@ -156,8 +146,8 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
   )
 }
 
-const ActivityStreamWithData = slurp(({ sync }: OwnProps) => ({
-  conversations: queryConversations(sync, navigator.languages, {
+const ActivityStreamWithData = slurp(({ }: OwnProps, { sync }: Object) => ({
+  conversations: q.fetchConversations(sync, navigator.languages, {
     labels: ['\\Inbox'],
     limit: 30,
     since: Moment().subtract(30, 'days').toISOString().slice(0, 10)

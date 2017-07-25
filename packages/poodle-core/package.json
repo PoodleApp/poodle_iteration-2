@@ -41,6 +41,7 @@
   "dependencies": {
     "arfe": "link:../../node_modules/arfe",
     "poodle-service": "link:../poodle-service",
+    "prop-types": "^15.5.10",
     "redux-slurp": "link:../redux-slurp"
   },
   "devDependencies": {

@@ -1,23 +1,30 @@
 /* @flow */
 
+import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import * as URI from 'arfe/lib/models/uri'
 
-import type { Activity, ActivityViewProps } from './types'
+import type { ActivityViewProps } from './types'
 
-export function editing(props: ActivityViewProps, activity: Activity): boolean {
+export function editing (
+  props: ActivityViewProps,
+  activity: DerivedActivity
+): boolean {
   return !!props.editing && props.editing === activity.id
 }
 
-export function hasType(type: string, activity: Activity): boolean {
+export function hasType (type: string, activity: DerivedActivity): boolean {
   return activity.types.some(t => t === type)
 }
 
-export function hasObjectType(type: string, activity: Activity): boolean {
+export function hasObjectType (
+  type: string,
+  activity: DerivedActivity
+): boolean {
   return !!activity.object && activity.object.types.some(t => t === type)
 }
 
-export function myContent(activity: Activity, email: string): boolean {
-  const me   = URI.mailtoUri(email)
+export function myContent (activity: DerivedActivity, email: string): boolean {
+  const me = URI.mailtoUri(email)
   const them = activity.actor
-  return !!them && (URI.equals(them.id, me))
+  return !!them && URI.equals(them.id, me)
 }
