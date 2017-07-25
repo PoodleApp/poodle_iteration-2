@@ -9,6 +9,13 @@ import type { Component, Element } from 'react'
 import type { Connector } from 'react-redux'
 import type { Store } from 'redux'
 
+export type Slurp<T, E = Error> = {
+  value?: T,
+  error?: E,
+  latest?: T | E,
+  complete: boolean
+}
+
 /*
  * This is the interface described by https://github.com/tc39/proposal-observable
  * It provides interoperability between stream implementations, including Kefir,
@@ -46,7 +53,7 @@ type Opts<OwnProps> = {
 }
 
 // Map an Observable object property to an object containing a value or an error
-type FromObservable = <V, E>(obs: Observable<V, E>) => SingleState<V, E>
+type FromObservable = <V, E>(obs: Observable<V, E>) => Slurp<V, E>
 
 export class SlurpError extends Error {
   mergedProps: Object
@@ -57,7 +64,7 @@ export class SlurpError extends Error {
 }
 
 export default function slurp<OwnProps: Object, SlurpProps: Object> (
-  mergeProps: (ownProps: OwnProps) => SlurpProps,
+  mergeProps: (ownProps: OwnProps, ownContext: Object) => SlurpProps,
   options?: Opts<OwnProps>
 ): Connector<
   OwnProps,
@@ -69,6 +76,7 @@ export default function slurp<OwnProps: Object, SlurpProps: Object> (
     [key: string]: { source: Observable<any, any>, unsubscribe: Unsubscribe }
   } = {}
   let store
+  let ownContext
   let prevProps
 
   return local({
@@ -76,6 +84,7 @@ export default function slurp<OwnProps: Object, SlurpProps: Object> (
 
     createStore (props: OwnProps, existingState, context) {
       store = createStore(reducer)
+      ownContext = context
 
       return {
         store,
@@ -94,7 +103,7 @@ export default function slurp<OwnProps: Object, SlurpProps: Object> (
       }
       prevProps = ownProps
 
-      const slurpProps = mergeProps(ownProps)
+      const slurpProps = mergeProps(ownProps, ownContext)
       const keys = sourceKeys(slurpProps)
 
       if (keys.length < 1) {
@@ -147,16 +156,9 @@ function getUniqueKey (props: Object, context: Object): string {
 
 /* state and reducer */
 
-type State = { [key: string]: SingleState<any, any> }
+type State = { [key: string]: Slurp<any, any> }
 
-type SingleState<Value, Error> = {
-  value?: Value,
-  error?: Error,
-  latest?: Value | Error,
-  complete: boolean
-}
-
-function getInitSingleState<Value, Error> (): SingleState<Value, Error> {
+function getInitSlurp<Value, Error> (): Slurp<Value, Error> {
   return { complete: false }
 }
 
@@ -202,11 +204,11 @@ function sourceKeys (props: Object): string[] {
 function slurpPropsFromState (
   state: State,
   sourceKeys: string[]
-): { [key: string]: SingleState<any, any> } {
+): { [key: string]: Slurp<any, any> } {
   const consumableState = { ...state }
   for (const key of sourceKeys) {
     if (!consumableState.hasOwnProperty(key)) {
-      consumableState[key] = getInitSingleState()
+      consumableState[key] = getInitSlurp()
     }
   }
   return consumableState
@@ -215,7 +217,7 @@ function slurpPropsFromState (
 function reducer<Value, Error> (state: State = {}, action: Action): State {
   switch (action.type) {
     case 'redux-slurp/on-init':
-      return updateSingle(action.key, state, getInitSingleState())
+      return updateSingle(action.key, state, getInitSlurp())
     case 'redux-slurp/on-value':
       return updateSingle(action.key, state, {
         value: action.value,
@@ -236,9 +238,9 @@ function reducer<Value, Error> (state: State = {}, action: Action): State {
 function updateSingle<V, E> (
   key: string,
   state: State,
-  changes: $Shape<SingleState<V, E>>
+  changes: $Shape<Slurp<V, E>>
 ): State {
-  const existing = state[key] || getInitSingleState()
+  const existing = state[key] || getInitSlurp()
   const updatedSingle = { ...existing, ...changes }
   return {
     ...state,
