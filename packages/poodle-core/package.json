@@ -43,6 +43,9 @@
     "poodle-service": "link:../poodle-service",
     "prop-types": "^15.5.10",
     "react": "link:../../node_modules/react",
+    "react-redux": "link:../../node_modules/react-redux",
+    "redux": "link:../../node_modules/redux",
+    "redux-saga": "link:../../node_modules/redux-saga",
     "redux-slurp": "link:../redux-slurp"
   },
   "devDependencies": {
@@ -52,7 +55,6 @@
     "babel-preset-stage-3": "^6",
     "flow-bin": "^0.50.0",
     "in-publish": "^2",
-    "redux-saga": "link:../../node_modules/redux-saga",
     "tap-summary": "^3.0.1",
     "tape": "^4.6.3",
     "watch": "^1"
