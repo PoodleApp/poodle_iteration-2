@@ -7,6 +7,7 @@ import IconButton from 'material-ui/IconButton'
 import RaisedButton from 'material-ui/RaisedButton'
 import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
+import * as m from 'mori'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as q from 'poodle-core/lib/queries/conversation'
 import poodleSlurp from 'poodle-core/lib/util/poodleSlurp'
@@ -76,16 +77,20 @@ export function Conversation (props: Props) {
       </div>
     )
   } else if (conversation) {
-    const activities = conversation.activities.map(activity =>
-      <ActivityView
-        key={activity.id}
-        account={props.account}
-        activity={activity}
-        conversation={conversation}
-        dispatch={props.dispatch}
-        editing={props.editing}
-        loading={false}
-      />
+    const activities = m.intoArray(
+      m.map(
+        activity =>
+          <ActivityView
+            key={activity.id}
+            account={props.account}
+            activity={activity}
+            conversation={conversation}
+            dispatch={props.dispatch}
+            editing={props.editing}
+            loading={false}
+          />,
+        conversation.activities
+      )
     )
     content = (
       <div>
