@@ -9,7 +9,7 @@ import { ConnectedRouter } from 'react-router-redux'
 import * as r3 from 'react-router-redux'
 import injectTapEventPlugin from 'react-tap-event-plugin'
 import * as redux from 'redux'
-import createLogger from 'redux-logger'
+import reduxLogger from 'redux-logger'
 import sagaMiddleware from 'redux-saga'
 import App from './components/App'
 import buildRootReducer from './reducers'
@@ -26,7 +26,7 @@ const history = createHistory()
 const saga = sagaMiddleware()
 
 const enhancer = redux.compose(
-  redux.applyMiddleware(createLogger(), saga, r3.routerMiddleware(history)),
+  redux.applyMiddleware(reduxLogger, saga, r3.routerMiddleware(history)),
   typeof window.devToolsExtension !== 'undefined'
     ? window.devToolsExtension()
     : f => f
