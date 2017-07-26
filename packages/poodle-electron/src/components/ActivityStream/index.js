@@ -123,7 +123,7 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
   const subject = conversation.subject || '[no subject]'
   const activity = conversation.latestActivity
   const actor = activity.actor || { displayName: 'unknown', email: '' }
-  const snippet = activity.contentSnippet
+  const snippet = activity.contentSnippet || '[unable to fetch content snippet]'
 
   return (
     <ListItem

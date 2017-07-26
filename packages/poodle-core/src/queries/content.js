@@ -15,12 +15,16 @@ export async function fetchContentSnippet (
   activity: DerivedActivity,
   length: number = 100
 ): Promise<?string> {
-  const result = await fetchActivityContent(sync, activity, [
-    'text/plain',
-    'text/html'
-  ])
-  if (result) {
-    return result.content.slice(0, length)
+  try {
+    const result = await fetchActivityContent(sync, activity, [
+      'text/plain',
+      'text/html'
+    ])
+    if (result) {
+      return result.content.slice(0, length)
+    }
+  } catch (err) {
+    console.error(`Failed to fetch content snippet for activity ${activity.id}`)
   }
 }
 
