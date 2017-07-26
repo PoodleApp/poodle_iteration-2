@@ -28,16 +28,19 @@ export default function poodleSlurp<OwnProps: Object, SlurpProps: Object> (
   $Supertype<$ObjMap<SlurpProps, FromObservable> & OwnProps & AuthProps>
 > {
   return (component => {
-    const withState = redux.connect(
-      <State: { auth: AuthState }>({ auth }: State) => {
-        return { account: auth.account, sync: auth.sync }
-      }
-    )(component)
-
     const withData = slurp((ownProps: OwnProps) =>
       mergeProps(ownProps, ownProps.sync, ownProps.account)
-    )(withState)
+    )(component)
 
-    return withData
+    const withState = redux.connect(
+      <State: { auth: AuthState }>({ auth }: State) => {
+        if (!auth.sync) {
+          throw new Error('Could not find `auth.sync` in redux state')
+        }
+        return { account: auth.account, sync: auth.sync }
+      }
+    )(withData)
+
+    return withState
   }: any)
 }
