@@ -1,11 +1,14 @@
 /* @flow */
 
 import * as oauth from 'poodle-service/lib/oauth/google'
+import Sync from 'poodle-service/lib/sync'
 import { takeLatest } from 'redux-saga'
 import { call, cancelled, fork, put } from 'redux-saga/effects'
 import * as auth from '../actions/auth'
 import * as chrome from '../actions/chrome'
+import { client_id, client_secret } from '../constants'
 
+import type { IMAPConnection } from 'poodle-service'
 import type { Effect } from 'redux-saga'
 
 export interface Dependencies {
@@ -50,7 +53,15 @@ function * initAccount (
   }
   if (token) {
     yield call(deps.storeAccessToken, token, account)
-    // TODO: yield put(auth.accessToken(account.email, token))
+    yield put(auth.accessToken(account.email, token))
+
+    const connectionFactory = yield getConnectionFactory(account.email, token)
+    const sync = new Sync({
+      boxes: ['\\Inbox'],
+      connectionFactory,
+      dbname: `poodle-${account}`
+    })
+    yield put(auth.setSync(sync))
 
     // persist account info on successful login
     deps.saveAccount(account)
@@ -71,6 +82,31 @@ function * fetchNewAccessToken (
   } finally {
     yield put(chrome.doneLoading('authentication-flow'))
   }
+}
+
+async function getConnectionFactory (
+  email: string,
+  token: oauth.OauthCredentials
+): Promise<() => Promise<IMAPConnection>> {
+  const tokGen = await getTokenGenerator(email, token)
+  return () => oauth.getConnection(tokGen)
+}
+
+async function getTokenGenerator (
+  email: string,
+  token: oauth.OauthCredentials
+): Promise<oauth.XOAuth2Generator> {
+  if (!token || !email) {
+    return Promise.reject(
+      new Error('cannot instantiate token generator without access token')
+    )
+  }
+  return oauth.getTokenGenerator({
+    email,
+    credentials: token,
+    client_id,
+    client_secret
+  })
 }
 
 export default function * root (
