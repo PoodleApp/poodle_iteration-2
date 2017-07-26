@@ -57,7 +57,7 @@ function processConversation (
       id: conv.id,
       lastActiveTime: conv.lastActiveTime,
       latestActivity: {
-        actor: activity.actor && processActor(activity.actor),
+        actor: activity.actor && processActor(langs, activity.actor),
         contentSnippet
       },
       participants: m.intoArray(conv.flatParticipants),
