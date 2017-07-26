@@ -1,7 +1,6 @@
 /* @flow */
 
 import * as authActions from 'poodle-core/lib/actions/auth'
-import SyncProvider from 'poodle-core/lib/components/SyncProvider'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import * as redux from 'react-redux'
@@ -46,19 +45,11 @@ export function AuthenticatedRoute ({
         }
 
         if (component) {
-          return (
-            <SyncProvider sync={sync}>
-              {React.createElement(component, rest)}
-            </SyncProvider>
-          )
+          return React.createElement(component, rest)
         }
 
         if (render) {
-          return (
-            <SyncProvider sync={sync}>
-              {render(props)}
-            </SyncProvider>
-          )
+          return render(props)
         }
 
         throw new Error(

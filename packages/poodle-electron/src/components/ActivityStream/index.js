@@ -12,10 +12,10 @@ import spacing from 'material-ui/styles/spacing'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as q from 'poodle-core/lib/queries/conversations'
+import poodleSlurp from 'poodle-core/lib/util/poodleSlurp'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import slurp from 'redux-slurp'
 
 import Avatar from '../Avatar'
 import ChannelListSidebar from './ChannelListSidebar'
@@ -146,7 +146,7 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
   )
 }
 
-const ActivityStreamWithData = slurp(({ }: OwnProps, { sync }: Object) => ({
+const ActivityStreamWithData = poodleSlurp(({ }: OwnProps, sync: Sync) => ({
   conversations: q.fetchConversations(sync, navigator.languages, {
     labels: ['\\Inbox'],
     limit: 30,
