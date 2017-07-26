@@ -111,7 +111,9 @@ function LoginForm (props: LoginFormProps, context) {
           Log in with your email address<br />to continue:
         </p>
         <TextField
+          id='login-email'
           type='email'
+          placeholder='you@the.internet'
           hintStyle={styles.emailInputHint}
           inputStyle={styles.emailInput}
           style={styles.emailInputContainer}
