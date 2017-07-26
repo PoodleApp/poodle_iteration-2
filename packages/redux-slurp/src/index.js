@@ -64,7 +64,7 @@ export class SlurpError extends Error {
 }
 
 export default function slurp<OwnProps: Object, SlurpProps: Object> (
-  mergeProps: (ownProps: OwnProps, ownContext: Object) => SlurpProps,
+  mergeProps: (ownProps: OwnProps) => SlurpProps,
   options?: Opts<OwnProps>
 ): Connector<
   OwnProps,
@@ -76,7 +76,6 @@ export default function slurp<OwnProps: Object, SlurpProps: Object> (
     [key: string]: { source: Observable<any, any>, unsubscribe: Unsubscribe }
   } = {}
   let store
-  let ownContext
   let prevProps
 
   return local({
@@ -84,7 +83,6 @@ export default function slurp<OwnProps: Object, SlurpProps: Object> (
 
     createStore (props: OwnProps, existingState, context) {
       store = createStore(reducer)
-      ownContext = context
 
       return {
         store,
@@ -103,7 +101,7 @@ export default function slurp<OwnProps: Object, SlurpProps: Object> (
       }
       prevProps = ownProps
 
-      const slurpProps = mergeProps(ownProps, ownContext)
+      const slurpProps = mergeProps(ownProps)
       const keys = sourceKeys(slurpProps)
 
       if (keys.length < 1) {
