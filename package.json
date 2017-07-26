@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "arfe": "^0.1.0",
+    "react": "^15.6.1",
     "redux-saga": "^0.15.4"
   }
 }
