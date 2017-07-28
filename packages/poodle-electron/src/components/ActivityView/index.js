@@ -60,11 +60,11 @@ export default function ActivityView (props: ActivityViewProps) {
     return <ConflictView {...props} />
   } else if (helpers.hasType(Join, activity)) {
     return <JoinView {...props} />
-  } else if (helpers.hasObjectType(Vocab.Note, activity)) {
+  } else if (activity.hasObjectType(Vocab.Note)) {
     return helpers.editing(props, activity)
       ? <EditNote {...props} />
       : <NoteView {...props} />
-  } else if (helpers.hasObjectType(Vocab.Document, activity)) {
+  } else if (activity.hasObjectType(Vocab.Document)) {
     return helpers.editing(props, activity)
       ? <EditNote {...props} />
       : <DocumentView {...props} />

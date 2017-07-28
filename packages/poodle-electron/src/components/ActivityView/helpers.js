@@ -16,13 +16,6 @@ export function hasType (type: string, activity: DerivedActivity): boolean {
   return activity.types.some(t => t === type)
 }
 
-export function hasObjectType (
-  type: string,
-  activity: DerivedActivity
-): boolean {
-  return !!activity.object && activity.object.types.some(t => t === type)
-}
-
 export function myContent (activity: DerivedActivity, email: string): boolean {
   const me = URI.mailtoUri(email)
   const them = activity.actor
