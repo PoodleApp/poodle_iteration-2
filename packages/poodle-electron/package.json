@@ -7,7 +7,7 @@
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "electron .",
+    "start": "electron --preserve-symlinks .",
     "test": "flow",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
