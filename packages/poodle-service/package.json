@@ -53,10 +53,6 @@
     "xoauth2": "^1.2.0"
   },
   "devDependencies": {
-    "babel-cli": "^6",
-    "babel-preset-env": "^1",
-    "babel-preset-react": "^6",
-    "babel-preset-stage-3": "^6",
     "flow-bin": "^0.50.0",
     "format-json": "^1.0.3",
     "in-publish": "^2",

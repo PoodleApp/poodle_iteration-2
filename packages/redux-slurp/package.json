@@ -41,10 +41,6 @@
   },
   "devDependencies": {
     "ava": "^0.20.0",
-    "babel-cli": "^6",
-    "babel-preset-env": "^1",
-    "babel-preset-react": "^6",
-    "babel-preset-stage-3": "^6",
     "flow-bin": "^0.50.0",
     "in-publish": "^2",
     "kefir": "^3.7.3",
