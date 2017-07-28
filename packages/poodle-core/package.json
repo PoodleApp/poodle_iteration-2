@@ -39,13 +39,8 @@
     ]
   },
   "dependencies": {
-    "arfe": "link:../../node_modules/arfe",
     "poodle-service": "link:../poodle-service",
     "prop-types": "^15.5.10",
-    "react": "link:../../node_modules/react",
-    "react-redux": "link:../../node_modules/react-redux",
-    "redux": "link:../../node_modules/redux",
-    "redux-saga": "link:../../node_modules/redux-saga",
     "redux-slurp": "link:../redux-slurp"
   },
   "devDependencies": {
@@ -61,5 +56,12 @@
   },
   "files": [
     "lib/"
-  ]
+  ],
+  "peerDependencies": {
+    "arfe": "*",
+    "react": "*",
+    "react-redux": "*",
+    "redux": "*",
+    "redux-saga": "*"
+  }
 }

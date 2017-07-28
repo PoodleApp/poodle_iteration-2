@@ -114,6 +114,10 @@ are-we-there-yet@~1.1.2:
     delegates "^1.0.0"
     readable-stream "^2.0.6"
 
+arfe@*:
+  version "0.0.0"
+  uid ""
+
 "arfe@link:../../node_modules/arfe":
   version "0.0.0"
   uid ""
@@ -2885,13 +2889,27 @@ re-emitter@^1.0.0:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/re-emitter/-/re-emitter-1.1.3.tgz#fa9e319ffdeeeb35b27296ef0f3d374dac2f52a7"
 
-"react-redux@link:../../node_modules/react-redux":
-  version "0.0.0"
-  uid ""
+react-redux@*:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-5.0.5.tgz#f8e8c7b239422576e52d6b7db06439469be9846a"
+  dependencies:
+    create-react-class "^15.5.3"
+    hoist-non-react-statics "^1.0.3"
+    invariant "^2.0.0"
+    lodash "^4.2.0"
+    lodash-es "^4.2.0"
+    loose-envify "^1.1.0"
+    prop-types "^15.5.10"
 
-"react@link:../../node_modules/react":
-  version "0.0.0"
-  uid ""
+react@*:
+  version "15.6.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-15.6.1.tgz#baa8434ec6780bde997cdc380b79cd33b96393df"
+  dependencies:
+    create-react-class "^15.6.0"
+    fbjs "^0.8.9"
+    loose-envify "^1.1.0"
+    object-assign "^4.1.0"
+    prop-types "^15.5.10"
 
 readable-stream@1.0.33:
   version "1.0.33"
@@ -2986,17 +3004,22 @@ recast@^0.11.17:
     private "~0.1.5"
     source-map "~0.5.0"
 
-"redux-saga@link:../../node_modules/redux-saga":
-  version "0.0.0"
-  uid ""
+redux-saga@*:
+  version "0.15.6"
+  resolved "https://registry.yarnpkg.com/redux-saga/-/redux-saga-0.15.6.tgz#8638dc522de6c6c0a496fe8b2b5466287ac2dc4d"
 
 "redux-slurp@link:../redux-slurp":
   version "0.0.0"
   uid ""
 
-"redux@link:../../node_modules/redux":
-  version "0.0.0"
-  uid ""
+redux@*:
+  version "3.7.2"
+  resolved "https://registry.yarnpkg.com/redux/-/redux-3.7.2.tgz#06b73123215901d25d065be342eb026bc1c8537b"
+  dependencies:
+    lodash "^4.2.1"
+    lodash-es "^4.2.1"
+    loose-envify "^1.1.0"
+    symbol-observable "^1.0.3"
 
 regenerate@^1.2.1:
   version "1.3.2"
