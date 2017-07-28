@@ -9,4 +9,4 @@ node_modules: package.json
 	yarn install
 
 $(PACKAGES):
-	$(MAKE) -C $@
+	$(MAKE) -C "$@"

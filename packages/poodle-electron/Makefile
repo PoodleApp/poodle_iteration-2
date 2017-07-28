@@ -1,7 +1,9 @@
 # Makefile for transpiling with Babel in a Node app, or in a client- or
 # server-side shared library.
 
-.PHONY: all build clean
+packages = node_modules/poodle-core node_modules/poodle-service
+
+.PHONY: all build clean $(packages)
 
 # Install `babel-cli` in a project to get the transpiler.
 project_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -33,7 +35,7 @@ all: build
 
 # Ask `make` to build all of the transpiled `.js` and `.js.flow` files that we
 # want to end up with in `lib/`.
-build: $(flow_files) $(transpiled_files)
+build: $(flow_files) $(transpiled_files) $(packages)
 
 # This rule tells `make` how to transpile a source file using `babel`.
 # Transpiled files will be written to `lib/`
@@ -54,3 +56,9 @@ lib/%.js.flow: src/%.js
 
 clean:
 	rm -rf lib
+
+$(packages):
+	$(MAKE) -C "../$(notdir $@)"
+	mkdir -p "node_modules/$(notdir $@)"
+	cp -r "../$(notdir $@)/lib" "node_modules/$(notdir $@)/"
+	cp "../$(notdir $@)/package.json" "node_modules/$(notdir $@)/"
