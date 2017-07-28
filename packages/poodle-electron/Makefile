@@ -1,7 +1,7 @@
 # Makefile for transpiling with Babel in a Node app, or in a client- or
 # server-side shared library.
 
-packages = node_modules/poodle-core node_modules/poodle-service
+packages = node_modules/poodle-core node_modules/poodle-service node_modules/redux-slurp
 
 .PHONY: all build clean $(packages)
 
@@ -58,6 +58,7 @@ clean:
 	rm -rf lib
 
 $(packages):
+	if test -L "node_modules/$(notdir $@)"; then rm "node_modules/$(notdir $@)"; fi
 	$(MAKE) -C "../$(notdir $@)"
 	mkdir -p "node_modules/$(notdir $@)"
 	cp -r "../$(notdir $@)/lib" "node_modules/$(notdir $@)/"
