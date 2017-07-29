@@ -4,6 +4,7 @@ import auth, { type State as AuthState } from 'poodle-core/lib/reducers/auth'
 import chrome, {
   type State as ChromeState
 } from 'poodle-core/lib/reducers/chrome'
+import * as slurp from 'poodle-core/lib/slurp'
 import { combineReducers } from 'redux'
 import { localReducer } from 'redux-fractal'
 
@@ -13,7 +14,8 @@ export type State = {
   auth: AuthState,
   chrome: ChromeState,
   local: Object,
-  router: Object
+  router: Object,
+  slurp: slurp.State
 }
 
 export default function buildRootReducer (
@@ -23,6 +25,7 @@ export default function buildRootReducer (
     auth,
     chrome,
     local: localReducer,
-    router: routerReducer
+    router: routerReducer,
+    slurp: slurp.reducer
   })
 }

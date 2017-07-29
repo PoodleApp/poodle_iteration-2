@@ -1,5 +1,6 @@
 /* @flow */
 
 export { slurp } from './slurp'
+export { default as reducer } from './reducer'
 
-export type { Slurp } from './types'
+export type { Slurp, State } from './types'

@@ -1,13 +1,10 @@
 /* @flow */
 
-import Sync from 'poodle-service/lib/sync'
-
 import type { OauthCredentials } from 'poodle-service/lib/oauth/google'
 import type { Account, Action } from '../actions/auth'
 
 export type State = {
   account?: Account,
-  sync?: Sync,
   authenticatedAs?: string
 }
 
@@ -22,11 +19,6 @@ export default function reducer (
       return {
         ...state,
         account: action.account
-      }
-    case 'auth/setSync':
-      return {
-        ...state,
-        sync: action.sync
       }
     case 'auth/accessToken':
       return {

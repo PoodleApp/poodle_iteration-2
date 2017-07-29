@@ -6,6 +6,7 @@ import { takeLatest } from 'redux-saga'
 import { call, cancelled, fork, put } from 'redux-saga/effects'
 import * as auth from '../actions/auth'
 import * as chrome from '../actions/chrome'
+import * as slurp from '../slurp/actions'
 import { client_id, client_secret } from '../constants'
 
 import type { IMAPConnection } from 'poodle-service'
@@ -61,7 +62,7 @@ function * initAccount (
       connectionFactory,
       dbname: `poodle-${account}`
     })
-    yield put(auth.setSync(sync))
+    yield put(slurp.setSync(sync))
 
     // persist account info on successful login
     deps.saveAccount(account)
