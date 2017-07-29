@@ -1020,7 +1020,7 @@ jws@^3.0.0, jws@~3.0.0:
     base64url "~1.0.4"
     jwa "~1.0.0"
 
-kefir@^3.7.3:
+kefir@*:
   version "3.7.3"
   resolved "https://registry.yarnpkg.com/kefir/-/kefir-3.7.3.tgz#c1d4e0a7a9f63cfd73720ae38e0630c14784ed97"
   dependencies:

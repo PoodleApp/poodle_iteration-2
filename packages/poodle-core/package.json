@@ -54,7 +54,7 @@
   ],
   "peerDependencies": {
     "arfe": "*",
-    "react": "*",
+    "kefir": "*",
     "react-redux": "*",
     "redux": "*",
     "redux-saga": "*"

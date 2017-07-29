@@ -34,6 +34,7 @@
     ]
   },
   "dependencies": {
+    "arfe": "^0.1.0",
     "electron": "^1.6.11",
     "electron-context-menu": "^0.9.1",
     "electron-rebuild": "^1.5.11",
@@ -46,12 +47,16 @@
     "opn": "^5.0.0",
     "poodle-core": "link:../poodle-core",
     "poodle-service": "link:../poodle-service",
+    "react": "^15.6.1",
     "react-dom": "^15.5.4",
+    "react-redux": "^5.0.5",
     "react-router-dom": "^4.1.1",
     "react-router-redux": "next",
     "react-tap-event-plugin": "^2.0.1",
+    "redux": "^3.7.2",
     "redux-fractal": "^1",
     "redux-logger": "^3.0.6",
+    "redux-saga": "^0.15.6",
     "repa": "^1.0.0",
     "string-hash": "^1.1.3",
     "vocabs-as": "^2"
@@ -69,12 +74,5 @@
     "index.html",
     "lib/",
     "main.css"
-  ],
-  "peerDependencies": {
-    "arfe": "*",
-    "react": "*",
-    "react-redux": "*",
-    "redux": "*",
-    "redux-saga": "*"
-  }
+  ]
 }

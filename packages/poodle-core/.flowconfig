@@ -1,12 +1,9 @@
 [ignore]
 .*/arfe/test/.*
-.*/graphql-imap/test/.*
 .*/mailcomposer/.*
 .*/poodle-core/lib/.*
-.*/kefir/test/flow/.*
 
 [include]
-../../node_modules/
 
 [libs]
 ./types/
