@@ -72,7 +72,7 @@ acorn@^4.0.3:
   version "4.0.11"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-4.0.11.tgz#edcda3bd937e7556410d42ed5860f67399c794c0"
 
-"activitystrea.ms@github:hallettj/activitystrea.ms#fix/template-idempotency", activitystrea.ms@hallettj/activitystrea.ms#fix/template-idempotency:
+activitystrea.ms@hallettj/activitystrea.ms#fix/template-idempotency:
   version "1.0.0"
   resolved "https://codeload.github.com/hallettj/activitystrea.ms/tar.gz/1b47a0a9454c088691d0776ef9324c6a1ab60f5d"
   dependencies:
@@ -176,21 +176,7 @@ are-we-there-yet@~1.1.2:
     delegates "^1.0.0"
     readable-stream "^2.0.6"
 
-arfe@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/arfe/-/arfe-0.1.0.tgz#525604bb960ebf2821482ecb62743046d6ed0c20"
-  dependencies:
-    activitystrea.ms hallettj/activitystrea.ms#fix/template-idempotency
-    activitystreams-context "^1.0.0"
-    email-addresses "^2.0.2"
-    moment "^2.17.1"
-    mori "^0.3.2"
-    safety-lens "^1.4.0"
-    stream-to-string "^1.1.0"
-    traverse "^0.6.6"
-    vocabs-as "^1.0.0"
-
-"arfe@link:../../node_modules/arfe":
+"arfe@link:../arfe":
   version "0.0.0"
   uid ""
 
@@ -2292,10 +2278,6 @@ immediate@~3.0.5:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/immediate/-/immediate-3.0.6.tgz#9db1dbd0faf8de6fbe0f5dd5e56bb606280de69b"
 
-immutable@*:
-  version "3.8.1"
-  resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.1.tgz#200807f11ab0f72710ea485542de088075f68cd2"
-
 import-lazy@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/import-lazy/-/import-lazy-2.1.0.tgz#05698e3d45c88e8d7e9d92cb0584e77f096f3e43"
@@ -4344,12 +4326,6 @@ rxjs@^5.1.1:
 safe-buffer@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.0.1.tgz#d263ca54696cd8a306b5ca6551e92de57918fbe7"
-
-safety-lens@^1.4.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/safety-lens/-/safety-lens-1.5.0.tgz#2cb815980337b706bd5a859175cf9af8314da191"
-  dependencies:
-    immutable "*"
 
 sanitize-filename@^1.6.1:
   version "1.6.1"

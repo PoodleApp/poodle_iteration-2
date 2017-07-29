@@ -7,7 +7,5 @@
     "babel-preset-stage-3": "^6.24.1",
     "prettier-standard": "^6.0.0"
   },
-  "dependencies": {
-    "arfe": "^0.1.0"
-  }
+  "dependencies": {}
 }

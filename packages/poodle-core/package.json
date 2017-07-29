@@ -39,6 +39,7 @@
     ]
   },
   "dependencies": {
+    "arfe": "link:../arfe",
     "poodle-service": "link:../poodle-service",
     "prop-types": "^15.5.10"
   },
@@ -53,7 +54,6 @@
     "lib/"
   ],
   "peerDependencies": {
-    "arfe": "*",
     "kefir": "*",
     "react-redux": "*",
     "redux": "*",

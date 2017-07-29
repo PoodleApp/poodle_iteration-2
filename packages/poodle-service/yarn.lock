@@ -88,7 +88,7 @@ are-we-there-yet@~1.1.2:
     delegates "^1.0.0"
     readable-stream "^2.0.0 || ^1.1.13"
 
-"arfe@link:../../node_modules/arfe":
+"arfe@link:../arfe":
   version "0.0.0"
   uid ""
 
@@ -824,10 +824,6 @@ immediate@~3.0.5:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/immediate/-/immediate-3.0.6.tgz#9db1dbd0faf8de6fbe0f5dd5e56bb606280de69b"
 
-immutable@*:
-  version "3.8.1"
-  resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.1.tgz#200807f11ab0f72710ea485542de088075f68cd2"
-
 in-publish@^2:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/in-publish/-/in-publish-2.0.0.tgz#e20ff5e3a2afc2690320b6dc552682a9c7fadf51"
@@ -1019,12 +1015,6 @@ jws@^3.0.0, jws@~3.0.0:
   dependencies:
     base64url "~1.0.4"
     jwa "~1.0.0"
-
-kefir@*:
-  version "3.7.3"
-  resolved "https://registry.yarnpkg.com/kefir/-/kefir-3.7.3.tgz#c1d4e0a7a9f63cfd73720ae38e0630c14784ed97"
-  dependencies:
-    symbol-observable "1.0.4"
 
 keypress@0.1.x:
   version "0.1.0"
@@ -1695,12 +1685,6 @@ safe-buffer@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.0.1.tgz#d263ca54696cd8a306b5ca6551e92de57918fbe7"
 
-safety-lens@^1.4.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/safety-lens/-/safety-lens-1.5.0.tgz#2cb815980337b706bd5a859175cf9af8314da191"
-  dependencies:
-    immutable "*"
-
 sanitize-filename@^1.6.1:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/sanitize-filename/-/sanitize-filename-1.6.1.tgz#612da1c96473fa02dccda92dcd5b4ab164a6772a"
@@ -1823,10 +1807,6 @@ strip-json-comments@~1.0.4:
 supports-color@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-2.0.0.tgz#535d045ce6b6363fa40117084629995e9df324c7"
-
-symbol-observable@1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.4.tgz#29bf615d4aa7121bdd898b22d4b3f9bc4e2aa03d"
 
 tar-fs@^1.7.0:
   version "1.15.0"
