@@ -1,0 +1,63 @@
+{
+  "name": "arfe",
+  "version": "0.1.0",
+  "description": "Federated social protocol on top of email",
+  "scripts": {
+    "test": "tape -r babel-register test/**/*_test.js | tap-summary",
+    "build": "make",
+    "build:watch": "watch 'yarn run build' src",
+    "prepublishOnly": "npm test && npm run build",
+    "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
+    "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PoodleApp/arfe.git"
+  },
+  "keywords": [
+    "social",
+    "email"
+  ],
+  "author": "Jesse Hallett <jesse@sitr.us>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/PoodleApp/arfe/issues"
+  },
+  "homepage": "https://github.com/PoodleApp/arfe#readme",
+  "babel": {
+    "presets": [
+      "react",
+      "stage-3",
+      "node7"
+    ]
+  },
+  "devDependencies": {
+    "babel-cli": "^6.22.2",
+    "babel-preset-node7": "^1.4.0",
+    "babel-preset-react": "^6.22.0",
+    "babel-preset-stage-3": "^6.22.0",
+    "babel-register": "^6.22.0",
+    "flow-bin": "^0.48.0",
+    "in-publish": "^2.0.0",
+    "string-to-stream": "^1.1.0",
+    "tap-summary": "^3.0.1",
+    "tape": "^4.6.3",
+    "tape-async": "^2.3.0",
+    "watch": "^1.0.1"
+  },
+  "dependencies": {
+    "activitystrea.ms": "hallettj/activitystrea.ms#fix/template-idempotency",
+    "activitystreams-context": "^1.0.0",
+    "buildmail": "^4.0.1",
+    "email-addresses": "^2.0.2",
+    "moment": "^2.17.1",
+    "mori": "^0.3.2",
+    "stream-from-promise": "^1.0.0",
+    "stream-to-string": "^1.1.0",
+    "traverse": "^0.6.6",
+    "vocabs-as": "^1.0.0"
+  },
+  "files": [
+    "lib/"
+  ]
+}
