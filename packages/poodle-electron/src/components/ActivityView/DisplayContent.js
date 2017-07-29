@@ -5,12 +5,11 @@ import marked from 'marked'
 import spacing from 'material-ui/styles/spacing'
 import opn from 'opn'
 import * as q from 'poodle-core/lib/queries/conversation'
-import poodleSlurp from 'poodle-core/lib/util/poodleSlurp'
+import { type Slurp, slurp } from 'poodle-core/lib/slurp'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import repa from 'repa'
 
-import type { Slurp } from 'redux-slurp'
 import type { State } from '../../reducers'
 
 const styles = {
@@ -52,7 +51,7 @@ export function DisplayContent ({ activity, content, style }: Props) {
   }
 }
 
-const ComponentWithData = poodleSlurp(({ activity }: Props, sync: Sync) => ({
+const ComponentWithData = slurp(({ activity }: Props, sync: Sync) => ({
   content: q.fetchActivityContent(sync, activity)
 }))(DisplayContent)
 

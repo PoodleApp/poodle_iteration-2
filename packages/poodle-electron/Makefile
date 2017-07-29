@@ -1,7 +1,7 @@
 # Makefile for transpiling with Babel in a Node app, or in a client- or
 # server-side shared library.
 
-packages = node_modules/poodle-core node_modules/poodle-service node_modules/redux-slurp
+packages = node_modules/poodle-core node_modules/poodle-service
 
 .PHONY: all build clean $(packages)
 

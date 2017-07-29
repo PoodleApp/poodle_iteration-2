@@ -12,7 +12,6 @@ import * as kefir from 'kefir'
 import type Moment from 'moment'
 import * as m from 'mori'
 import Sync from 'poodle-service/lib/sync'
-import type { Observable } from 'redux-slurp'
 import { type Actor, processActor } from './actor'
 import { fetchContentSnippet } from './content'
 import { resolveLanguageValue } from './lang'
@@ -38,7 +37,7 @@ export function fetchConversations (
   sync: Sync,
   langs: string[],
   queryParams: * = { labels: ['\\Inbox'], limit: 30 }
-): Observable<ConversationListItem[], *> {
+): kefir.Observable<ConversationListItem[], *> {
   return sync
     .queryConversations(queryParams)
     .flatMap(processConversation.bind(null, sync, langs))

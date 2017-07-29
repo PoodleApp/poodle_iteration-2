@@ -10,7 +10,7 @@ import spacing from 'material-ui/styles/spacing'
 import * as m from 'mori'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as q from 'poodle-core/lib/queries/conversation'
-import poodleSlurp from 'poodle-core/lib/util/poodleSlurp'
+import { type Slurp, slurp } from 'poodle-core/lib/slurp'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import * as redux from 'react-redux'
@@ -20,7 +20,6 @@ import ActivityView from '../ActivityView'
 
 import type { Match } from 'react-router-dom'
 import type { Dispatch } from 'redux'
-import type { Slurp } from 'redux-slurp'
 import type { State } from '../../reducers'
 
 type OwnProps = {
@@ -138,10 +137,8 @@ const ComponentWithState = redux.connect(function mapStateToProps (
   }
 })(Conversation)
 
-const ComponentWithData = poodleSlurp(
-  ({ conversationId }: OwnProps, sync: Sync) => ({
-    conversation: q.fetchConversation(sync, conversationId)
-  })
-)(ComponentWithState)
+const ComponentWithData = slurp(({ conversationId }: OwnProps, sync: Sync) => ({
+  conversation: q.fetchConversation(sync, conversationId)
+}))(ComponentWithState)
 
 export default ComponentWithData
