@@ -15,10 +15,10 @@ export default function App ({ }: AppProps) {
       <AuthenticatedRoute path='/activity' component={ActivityStream} />
       <AuthenticatedRoute
         path='/conversations/:id'
-        render={({ match, ...rest }) =>
+        render={props =>
           <Conversation
-            conversationId={decodeURIComponent(match.params.id)}
-            {...rest}
+            conversationId={decodeURIComponent(props.match.params.id)}
+            {...props}
           />}
       />
       <Route path='/login' component={Login} />
