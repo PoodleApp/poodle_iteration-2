@@ -17,7 +17,7 @@
   "homepage": "https://github.com/PoodleApp/poodle-core#readme",
   "main": "lib/index.js",
   "scripts": {
-    "test": "tape -r babel-register test/**/*_test.js | tap-summary",
+    "test": "ava",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
     "prepublishOnly": "yarn test && yarn run build",
@@ -38,16 +38,23 @@
       ]
     ]
   },
+  "ava": {
+    "require": [
+      "babel-register"
+    ],
+    "babel": "inherit",
+    "color": false
+  },
   "dependencies": {
     "arfe": "link:../arfe",
     "poodle-service": "link:../poodle-service",
     "prop-types": "^15.5.10"
   },
   "devDependencies": {
+    "ava": "^0.21.0",
     "flow-bin": "^0.50.0",
     "in-publish": "^2",
-    "tap-summary": "^3.0.1",
-    "tape": "^4.6.3",
+    "react-test-renderer": "^15.6.1",
     "watch": "^1"
   },
   "files": [

@@ -7,5 +7,10 @@
     "babel-preset-stage-3": "^6.24.1",
     "prettier-standard": "^6.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "kefir": "^3.7.3",
+    "react": "^15.6.1",
+    "react-redux": "^5.0.5",
+    "redux": "^3.7.2"
+  }
 }

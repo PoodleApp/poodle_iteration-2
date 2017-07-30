@@ -9,5 +9,5 @@
 ./types/
 
 [options]
-suppress_comment=\\\\(.\\\\|\\n\\\\)*\\\\$ExpectError
+suppress_comment=\\(.\\|\n\\)*\\$ExpectError
 unsafe.enable_getters_and_setters=true

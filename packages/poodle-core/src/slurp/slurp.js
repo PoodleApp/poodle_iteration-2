@@ -3,11 +3,10 @@
 import * as kefir from 'kefir'
 import Sync from 'poodle-service/lib/sync'
 import { connect } from 'react-redux'
-import { whenMapStateToPropsIsFunction } from 'react-redux/lib/connect/mapStateToProps'
-import shallowEqual from 'react-redux/lib/utils/shallowEqual'
 import * as actions from './actions'
 import * as helpers from './helpers'
 import * as selectors from './selectors'
+import willUnmount from './willUnmount'
 
 import type { Dispatch } from 'redux'
 import type {
@@ -36,10 +35,7 @@ const getKey = (function () {
   }
 })()
 
-type MapSubscriptionsToProps<OP: Object, SP: Object> = (
-  ownProps: OP,
-  sync: Sync
-) => SP
+type MapSubscriptionsToProps<OP, SP> = (ownProps: OP, sync: Sync) => SP
 
 declare function slurp<S, A, OP, SP>(
   mapSubscriptionsToProps: MapSubscriptionsToProps<OP, SP>,
@@ -72,15 +68,39 @@ declare function slurp<S, A, OP, SP, DP, P>(
   options?: ConnectOptions
 ): Connector<OP, P>
 
-export function slurp<
-  OwnProps: Object,
-  SlurpProps: Object,
-  State: { slurp: SlurpState }
-> (
-  mapSubscriptionsToProps: (ownProps: OwnProps, sync: Sync) => SlurpProps,
+export function slurp<OP: Object, SP: Object> (
+  mapSubscriptionsToProps: (ownProps: OP, sync: Sync) => SP,
   mapDispatchToProps: *,
   mergeProps: *,
   extraOptions: * = {}
+) {
+  return component => {
+    let onUnmount
+    const unmountPromise = new Promise(resolve => (onUnmount = resolve))
+
+    const withState = connect(null, mapDispatchToProps, mergeProps, {
+      initMapStateToProps: initMapStateToProps.bind(
+        null,
+        mapSubscriptionsToProps,
+        unmountPromise
+      ),
+      shouldHandleStateChanges: true,
+      ...extraOptions
+    })(component)
+
+    return willUnmount((onUnmount: any))(withState)
+  }
+}
+
+function initMapStateToProps<
+  OP: Object,
+  SP: Object,
+  State: { slurp: SlurpState }
+> (
+  mapSubscriptionsToProps: MapSubscriptionsToProps<OP, SP>,
+  willUnmount: Promise<void>,
+  dispatch: Dispatch<*>,
+  options: *
 ) {
   const componentKey = getKey()
   let sources: {
@@ -90,59 +110,59 @@ export function slurp<
     }
   } = {}
   let lastOwnProps
+  let lastStateProps
 
-  function initMapStateToProps (dispatch: Dispatch<*>, options: *) {
-    return whenMapStateToPropsIsFunction(function mapStateToProps (
-      state: State,
-      ownProps: OwnProps
-    ): * {
-      if (shallowEqual(ownProps, lastOwnProps)) {
-        // Do not re-run `mapSubscriptionsToProps` on state changes - only on
-        // props changes
-        return selectors.props(state.slurp, componentKey, lastOwnProps)
+  function mapStateToProps (state: State, ownProps: OP): * {
+    if (ownProps === lastOwnProps) {
+      // Do not re-run `mapSubscriptionsToProps` on state changes - only on
+      // props changes
+      return selectors.props(state.slurp, componentKey, lastStateProps)
+    }
+    lastOwnProps = ownProps
+
+    const sync = state.slurp.sync
+    if (!sync) {
+      throw new Error('Could not find `sync` in redux state')
+    }
+
+    const props = mapSubscriptionsToProps(ownProps, sync)
+    const keys = helpers.sourceKeys(props)
+    const prevKeys = Object.keys(sources)
+
+    // Unsubscribe to sources that no longer appear in slurpProps
+    for (const key of prevKeys) {
+      if (!props.hasOwnProperty(key)) {
+        sources[key].unsubscribe()
+        delete sources[key]
       }
-      lastOwnProps = ownProps
+    }
 
-      const sync = state.slurp.sync
-      if (!sync) {
-        throw new Error('Could not find `sync` in redux state')
-      }
-
-      const props = mapSubscriptionsToProps(ownProps, sync)
-      const keys = helpers.sourceKeys(props)
-      const prevKeys = Object.keys(sources)
-
-      // Unsubscribe to sources that no longer appear in slurpProps
-      for (const key of prevKeys) {
-        if (!props.hasOwnProperty(key)) {
-          sources[key].unsubscribe()
-          delete sources[key]
+    // Create or recreate subscriptions for all sources unless the source
+    // reference for a key is identical to the previous source given for the same
+    // key.
+    for (const key of keys) {
+      const newSource = props[key]
+      const existing = sources[key]
+      if (!existing || newSource !== existing.source) {
+        if (existing) {
+          existing.unsubscribe()
         }
+        const unsubscribe = subscribe(dispatch, componentKey, key, newSource)
+        sources[key] = { source: newSource, unsubscribe }
       }
+    }
 
-      // Create or recreate subscriptions for all sources unless the source
-      // reference for a key is identical to the previous source given for the same
-      // key.
-      for (const key of keys) {
-        const newSource = props[key]
-        const existing = sources[key]
-        if (!existing || newSource !== existing.source) {
-          if (existing) {
-            existing.unsubscribe()
-          }
-          const unsubscribe = subscribe(dispatch, componentKey, key, newSource)
-          sources[key] = { source: newSource, unsubscribe }
-        }
-      }
-
-      return selectors.props(state.slurp, componentKey, props)
-    })
+    lastStateProps = selectors.props(state.slurp, componentKey, props)
+    return lastStateProps
   }
+  mapStateToProps.dependsOnOwnProps = true
 
-  return connect(null, mapDispatchToProps, mergeProps, {
-    initMapStateToProps,
-    ...extraOptions
+  willUnmount.then(() => {
+    unsubscribe(sources)
+    sources = {}
   })
+
+  return mapStateToProps
 }
 
 function subscribe<V, E> (
@@ -163,4 +183,12 @@ function subscribe<V, E> (
     }
   })
   return unsubscribe
+}
+
+function unsubscribe (sources: {
+  [key: string]: { source: *, unsubscribe: Unsubscribe }
+}) {
+  for (const key of Object.keys(sources)) {
+    sources[key].unsubscribe()
+  }
 }
