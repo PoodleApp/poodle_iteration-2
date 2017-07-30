@@ -1,12 +1,7 @@
-PACKAGES := packages/poodle-core packages/poodle-electron packages/poodle-service packages/redux-slurp
+.PHONY: start node_modules
 
-.PHONY: start node_modules $(PACKAGES)
-
-start: node_modules $(PACKAGES)
+start: node_modules
 	cd packages/poodle-electron && yarn install && make && yarn start
 
 node_modules: package.json
 	yarn install
-
-$(PACKAGES):
-	$(MAKE) -C "$@"
