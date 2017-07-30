@@ -1,6 +1,7 @@
 /* @flow */
 
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
+import * as kefir from 'kefir'
 import * as m from 'mori'
 import Sync from 'poodle-service/lib/sync'
 import toString from 'stream-to-string'
@@ -16,7 +17,7 @@ export async function fetchContentSnippet (
   length: number = 100
 ): Promise<?string> {
   try {
-    const result = await fetchActivityContent(sync, activity, [
+    const result = await fetchActivityContentPromise(sync, activity, [
       'text/plain',
       'text/html'
     ])
@@ -28,7 +29,7 @@ export async function fetchContentSnippet (
   }
 }
 
-export async function fetchActivityContent (
+async function fetchActivityContentPromise (
   sync: Sync,
   activity: DerivedActivity,
   preferences: string[] = ['text/html', 'text/plain']
@@ -55,4 +56,14 @@ export async function fetchActivityContent (
     content: await toString(stream, 'utf8'), // TODO: check charset
     mediaType: link.mediaType
   }
+}
+
+export function fetchActivityContent (
+  sync: Sync,
+  activity: DerivedActivity,
+  preferences: string[] = ['text/html', 'text/plain']
+): kefir.Observable<?{ content: string, mediaType: string }> {
+  return kefir.fromPromise(
+    fetchActivityContentPromise(sync, activity, preferences)
+  )
 }
