@@ -45,11 +45,11 @@ export function AuthenticatedRoute ({
         }
 
         if (component) {
-          return React.createElement(component, rest)
+          return React.createElement(component, { ...props, account })
         }
 
         if (render) {
-          return render(props)
+          return render({ ...props, account })
         }
 
         throw new Error(
