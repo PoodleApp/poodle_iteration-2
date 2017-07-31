@@ -5,6 +5,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chromeState from 'poodle-core/lib/reducers/chrome'
+import * as queryString from 'query-string'
 import React from 'react'
 import * as redux from 'react-redux'
 import { Redirect } from 'react-router-dom'
@@ -67,6 +68,7 @@ type LoginProps = {
 export function Login ({
   account,
   dispatch,
+  location,
   loggedIn,
   oauthLoadingMessages
 }: LoginProps) {
@@ -76,13 +78,19 @@ export function Login ({
     </p>
   )
 
+  if (account && loggedIn) {
+    const referrer = queryString.parse(location.search).referrer
+    return (
+      <Redirect to={referrer || '/activity'} />
+    )
+  }
+
   return (
     <div>
       <LoginForm dispatch={dispatch} />
       <Dialog modal={true} open={messages.length > 0}>
         {messages}
       </Dialog>
-      {account && loggedIn ? <Redirect to='/activity' /> : ''}
     </div>
   )
 }

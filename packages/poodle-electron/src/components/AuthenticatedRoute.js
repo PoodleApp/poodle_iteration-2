@@ -2,6 +2,7 @@
 
 import * as authActions from 'poodle-core/lib/actions/auth'
 import Sync from 'poodle-service/lib/sync'
+import * as queryString from 'query-string'
 import React from 'react'
 import * as redux from 'react-redux'
 import { Redirect, Route } from 'react-router-dom'
@@ -33,7 +34,15 @@ export function AuthenticatedRoute ({
       {...rest}
       render={props => {
         if (!account) {
-          return <Redirect to='/login' />
+          const referrer = props.location.pathname + props.location.search
+          return (
+            <Redirect
+              to={{
+                pathname: '/login',
+                search: queryString.stringify({ referrer })
+              }}
+            />
+          )
         }
 
         if (!sync) {
