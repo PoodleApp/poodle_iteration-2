@@ -18,6 +18,8 @@ export default function reducer (state: State = {}, action: Action): State {
       })
     case 'slurp/on-complete':
       return updateSingle(action, state, { complete: true })
+    case 'slurp/cleanup':
+      return removeComponentState(action, state)
     default:
       return state
   }
@@ -44,5 +46,14 @@ function updateSingle<V, E> (
         [action.propName]: updatedSlurp
       }
     }
+  }
+}
+
+function removeComponentState (action: Action, state: State): State {
+  const { [action.componentKey]: _, ...remainingStates } =
+    state.componentStates || {}
+  return {
+    ...state,
+    componentStates: remainingStates
   }
 }

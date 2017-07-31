@@ -145,6 +145,7 @@ function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
   willUnmount.then(() => {
     unsubscribe(sources)
     sources = {}
+    dispatch(actions.cleanup(componentKey))
   })
 
   return mapStateToProps

@@ -22,6 +22,11 @@ export type Action =
       propName: PropName,
       type: 'slurp/on-complete'
     }
+  | {
+      componentKey: ComponentKey,
+      propName: PropName, // Included for symmetry with other actions
+      type: 'slurp/cleanup'
+    }
 
 export function onValue<Value> (
   componentKey: ComponentKey,
@@ -54,4 +59,8 @@ export function onComplete (
   propName: PropName
 ): Action {
   return { componentKey, propName, type: 'slurp/on-complete' }
+}
+
+export function cleanup(componentKey: ComponentKey): Action {
+  return { componentKey, propName: '', type: 'slurp/cleanup' }
 }
