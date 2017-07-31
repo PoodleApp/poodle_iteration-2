@@ -7,7 +7,7 @@ import * as actions from './actions'
 import * as effects from './effects'
 import * as helpers from './helpers'
 import * as selectors from './selectors'
-import willUnmount from './willUnmount'
+import lifecycle from './lifecycle'
 
 import type { Dispatch } from 'redux'
 import type {
@@ -80,26 +80,19 @@ export function slurp<S, OP: Object, SP: Object> (
   extraOptions: * = {}
 ) {
   return component => {
-    let onUnmount
-    const unmountPromise = new Promise(resolve => (onUnmount = resolve))
-
-    const withState = connect(null, mapDispatchToProps, mergeProps, {
+    return connect(null, mapDispatchToProps, mergeProps, {
       initMapStateToProps: initMapStateToProps.bind(
         null,
-        mapSubscriptionsToProps,
-        unmountPromise
+        mapSubscriptionsToProps
       ),
       shouldHandleStateChanges: true,
       ...extraOptions
-    })(component)
-
-    return willUnmount((onUnmount: any))(withState)
+    })(lifecycle(component))
   }
 }
 
 function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
-  willUnmount: Promise<void>,
   dispatch: Dispatch<*>,
   options: *
 ) {
@@ -110,6 +103,12 @@ function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
       unsubscribe: Unsubscribe
     }
   } = {}
+
+  function onWillUnmount () {
+    unsubscribe(sources)
+    sources = {}
+    dispatch(actions.cleanup(componentKey))
+  }
 
   function mapStateToProps (state: S, ownProps: OP): * {
     const props = mapSubscriptionsToProps(state, ownProps)
@@ -138,15 +137,12 @@ function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
       }
     }
 
-    return selectors.props(state.slurp, componentKey, props)
+    return {
+      ...selectors.props(state.slurp, componentKey, props),
+      onWillUnmount
+    }
   }
   mapStateToProps.dependsOnOwnProps = true
-
-  willUnmount.then(() => {
-    unsubscribe(sources)
-    sources = {}
-    dispatch(actions.cleanup(componentKey))
-  })
 
   return mapStateToProps
 }
