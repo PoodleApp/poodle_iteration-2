@@ -18,11 +18,6 @@ export default function reducer (state: State = {}, action: Action): State {
       })
     case 'slurp/on-complete':
       return updateSingle(action, state, { complete: true })
-    case 'slurp/set-sync':
-      return {
-        ...state,
-        sync: action.sync
-      }
     default:
       return state
   }

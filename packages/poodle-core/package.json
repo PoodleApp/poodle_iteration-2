@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "arfe": "link:../arfe",
+    "deep-equal": "^1.0.1",
     "poodle-service": "link:../poodle-service",
     "prop-types": "^15.5.10"
   },

@@ -1,7 +1,6 @@
 /* @flow */
 
 import * as kefir from 'kefir'
-import Sync from 'poodle-service/lib/sync'
 
 import type { ComponentKey, PropName } from './types'
 
@@ -22,12 +21,6 @@ export type Action =
       componentKey: ComponentKey,
       propName: PropName,
       type: 'slurp/on-complete'
-    }
-  | {
-      componentKey: ComponentKey, // key here just for consistency with other actions
-      propName: PropName,
-      type: 'slurp/set-sync',
-      sync: Sync
     }
 
 export function onValue<Value> (
@@ -61,13 +54,4 @@ export function onComplete (
   propName: PropName
 ): Action {
   return { componentKey, propName, type: 'slurp/on-complete' }
-}
-
-export function setSync (sync: Sync): Action {
-  return {
-    componentKey: '',
-    propName: '',
-    type: 'slurp/set-sync',
-    sync
-  }
 }

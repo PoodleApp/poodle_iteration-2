@@ -1,9 +1,11 @@
 /* @flow */
 
-export function isObservable (obj: Object): boolean {
-  return !!obj && typeof obj.observe === 'function'
+export function isEffect (obj: Object): boolean {
+  return (
+    !!obj && (obj.type === 'slurp/observable' || obj.type === 'slurp/promise')
+  )
 }
 
 export function sourceKeys (props: Object): string[] {
-  return Object.keys(props).filter(key => isObservable(props[key]))
+  return Object.keys(props).filter(key => isEffect(props[key]))
 }

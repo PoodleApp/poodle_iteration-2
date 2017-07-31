@@ -1,9 +1,10 @@
 /* @flow */
 
+import deepEqual from 'deep-equal'
 import * as kefir from 'kefir'
-import Sync from 'poodle-service/lib/sync'
 import { connect } from 'react-redux'
 import * as actions from './actions'
+import * as effects from './effects'
 import * as helpers from './helpers'
 import * as selectors from './selectors'
 import willUnmount from './willUnmount'
@@ -24,8 +25,9 @@ import type {
   Unsubscribe
 } from './types'
 
-// Map an Observable object property to an object containing a value or an error
-type FromObservable = <V, E>(obs: kefir.Observable<V, E>) => Slurp<V, E>
+// Map an `Effect` that produces an observable or a promise to a value or an
+// error
+type FromEffect = <T, E>(eff: effects.Effect<T, E>) => Slurp<T, E>
 
 const getKey = (function () {
   let lastKey = 1
@@ -35,41 +37,44 @@ const getKey = (function () {
   }
 })()
 
-type MapSubscriptionsToProps<OP, SP> = (ownProps: OP, sync: Sync) => SP
+type MapSubscriptionsToProps<S, OP: Object, SP: Object> = (
+  state: S,
+  ownProps: OP
+) => SP
 
 declare function slurp<S, A, OP, SP>(
-  mapSubscriptionsToProps: MapSubscriptionsToProps<OP, SP>,
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: Null,
   mergeProps: Null,
   options?: ConnectOptions
 ): Connector<
   OP,
-  $Supertype<$ObjMap<SP, FromObservable> & { dispatch: Dispatch<A> } & OP>
+  $Supertype<$ObjMap<SP, FromEffect> & { dispatch: Dispatch<A> } & OP>
 >
 
 declare function slurp<S, A, OP, SP, DP>(
-  mapSubscriptionsToProps: MapSubscriptionsToProps<OP, SP>,
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: MapDispatchToProps<A, OP, DP>,
   mergeProps: Null,
   options?: ConnectOptions
-): Connector<OP, $Supertype<$ObjMap<SP, FromObservable> & DP & OP>>
+): Connector<OP, $Supertype<$ObjMap<SP, FromEffect> & DP & OP>>
 
 declare function slurp<S, A, OP, SP, DP, P>(
-  mapSubscriptionsToProps: MapSubscriptionsToProps<OP, SP>,
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: Null,
-  mergeProps: MergeProps<$ObjMap<SP, FromObservable>, DP, OP, P>,
+  mergeProps: MergeProps<$ObjMap<SP, FromEffect>, DP, OP, P>,
   options?: ConnectOptions
 ): Connector<OP, P>
 
 declare function slurp<S, A, OP, SP, DP, P>(
-  mapSubscriptionsToProps: MapSubscriptionsToProps<OP, SP>,
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: MapDispatchToProps<A, OP, DP>,
-  mergeProps: MergeProps<$ObjMap<SP, FromObservable>, DP, OP, P>,
+  mergeProps: MergeProps<$ObjMap<SP, FromEffect>, DP, OP, P>,
   options?: ConnectOptions
 ): Connector<OP, P>
 
-export function slurp<OP: Object, SP: Object> (
-  mapSubscriptionsToProps: (ownProps: OP, sync: Sync) => SP,
+export function slurp<S, OP: Object, SP: Object> (
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: *,
   mergeProps: *,
   extraOptions: * = {}
@@ -92,12 +97,8 @@ export function slurp<OP: Object, SP: Object> (
   }
 }
 
-function initMapStateToProps<
-  OP: Object,
-  SP: Object,
-  State: { slurp: SlurpState }
-> (
-  mapSubscriptionsToProps: MapSubscriptionsToProps<OP, SP>,
+function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   willUnmount: Promise<void>,
   dispatch: Dispatch<*>,
   options: *
@@ -105,28 +106,13 @@ function initMapStateToProps<
   const componentKey = getKey()
   let sources: {
     [key: string]: {
-      source: kefir.Observable<any, any>,
+      source: effects.Effect<any, any>,
       unsubscribe: Unsubscribe
     }
   } = {}
-  let lastOwnProps
-  let lastStateProps
 
-  function mapStateToProps (state: State, ownProps: OP): * {
-    if (ownProps === lastOwnProps) {
-      // Do not re-run `mapSubscriptionsToProps` on state changes - only on
-      // props changes
-      return selectors.props(state.slurp, componentKey, lastStateProps)
-    }
-    lastOwnProps = ownProps
-
-    const sync = state.slurp.sync
-    if (!sync) {
-      throw new Error('Could not find `sync` in redux state')
-    }
-
-    const props = mapSubscriptionsToProps(ownProps, sync)
-    const keys = helpers.sourceKeys(props)
+  function mapStateToProps (state: S, ownProps: OP): * {
+    const props = mapSubscriptionsToProps(state, ownProps)
     const prevKeys = Object.keys(sources)
 
     // Unsubscribe to sources that no longer appear in slurpProps
@@ -137,13 +123,13 @@ function initMapStateToProps<
       }
     }
 
-    // Create or recreate subscriptions for all sources unless the source
-    // reference for a key is identical to the previous source given for the same
-    // key.
-    for (const key of keys) {
+    // Create or recreate subscriptions for all sources unless the given Effect
+    // matches a previously supplied Effect for the given key (using
+    // shallowEqual comparison).
+    for (const key of helpers.sourceKeys(props)) {
       const newSource = props[key]
       const existing = sources[key]
-      if (!existing || newSource !== existing.source) {
+      if (!existing || !deepEqual(newSource, existing.source)) {
         if (existing) {
           existing.unsubscribe()
         }
@@ -152,8 +138,7 @@ function initMapStateToProps<
       }
     }
 
-    lastStateProps = selectors.props(state.slurp, componentKey, props)
-    return lastStateProps
+    return selectors.props(state.slurp, componentKey, props)
   }
   mapStateToProps.dependsOnOwnProps = true
 
@@ -165,14 +150,39 @@ function initMapStateToProps<
   return mapStateToProps
 }
 
-function subscribe<V, E> (
+function subscribe<T, E> (
   dispatch: Dispatch<*>,
   componentKey: ComponentKey,
   propName: PropName,
-  source: kefir.Observable<V, E>
+  source: effects.Effect<T, E>
+): Unsubscribe {
+  if (source.type === 'slurp/observable') {
+    return subscribeToObservable(
+      dispatch,
+      componentKey,
+      propName,
+      source.observableFn.apply(null, source.args)
+    )
+  } else if (source.type === 'slurp/promise') {
+    return subscribeToPromise(
+      dispatch,
+      componentKey,
+      propName,
+      source.promiseFn.apply(null, source.args)
+    )
+  } else {
+    throw new Error('Unknown slurp effect type!')
+  }
+}
+
+function subscribeToObservable<T, E> (
+  dispatch: Dispatch<*>,
+  componentKey: ComponentKey,
+  propName: PropName,
+  source: kefir.Observable<T, E>
 ): Unsubscribe {
   const { unsubscribe } = source.observe({
-    value (v: V) {
+    value (v: T) {
       dispatch(actions.onValue(componentKey, propName, v))
     },
     error (e: E) {
@@ -185,6 +195,25 @@ function subscribe<V, E> (
   return unsubscribe
 }
 
+function subscribeToPromise<T> (
+  dispatch: Dispatch<*>,
+  componentKey: ComponentKey,
+  propName: PropName,
+  source: Promise<T>
+): Unsubscribe {
+  source
+    .then(v => {
+      dispatch(actions.onValue(componentKey, propName, v))
+      dispatch(actions.onComplete(componentKey, propName))
+    })
+    .catch(e => {
+      dispatch(actions.onError(componentKey, propName, e))
+      dispatch(actions.onComplete(componentKey, propName))
+    })
+  // Unsubscribing from a promise has no effect
+  return noop
+}
+
 function unsubscribe (sources: {
   [key: string]: { source: *, unsubscribe: Unsubscribe }
 }) {
@@ -192,3 +221,5 @@ function unsubscribe (sources: {
     sources[key].unsubscribe()
   }
 }
+
+function noop () {}

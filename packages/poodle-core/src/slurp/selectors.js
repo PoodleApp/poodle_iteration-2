@@ -17,7 +17,7 @@ export function props (
   const ss = subscriptionStates(state, key)
   const props = { ...defaultProps, ...ss }
   for (const key of Object.keys(props)) {
-    if (helpers.isObservable(props[key])) {
+    if (helpers.isEffect(props[key])) {
       // Replace any Observables that are not yet represented in redux state
       props[key] = initSlurp()
     }

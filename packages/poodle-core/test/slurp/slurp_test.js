@@ -8,7 +8,7 @@ import ReactTestRenderer from 'react-test-renderer'
 import { combineReducers, createStore } from 'redux'
 
 import * as slurp from '../../src/slurp'
-import * as actions from '../../src/slurp/actions'
+import * as effects from '../../src/slurp/effects'
 
 const store = createStore(
   combineReducers({
@@ -16,18 +16,15 @@ const store = createStore(
   })
 )
 
-const syncStub = {}
-store.dispatch(actions.setSync((syncStub: any)))
-
 const states = (initialCount: number = 0) => {
   const values = [0, 1, 2, 3].map(value => value + initialCount)
   return kefir.sequentially(0, values).map(n => ({ count: n }))
 }
 
-test('supplies data to component', async t => {
+test('supplies data to component from an observable source', async t => {
   t.plan(2)
   const C = slurp.slurp(() => ({
-    count: states()
+    count: effects.observable(states)
   }))(Counter)
 
   const renderer = ReactTestRenderer.create(
@@ -39,47 +36,47 @@ test('supplies data to component', async t => {
   const display = getCounterDisplay(renderer)
   t.is(display, 'loading')
 
-  await delay(50)
+  await delay(100)
 
   t.is(getCounterDisplay(renderer), 3)
 })
 
-test('runs callback only once if props do not change', async t => {
-  t.plan(1)
+test('accepts prop values that are not observable or promise effects', async t => {
+  t.plan(2)
 
-  let callCount = 0
-  const C = slurp.slurp(() => {
-    callCount += 1
-    return {
-      count: states()
-    }
-  })(Counter)
+  function Foo (props) {
+    t.false(props.count.complete)
+    t.is(props.foo, 1)
+    return <div>props.foo</div>
+  }
+
+  const C = slurp.slurp(() => ({
+    count: effects.observable(states),
+    foo: 1
+  }))(Foo)
 
   const renderer = ReactTestRenderer.create(
     <Provider store={store}>
       <C />
     </Provider>
   )
-
-  await delay(50)
-
-  t.is(callCount, 1)
 })
 
 test('unsubscribes from streams when component unmounts', async t => {
   t.plan(1)
 
-  const observable = kefir.stream(emitter => {
-    states().onValue(v => {
-      emitter.emit(v)
+  const observable = () =>
+    kefir.stream(emitter => {
+      states().onValue(v => {
+        emitter.emit(v)
+      })
+      return function unsubscribe () {
+        t.pass('stream is unsubscribed when component unmounts')
+      }
     })
-    return function unsubscribe () {
-      t.pass('stream is unsubscribed when component unmounts')
-    }
-  })
 
   const C = slurp.slurp(() => ({
-    count: observable
+    count: effects.observable(observable)
   }))(Counter)
 
   let resolve
@@ -97,19 +94,21 @@ test('unsubscribes from streams when component unmounts', async t => {
   )
 
   await unmount
-  await delay(10)
+  await delay(100)
 })
 
-test('re-suscribes to sources when props change', async t => {
+test('re-subscribes to sources when props change', async t => {
   t.plan(4)
 
   let callCount = 0
-  const C = slurp.slurp(({ initialCount }) => {
+  function statesSpy (initialCount) {
     callCount += 1
-    return {
-      count: states(initialCount)
-    }
-  })(Counter)
+    return states(initialCount)
+  }
+
+  const C = slurp.slurp((state, { initialCount }) => ({
+    count: effects.observable(statesSpy, initialCount)
+  }))(Counter)
 
   let emitProps
   const props = kefir.stream(emitter => {
@@ -135,7 +134,7 @@ test('re-suscribes to sources when props change', async t => {
   emitProps && emitProps({ initialCount: 10 })
 
   await firstRender
-  await delay(25)
+  await delay(100)
 
   t.is(getCounterDisplay(renderer), 13)
   t.is(callCount, 1)
@@ -143,31 +142,31 @@ test('re-suscribes to sources when props change', async t => {
   emitProps && emitProps({ initialCount: 100 })
 
   await secondRender
-  await delay(25)
+  await delay(100)
 
   t.is(getCounterDisplay(renderer), 103)
   t.is(callCount, 2)
 })
 
-test('does not re-subscribe on props change if same observable reference is given', async t => {
+test('does not re-subscribe on props change if same effect is given', async t => {
   t.plan(4)
 
-  const observable = kefir.stream(emitter => {
-    states().onValue(v => {
-      emitter.emit(v)
-    })
-    return function unsubscribe () {
-      t.fail('stream is not unsubscribed when props change')
-    }
-  })
-
   let callCount = 0
-  const C = slurp.slurp(({ initialCount }) => {
+  const observable = initialCount => {
     callCount += 1
-    return {
-      count: observable
-    }
-  })(Counter)
+    return kefir.stream(emitter => {
+      states(initialCount).onValue(v => {
+        emitter.emit(v)
+      })
+      return function unsubscribe () {
+        t.fail('stream is not unsubscribed when props change')
+      }
+    })
+  }
+
+  const C = slurp.slurp((state, { initialCount }) => ({
+    count: effects.observable(observable, 0)
+  }))(Counter)
 
   let emitProps
   const props = kefir.stream(emitter => {
@@ -193,7 +192,7 @@ test('does not re-subscribe on props change if same observable reference is give
   emitProps && emitProps({ initialCount: 10 })
 
   await firstRender
-  await delay(25)
+  await delay(100)
 
   t.is(getCounterDisplay(renderer), 3)
   t.is(callCount, 1)
@@ -201,10 +200,10 @@ test('does not re-subscribe on props change if same observable reference is give
   emitProps && emitProps({ initialCount: 100 })
 
   await secondRender
-  await delay(25)
+  await delay(100)
 
   t.is(getCounterDisplay(renderer), 3)
-  t.is(callCount, 2)
+  t.is(callCount, 1)
 })
 
 test('`dispatch` function is available', async t => {
@@ -216,7 +215,7 @@ test('`dispatch` function is available', async t => {
   }
 
   const C = slurp.slurp(() => ({
-    count: states()
+    count: effects.observable(states)
   }))(CheckForDispatch)
 
   const renderer = ReactTestRenderer.create(
@@ -238,10 +237,10 @@ test('local `dispatch` function does not shadow `dispatch` from use of `connect`
     return <div />
   }
 
-  const C = slurp.slurp(ownProps => {
+  const C = slurp.slurp((state, ownProps) => {
     t.true(ownProps.connected, 'receives props from redux state')
     return {
-      count: states()
+      count: effects.observable(states)
     }
   })(CheckForDispatch)
 
@@ -326,7 +325,7 @@ class MountChildBriefly extends React.Component<
   }
 
   componentDidMount () {
-    setTimeout(() => this.setState({ childMounted: false }), 25)
+    setTimeout(() => this.setState({ childMounted: false }), 50)
   }
 
   render () {
