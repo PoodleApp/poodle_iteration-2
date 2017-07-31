@@ -1,27 +1,37 @@
 /* @flow */
 
 const { app, BrowserWindow } = require('electron')
-const contextMenu            = require('electron-context-menu')
-const path                   = require('path')
-const url                    = require('url')
+const contextMenu = require('electron-context-menu')
+const path = require('path')
+const url = require('url')
+
+const {
+  default: installExtension,
+  REACT_DEVELOPER_TOOLS
+} = require('electron-devtools-installer')
+installExtension(REACT_DEVELOPER_TOOLS)
+  .then(name => console.log(`Added Extension:  ${name}`))
+  .catch(err => console.log('An error occurred: ', err))
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is GCed.
 let mainWindow = null
 
-function createWindow() {
+function createWindow () {
   mainWindow = new BrowserWindow({ width: 800, height: 600 })
 
   contextMenu({
-    window: mainWindow,
+    window: mainWindow
   })
 
   // Load browser portion of app
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes:  true,
-  }))
+  mainWindow.loadURL(
+    url.format({
+      pathname: path.join(__dirname, 'index.html'),
+      protocol: 'file:',
+      slashes: true
+    })
+  )
 
   // Open the dev tools panel
   mainWindow.openDevTools()
@@ -37,7 +47,7 @@ function createWindow() {
 app.on('ready', createWindow)
 
 // Quit when all windows have been closed - except in OS X
-app.on('window-all-closed', function() {
+app.on('window-all-closed', function () {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform != 'darwin') {

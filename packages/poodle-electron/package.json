@@ -64,6 +64,7 @@
   },
   "devDependencies": {
     "ava": "^0.20.0",
+    "electron-devtools-installer": "^2.2.0",
     "flow-bin": "^0.50.0",
     "in-publish": "^2",
     "react-test-renderer": "^15",
