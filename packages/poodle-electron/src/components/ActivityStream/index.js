@@ -13,6 +13,7 @@ import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as q from 'poodle-core/lib/queries/conversations'
 import { type Slurp, slurp } from 'poodle-core/lib/slurp'
+import { observable } from 'poodle-core/lib/slurp/effects'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -27,7 +28,7 @@ type OwnProps = {
 }
 
 type Props = OwnProps & {
-  conversations: Slurp<q.ConversationListItem[]>
+  conversations: Slurp<q.ConversationListItem[], mixed>
 }
 
 const styles = {
@@ -145,12 +146,17 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
   )
 }
 
-const ActivityStreamWithData = slurp(({ }: OwnProps, sync: Sync) => ({
-  conversations: q.fetchConversations(sync, navigator.languages, {
-    labels: ['\\Inbox'],
-    limit: 30,
-    since: Moment().subtract(30, 'days').toISOString().slice(0, 10)
-  })
+const ActivityStreamWithData = slurp(({ auth }: State, { }: OwnProps) => ({
+  conversations: observable(
+    q.fetchConversations,
+    auth.sync,
+    navigator.languages,
+    {
+      labels: ['\\Inbox'],
+      limit: 30,
+      since: Moment().subtract(30, 'days').toISOString().slice(0, 10)
+    }
+  )
 }))(ActivityStream)
 
 export default ActivityStreamWithData

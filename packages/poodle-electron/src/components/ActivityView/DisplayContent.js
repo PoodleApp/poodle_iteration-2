@@ -6,6 +6,7 @@ import spacing from 'material-ui/styles/spacing'
 import opn from 'opn'
 import * as q from 'poodle-core/lib/queries/conversation'
 import { type Slurp, slurp } from 'poodle-core/lib/slurp'
+import { promise } from 'poodle-core/lib/slurp/effects'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import repa from 'repa'
@@ -26,7 +27,7 @@ type OwnProps = {
 }
 
 type Props = OwnProps & {
-  content: Slurp<q.Content>
+  content: Slurp<?q.Content>
 }
 
 export function DisplayContent ({ activity, content, style }: Props) {
@@ -51,8 +52,8 @@ export function DisplayContent ({ activity, content, style }: Props) {
   }
 }
 
-const ComponentWithData = slurp(({ activity }: Props, sync: Sync) => ({
-  content: q.fetchActivityContent(sync, activity)
+const ComponentWithData = slurp(({ auth }: State, { activity }: Props) => ({
+  content: promise(q.fetchActivityContent, auth.sync, activity)
 }))(DisplayContent)
 
 export default ComponentWithData

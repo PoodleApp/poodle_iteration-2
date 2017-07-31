@@ -60,10 +60,10 @@ export function AuthenticatedRoute ({
   )
 }
 
-function mapStateToProps ({ auth, slurp }: State): $Shape<Props> {
+function mapStateToProps ({ auth }: State): $Shape<Props> {
   return {
     account: auth.account,
-    sync: slurp.sync
+    sync: auth.sync
   }
 }
 

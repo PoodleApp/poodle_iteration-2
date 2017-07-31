@@ -17,7 +17,7 @@ export async function fetchContentSnippet (
   length: number = 100
 ): Promise<?string> {
   try {
-    const result = await fetchActivityContentPromise(sync, activity, [
+    const result = await fetchActivityContent(sync, activity, [
       'text/plain',
       'text/html'
     ])
@@ -29,7 +29,7 @@ export async function fetchContentSnippet (
   }
 }
 
-async function fetchActivityContentPromise (
+export async function fetchActivityContent (
   sync: Sync,
   activity: DerivedActivity,
   preferences: string[] = ['text/html', 'text/plain']
@@ -56,14 +56,4 @@ async function fetchActivityContentPromise (
     content: await toString(stream, 'utf8'), // TODO: check charset
     mediaType: link.mediaType
   }
-}
-
-export function fetchActivityContent (
-  sync: Sync,
-  activity: DerivedActivity,
-  preferences: string[] = ['text/html', 'text/plain']
-): kefir.Observable<?{ content: string, mediaType: string }> {
-  return kefir.fromPromise(
-    fetchActivityContentPromise(sync, activity, preferences)
-  )
 }

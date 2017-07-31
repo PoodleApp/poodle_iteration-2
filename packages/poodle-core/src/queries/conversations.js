@@ -37,7 +37,7 @@ export function fetchConversations (
   sync: Sync,
   langs: string[],
   queryParams: * = { labels: ['\\Inbox'], limit: 30 }
-): kefir.Observable<ConversationListItem[], *> {
+): kefir.Observable<ConversationListItem[], mixed> {
   return sync
     .queryConversations(queryParams)
     .flatMap(processConversation.bind(null, sync, langs))
