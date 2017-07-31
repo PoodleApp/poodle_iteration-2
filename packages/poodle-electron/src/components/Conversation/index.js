@@ -9,6 +9,7 @@ import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import * as m from 'mori'
 import * as authActions from 'poodle-core/lib/actions/auth'
+import { languageValue } from 'poodle-core/lib/components/Lang'
 import * as q from 'poodle-core/lib/queries/conversation'
 import { type Slurp, slurp } from 'poodle-core/lib/slurp'
 import { observable } from 'poodle-core/lib/slurp/effects'
@@ -107,7 +108,7 @@ export function Conversation (props: Props) {
         <AppBar
           title={
             <span style={styles.title}>
-              {conversation ? conversation.subject : '...'}
+              {conversation ? languageValue(conversation.subject) : '...'}
             </span>
           }
           iconElementLeft={
