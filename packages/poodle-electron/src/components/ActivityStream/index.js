@@ -11,6 +11,8 @@ import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
+import { languageValue } from 'poodle-core/lib/components/Lang'
+import * as Actor from 'poodle-core/lib/components/Actor'
 import * as q from 'poodle-core/lib/queries/conversations'
 import { type Slurp, slurp } from 'poodle-core/lib/slurp'
 import { observable } from 'poodle-core/lib/slurp/effects'
@@ -120,18 +122,19 @@ type ConversationRowProps = {
 }
 
 function ConversationRow ({ conversation }: ConversationRowProps) {
-  const subject = conversation.subject || '[no subject]'
   const activity = conversation.latestActivity
-  const actor = activity.actor || { displayName: 'unknown', email: '' }
+  const actor = activity.actor
+  const actorDisplayName = Actor.displayName(actor)
+  const actorEmail = actor ? Actor.email(actor) : ''
   const snippet = activity.contentSnippet || '[unable to fetch content snippet]'
 
   return (
     <ListItem
-      leftAvatar={<Avatar name={actor.displayName} id={actor.email} />}
-      primaryText={subject}
+      leftAvatar={<Avatar actor={actor} />}
+      primaryText={languageValue(conversation.subject, '[no subject]')}
       secondaryText={
         <p>
-          <span style={styles.authorName}>{actor.displayName}</span> — {snippet}
+          <span style={styles.authorName}>{actorDisplayName}</span> — {snippet}
         </p>
       }
       secondaryTextLines={2}
@@ -147,16 +150,11 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
 }
 
 const ActivityStreamWithData = slurp(({ auth }: State, { }: OwnProps) => ({
-  conversations: observable(
-    q.fetchConversations,
-    auth.sync,
-    navigator.languages,
-    {
-      labels: ['\\Inbox'],
-      limit: 30,
-      since: Moment().subtract(30, 'days').toISOString().slice(0, 10)
-    }
-  )
+  conversations: observable(q.fetchConversations, auth.sync, {
+    labels: ['\\Inbox'],
+    limit: 30,
+    since: Moment().subtract(30, 'days').toISOString().slice(0, 10)
+  })
 }))(ActivityStream)
 
 export default ActivityStreamWithData

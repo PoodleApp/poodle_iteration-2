@@ -7,17 +7,15 @@
  * @flow
  */
 
+import * as AS from 'activitystrea.ms'
 import Conversation from 'arfe/lib/models/Conversation'
 import * as kefir from 'kefir'
 import type Moment from 'moment'
 import * as m from 'mori'
 import Sync from 'poodle-service/lib/sync'
-import { type Actor, processActor } from './actor'
 import { fetchContentSnippet } from './content'
-import { resolveLanguageValue } from './lang'
 
-export type { Actor } from './actor'
-
+type Actor = AS.models.Object
 type URI = string
 
 export type ConversationListItem = {
@@ -35,18 +33,16 @@ export type ActivityListItem = {
 
 export function fetchConversations (
   sync: Sync,
-  langs: string[],
   queryParams: * = { labels: ['\\Inbox'], limit: 30 }
 ): kefir.Observable<ConversationListItem[], mixed> {
   return sync
     .queryConversations(queryParams)
-    .flatMap(processConversation.bind(null, sync, langs))
+    .flatMap(processConversation.bind(null, sync))
     .scan((cs, conv) => cs.concat(conv), [])
 }
 
 function processConversation (
   sync: Sync,
-  langs: string[],
   conv: Conversation
 ): kefir.Observable<ConversationListItem, *> {
   const activity = conv.latestActivity
@@ -56,10 +52,10 @@ function processConversation (
       id: conv.id,
       lastActiveTime: conv.lastActiveTime,
       latestActivity: {
-        actor: activity.actor && processActor(langs, activity.actor),
+        actor: activity.actor,
         contentSnippet
       },
       participants: m.intoArray(conv.flatParticipants),
-      subject: conv.subject && resolveLanguageValue(langs, conv.subject)
+      subject: conv.subject
     }))
 }

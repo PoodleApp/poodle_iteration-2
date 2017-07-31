@@ -8,6 +8,7 @@ import Paper from 'material-ui/Paper'
 import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import moment from 'moment'
+import * as Actor from 'poodle-core/lib/components/Actor'
 import * as q from 'poodle-core/lib/queries/conversation'
 import React from 'react'
 import * as Vocab from 'vocabs-as'
@@ -86,14 +87,14 @@ function ActivityCard (props: { nestLevel: ?number, children?: any }) {
 function NoteView (props: ActivityViewProps) {
   const { activity, nestLevel } = props
   const actor = activity.actor
-  const actorStr = (actor && actor.name) || '[unknown author]'
+  const actorDisplayName = Actor.displayName(actor)
   const dateStr = moment(activity.publishTime).fromNow()
   return (
     <ActivityCard nestLevel={nestLevel}>
       <CardHeader
-        title={actorStr}
+        title={actorDisplayName}
         subtitle={dateStr}
-        avatar={actor && <Avatar {...actor} />}
+        avatar={<Avatar actor={actor} />}
       >
         <LikeButton style={{ float: 'right' }} {...props} />
         <ActivityOptsMenu style={styles.menu} {...props} />
@@ -114,7 +115,6 @@ function DocumentView (props: ActivityViewProps) {
   const { activity, conversation } = props
 
   const actor = activity.actor
-  const actorStr = (actor && actor.name) || '[unknown author]'
 
   const dateStr = moment(activity.publishTime).fromNow()
   const editDateStr =
@@ -122,7 +122,6 @@ function DocumentView (props: ActivityViewProps) {
 
   const latestUpdate = activity.revisions[0].updateActivity
   const editor = latestUpdate && latestUpdate.actor
-  const editorStr = (editor && editor.name) || '[unknown editor]'
   return (
     <div>
       <h2>
@@ -131,12 +130,12 @@ function DocumentView (props: ActivityViewProps) {
       {activity.isEdited
         ? <p>
             <em>
-              Last edited {editDateStr} by {editorStr}
+              Last edited {editDateStr} by {Actor.displayName(editor)}
             </em>
           </p>
         : <p>
             <em>
-              Posted {dateStr} by {actorStr}
+              Posted {dateStr} by {Actor.displayName(Actor)}
             </em>
           </p>}
       <DisplayContent activity={activity} style={styles.documentBody} />
@@ -165,7 +164,6 @@ function JoinView (props: ActivityViewProps, context) {
   const { activity, nestLevel } = props
 
   const actor = activity.actor
-  const actorStr = (actor && actor.name) || '[unknown author]'
 
   const { palette } = context.muiTheme.baseTheme
   const backgroundColor = palette.borderColor
@@ -173,9 +171,9 @@ function JoinView (props: ActivityViewProps, context) {
   return (
     <ActivityCard nestLevel={nestLevel} style={{ backgroundColor }}>
       <CardHeader
-        title={actorStr}
+        title={Actor.displayName(actor)}
         subtitle='joined the discussion'
-        avatar={actor && <Avatar {...actor} />}
+        avatar={<Avatar actor={actor} />}
       />
     </ActivityCard>
   )
@@ -183,6 +181,7 @@ function JoinView (props: ActivityViewProps, context) {
 
 JoinView.contextTypes = contextTypes
 
+// TODO: aside handling needs updating
 function AsideView (props: ActivityViewProps) {
   const nestLevel = props.nestLevel || 1
   const { activity, conversation } = props
@@ -229,14 +228,13 @@ function AsideView (props: ActivityViewProps) {
 function UnknownView (props: ActivityViewProps) {
   const { activity, nestLevel } = props
   const actor = activity.actor
-  const actorStr = (actor && actor.name) || '[unknown author]'
   const dateStr = moment(activity.publishTime).fromNow()
   return (
     <ActivityCard nestLevel={nestLevel}>
       <CardHeader
-        title={actorStr}
+        title={Actor.displayName(actor)}
         subtitle={dateStr}
-        avatar={actor && <Avatar {...actor} />}
+        avatar={<Avatar actor={actor} />}
       />
       <DisplayContent activity={activity} />
     </ActivityCard>
