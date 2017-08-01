@@ -19,6 +19,7 @@ import * as redux from 'react-redux'
 import * as router from 'react-router-redux'
 
 import ActivityView from '../ActivityView'
+import ComposeReply from '../ComposeReply'
 
 import type { Match } from 'react-router-dom'
 import type { Dispatch } from 'redux'
@@ -96,6 +97,18 @@ export function Conversation (props: Props) {
     content = (
       <div>
         {activities}
+        <ComposeReply
+          account={props.account}
+          conversation={conversation}
+          loading={false}
+          send={(...args) => {
+            alert('TODO: implement send')
+          }}
+          showAddPeople={false}
+          toggleShowAddPeople={(...args) => {
+            alert('TODO: implement add people')
+          }}
+        />
       </div>
     )
   } else {

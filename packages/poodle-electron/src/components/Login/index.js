@@ -5,6 +5,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chromeState from 'poodle-core/lib/reducers/chrome'
+import PropTypes from 'prop-types'
 import * as queryString from 'query-string'
 import React from 'react'
 import * as redux from 'react-redux'
@@ -14,7 +15,6 @@ import type { Dispatch } from 'redux'
 import type { State } from '../../reducers'
 
 function getStyles (palette: Object) {
-  console.log('palette', palette)
   return {
     root: {
       display: 'flex',
@@ -136,7 +136,7 @@ function LoginForm (props: LoginFormProps, context) {
 }
 
 LoginForm.contextTypes = {
-  muiTheme: React.PropTypes.object.isRequired
+  muiTheme: PropTypes.object.isRequired
 }
 
 function onLogin (

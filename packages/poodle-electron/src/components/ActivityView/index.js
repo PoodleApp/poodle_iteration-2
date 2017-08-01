@@ -10,6 +10,7 @@ import spacing from 'material-ui/styles/spacing'
 import moment from 'moment'
 import * as Actor from 'poodle-core/lib/components/Actor'
 import * as q from 'poodle-core/lib/queries/conversation'
+import PropTypes from 'prop-types'
 import React from 'react'
 import * as Vocab from 'vocabs-as'
 import Avatar from '../Avatar'
@@ -50,7 +51,7 @@ const styles = {
 }
 
 const contextTypes = {
-  muiTheme: React.PropTypes.object.isRequired
+  muiTheme: PropTypes.object.isRequired
 }
 
 export default function ActivityView (props: ActivityViewProps) {
