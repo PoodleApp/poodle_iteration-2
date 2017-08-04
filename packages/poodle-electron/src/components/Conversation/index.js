@@ -1,6 +1,7 @@
 /* @flow */
 
 import ArfeConversation from 'arfe/lib/models/Conversation'
+import * as LV from 'arfe/lib/models/LanguageValue'
 import AppBar from 'material-ui/AppBar'
 import Divider from 'material-ui/Divider'
 import IconButton from 'material-ui/IconButton'
@@ -9,7 +10,6 @@ import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import * as m from 'mori'
 import * as authActions from 'poodle-core/lib/actions/auth'
-import { languageValue } from 'poodle-core/lib/components/Lang'
 import * as q from 'poodle-core/lib/queries/conversation'
 import { type Slurp, slurp } from 'poodle-core/lib/slurp'
 import { observable } from 'poodle-core/lib/slurp/effects'
@@ -100,14 +100,6 @@ export function Conversation (props: Props) {
         <ComposeReply
           account={props.account}
           conversation={conversation}
-          loading={false}
-          send={(...args) => {
-            alert('TODO: implement send')
-          }}
-          showAddPeople={false}
-          toggleShowAddPeople={(...args) => {
-            alert('TODO: implement add people')
-          }}
         />
       </div>
     )
@@ -121,7 +113,7 @@ export function Conversation (props: Props) {
         <AppBar
           title={
             <span style={styles.title}>
-              {conversation ? languageValue(conversation.subject) : '...'}
+              {conversation ? LV.getString(conversation.subject) : '...'}
             </span>
           }
           iconElementLeft={

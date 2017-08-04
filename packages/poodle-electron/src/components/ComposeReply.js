@@ -1,6 +1,6 @@
 /* @flow */
 
-import Conversation from 'arfe/lib/models/Conversation'
+import Conversation, { type Participants } from 'arfe/lib/models/Conversation'
 import {
   FlatButton,
   IconButton,
@@ -12,17 +12,25 @@ import {
 import MenuItem from 'material-ui/MenuItem'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import spacing from 'material-ui/styles/spacing'
+import * as m from 'mori'
 import PropTypes from 'prop-types'
 import React from 'react'
+import { connect } from 'react-redux'
+import { type Dispatch } from 'redux'
 import * as auth from 'poodle-core/lib/actions/auth'
+import * as compose from 'poodle-core/lib/actions/compose'
+import { type State } from '../reducers'
 
-type Props = {
+type OwnProps = {
   account: auth.Account,
   conversation: Conversation,
+  hintText?: string
+}
+
+type Props = OwnProps & {
+  dispatch: Dispatch<*>,
   loading: boolean,
-  send: (conversation: Conversation, content: string) => void,
-  showAddPeople: boolean,
-  toggleShowAddPeople: (on: boolean) => void
+  showAddPeople: boolean
 }
 
 const styles = {
@@ -38,13 +46,22 @@ const styles = {
   }
 }
 
-export default function ComposeReply (props: Props) {
+export function ComposeReply (props: Props) {
   let bodyInput: ?HTMLInputElement
+
+  const recipients = props.conversation.replyRecipients(props.account)
 
   function onSend (event) {
     event.preventDefault()
     if (bodyInput) {
-      props.send(props.conversation, bodyInput.value)
+      props.dispatch(
+        compose.send(
+          props.account,
+          props.conversation,
+          recipients,
+          bodyInput.value
+        )
+      )
     }
   }
 
@@ -52,9 +69,9 @@ export default function ComposeReply (props: Props) {
     <div style={styles.activityCard}>
       <Paper>
         <ComposeOptsMenu
+          dispatch={props.dispatch}
           style={styles.menu}
           showAddPeople={props.showAddPeople}
-          toggleShowAddPeople={props.toggleShowAddPeople}
         />
         <form style={styles.body} onSubmit={onSend}>
           {props.showAddPeople ? <div>TODO</div> : ''}
@@ -82,8 +99,8 @@ export default function ComposeReply (props: Props) {
 }
 
 type ComposeOptsMenuProps = {
-  showAddPeople: boolean,
-  toggleShowAddPeople: (on: boolean) => void
+  dispatch: Dispatch<*>,
+  showAddPeople: boolean
 }
 
 function ComposeOptsMenu (props: ComposeOptsMenuProps, context) {
@@ -118,6 +135,15 @@ function onMenuAction (
   item: React.Element<*>
 ) {
   if (item.props.value === 'addPeople') {
-    props.toggleShowAddPeople(!props.showAddPeople)
+    alert('TODO: implement recipient list editing')
   }
 }
+
+function mapStateToProps (state: State, props: OwnProps): $Shape<Props> {
+  return {
+    loading: false, // TODO
+    showAddPeople: false, // TODO
+  }
+}
+
+export default connect(mapStateToProps)(ComposeReply)

@@ -1,9 +1,9 @@
 /* @flow */
 
 import * as AS from 'activitystrea.ms'
+import * as Actor from 'arfe/lib/models/Actor'
 import MuiAvatar from 'material-ui/Avatar'
 import * as colors from 'material-ui/styles/colors'
-import * as Actor from 'poodle-core/lib/components/Actor'
 import React from 'react'
 import stringHash from 'string-hash'
 

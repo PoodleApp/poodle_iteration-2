@@ -10,7 +10,8 @@ export type Action =
   | { type: 'auth/setSync', sync: Sync }
 
 export type Account = {
-  email: string
+  email: string,
+  name?: string
 }
 
 export function accessToken (email: string, creds: OauthCredentials): Action {

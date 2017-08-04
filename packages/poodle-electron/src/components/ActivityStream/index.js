@@ -1,6 +1,8 @@
 /* @flow */
 
+import * as Actor from 'arfe/lib/models/Actor'
 import Conversation from 'arfe/lib/models/Conversation'
+import * as LV from 'arfe/lib/models/LanguageValue'
 import AppBar from 'material-ui/AppBar'
 import Divider from 'material-ui/Divider'
 import IconButton from 'material-ui/IconButton'
@@ -11,8 +13,6 @@ import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
-import { languageValue } from 'poodle-core/lib/components/Lang'
-import * as Actor from 'poodle-core/lib/components/Actor'
 import * as q from 'poodle-core/lib/queries/conversations'
 import { type Slurp, slurp } from 'poodle-core/lib/slurp'
 import { observable } from 'poodle-core/lib/slurp/effects'
@@ -131,7 +131,7 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
   return (
     <ListItem
       leftAvatar={<Avatar actor={actor} />}
-      primaryText={languageValue(conversation.subject, '[no subject]')}
+      primaryText={LV.getString(conversation.subject, '[no subject]')}
       secondaryText={
         <p>
           <span style={styles.authorName}>{actorDisplayName}</span> — {snippet}

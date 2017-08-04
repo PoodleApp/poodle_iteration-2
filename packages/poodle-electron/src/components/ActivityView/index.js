@@ -1,5 +1,6 @@
 /* @flow */
 
+import * as Actor from 'arfe/lib/models/Actor'
 import * as Drv from 'arfe/lib/models/DerivedActivity'
 import * as URI from 'arfe/lib/models/uri'
 import { Card, CardHeader } from 'material-ui/Card'
@@ -8,7 +9,6 @@ import Paper from 'material-ui/Paper'
 import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import moment from 'moment'
-import * as Actor from 'poodle-core/lib/components/Actor'
 import * as q from 'poodle-core/lib/queries/conversation'
 import PropTypes from 'prop-types'
 import React from 'react'
