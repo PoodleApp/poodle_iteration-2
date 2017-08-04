@@ -52,7 +52,6 @@
     "xoauth2": "^1.2.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.50.0",
     "format-json": "^1.0.3",
     "in-publish": "^2",
     "watch": "^1"
