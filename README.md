@@ -7,7 +7,7 @@ Experimental email client with social features
 You must have these programs installed:
 
 - GNU Make
-- yarn
+- yarn v0.26.0 or later
 
 You might also need some development libraries installed for building npm
 modules with native dependencies. On Debian-based systems the required
