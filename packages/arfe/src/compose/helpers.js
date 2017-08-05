@@ -6,6 +6,7 @@ import * as m                  from 'mori'
 import * as Vocab              from 'vocabs-as'
 import Address                 from '../models/Address'
 import Conversation, * as Conv from '../models/Conversation'
+import * as LV                 from '../models/LanguageValue'
 import { midUri, sameEmail }   from '../models/uri'
 import * as asutil             from '../util/activity'
 import { uniqBy }              from '../util/mori'
@@ -41,6 +42,7 @@ export function newMessage({ from, to, cc, conversation }: {
     from:       addresses(from),
     to:         addresses(to),
     cc:         addresses(cc),
+    subject:    LV.getString(conversation.subject, ''),
     references: refs,
   })
 }
