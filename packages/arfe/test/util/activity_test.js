@@ -1,10 +1,11 @@
 /* @flow */
 
-import describe from 'tape'
+import describe from 'tape-async'
 
-import * as AS     from 'activitystrea.ms'
-import * as V      from 'vocabs-as'
-import * as asutil from '../../src/util/activity'
+import * as AS        from 'activitystrea.ms'
+import streamToString from 'stream-to-string'
+import * as V         from 'vocabs-as'
+import * as asutil    from '../../src/util/activity'
 
 function actCreate(): AS.models.Activity {
   return AS
@@ -66,6 +67,15 @@ describe('util/activity', ({ test }) => {
 
     t.ok(!!act.object, 'object should be preserved')
     t.ok(!!orig.object, 'original should still have object')
+  })
+
+  test('emits an activity as a readable stream', async t => {
+    t.plan(1)
+
+    const act = actCreate()
+    const stream = asutil.createReadStream(act)
+    const string = await streamToString(stream)
+    t.ok(string.length >= 1)
   })
 
 })
