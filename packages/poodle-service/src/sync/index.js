@@ -2,7 +2,7 @@
 
 import Conversation            from 'arfe/lib/models/Conversation'
 import cachedir                from 'cache-directory'
-import * as nodemailer         from 'nodemailer'
+import nodemailer              from 'nodemailer'
 import findPlugin              from 'pouchdb-find'
 import PouchDB                 from 'pouchdb-node'
 import sanitize                from 'sanitize-filename'
@@ -69,9 +69,9 @@ export default class Sync {
 type DeliveryResult = {
   messageId: string,
   envelope: Object,
-  accepted: mixed[],
-  rejected: mixed[],
-  pending: mixed[],
+  accepted: string[], // email addresses
+  rejected: string[],
+  pending: string[],
   response: string
 }
 

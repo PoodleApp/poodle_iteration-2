@@ -58,14 +58,16 @@ function * initAccount (
     const connectionFactory = yield getConnectionFactory(account.email, token)
     const smtpConfig = {
       service: 'Gmail',
-      secure: true,
       auth: {
-        XOAuth2: {
-          user: account.email,
-          clientId: client_id,
-          clientSecret: client_secret,
-          refreshToken: token.refresh_token
-        }
+        type: 'OAuth2',
+        accessToken: token.access_token,
+        // accessUrl: 'https://accounts.google.com/o/oauth2/token',
+        clientId: client_id,
+        clientSecret: client_secret,
+        expires: token.expires_in,
+        refreshToken: token.refresh_token,
+        service: 'Gmail',
+        user: account.email
       }
     }
 
