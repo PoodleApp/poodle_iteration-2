@@ -56,10 +56,24 @@ function * initAccount (
     yield put(auth.accessToken(account.email, token))
 
     const connectionFactory = yield getConnectionFactory(account.email, token)
+    const smtpConfig = {
+      service: 'Gmail',
+      secure: true,
+      auth: {
+        XOAuth2: {
+          user: account.email,
+          clientId: client_id,
+          clientSecret: client_secret,
+          refreshToken: token.refresh_token
+        }
+      }
+    }
+
     const sync = new Sync({
       boxes: ['\\Inbox'],
       connectionFactory,
-      dbname: `poodle-${account}`
+      dbname: `poodle-${account}`,
+      smtpConfig
     })
     yield put(auth.setSync(sync))
 

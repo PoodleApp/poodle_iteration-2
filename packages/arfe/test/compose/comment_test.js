@@ -65,7 +65,7 @@ async function testConversation(): Promise<[Conversation, MB.FetchPartContent]> 
 describe('compose/comment', ({ test }) => {
 
   test('produces a reply', async t => {
-    t.plan(4)
+    t.plan(2)
 
     const [conversation, fetcher] = await testConversation()
     const replyContent = 'new reply'
@@ -82,11 +82,12 @@ describe('compose/comment', ({ test }) => {
       conversation, 
     })
 
-    const addrs = reply.getAddresses()
-    t.equal(addrs.from[0].name,    loraine.name,  "reply is from Loraine")
-    t.equal(addrs.from[0].address, loraine.email, "reply shows Loraine's address")
-    t.equal(addrs.to[0].name,    joseph.name,  "reply is to Joseph")
-    t.equal(addrs.to[0].address, joseph.email, "reply shows Joseph's address")
+    const { envelope } = reply
+    if (!envelope) {
+      return
+    }
+    t.equal(envelope.from, loraine.headerValue, "reply is from Loraine")
+    t.equal(envelope.to[1], joseph.headerValue, "reply is to Joseph")
 
     // const rfc822 = await toString(reply.createReadStream())
     // console.log(rfc822)

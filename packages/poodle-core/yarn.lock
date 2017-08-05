@@ -2941,6 +2941,10 @@ nodemailer-shared@1.1.0:
   dependencies:
     nodemailer-fetch "1.6.0"
 
+nodemailer@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-4.0.1.tgz#b95864b07facee8287e8232effd6f1d56ec75ab2"
+
 noop-logger@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/noop-logger/-/noop-logger-0.1.1.tgz#94a2b1633c4f1317553007d8966fd0e841b6a4c2"
@@ -3491,7 +3495,7 @@ readable-stream@1.1.x, readable-stream@^1.0.33, readable-stream@~1.1.9:
     isarray "0.0.1"
     string_decoder "~0.10.x"
 
-readable-stream@^2.0.0, readable-stream@^2.0.2, readable-stream@^2.0.5, readable-stream@^2.0.6, readable-stream@^2.1.4, readable-stream@^2.1.5:
+readable-stream@^2.0.0, readable-stream@^2.0.2, readable-stream@^2.0.5, readable-stream@^2.0.6, readable-stream@^2.1.0, readable-stream@^2.1.4, readable-stream@^2.1.5:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-2.3.3.tgz#368f2512d79f9d46fdfc71349ae7878bbc1eb95c"
   dependencies:
@@ -3939,6 +3943,13 @@ string-template@~0.2.0:
 string-template@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/string-template/-/string-template-1.0.0.tgz#9e9f2233dc00f218718ec379a28a5673ecca8b96"
+
+string-to-stream@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/string-to-stream/-/string-to-stream-1.1.0.tgz#acf2c9ead1c418e148509a12d2cbb469f333a218"
+  dependencies:
+    inherits "^2.0.1"
+    readable-stream "^2.1.0"
 
 string-width@^1.0.1, string-width@^1.0.2:
   version "1.0.2"

@@ -175,7 +175,7 @@ function separateContentAndFallback(
 
 /* formatting helpers */
 
-function addresses(addrs: Seqable<Address>): string {
+export function addresses(addrs: Seqable<Address>): string {
   return m.intoArray(m.map(addr => addr.headerValue, addrs)).join(', ')
 }
 

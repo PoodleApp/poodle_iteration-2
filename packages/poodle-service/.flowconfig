@@ -5,7 +5,6 @@
 .*/node_modules/mailcomposer/.*
 
 [include]
-../../node_modules/
 
 [libs]
 ./types/

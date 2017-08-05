@@ -1,6 +1,7 @@
 /* @flow */
 
 import Conversation, { type Participants } from 'arfe/lib/models/Conversation'
+import marked from 'marked'
 import {
   FlatButton,
   IconButton,
@@ -15,10 +16,9 @@ import spacing from 'material-ui/styles/spacing'
 import * as m from 'mori'
 import PropTypes from 'prop-types'
 import React from 'react'
-import { connect } from 'react-redux'
-import { type Dispatch } from 'redux'
 import * as auth from 'poodle-core/lib/actions/auth'
-import * as compose from 'poodle-core/lib/actions/compose'
+import { ComposeHOC } from 'poodle-core/lib/compose'
+import * as compose from 'poodle-core/lib/compose/actions'
 import { type State } from '../reducers'
 
 type OwnProps = {
@@ -28,8 +28,10 @@ type OwnProps = {
 }
 
 type Props = OwnProps & {
-  dispatch: Dispatch<*>,
+  content: string,
   loading: boolean,
+  onContentChange: typeof compose.setContent,
+  onSend: typeof compose.send,
   showAddPeople: boolean
 }
 
@@ -47,29 +49,20 @@ const styles = {
 }
 
 export function ComposeReply (props: Props) {
-  let bodyInput: ?HTMLInputElement
-
   const recipients = props.conversation.replyRecipients(props.account)
 
   function onSend (event) {
     event.preventDefault()
-    if (bodyInput) {
-      props.dispatch(
-        compose.send(
-          props.account,
-          props.conversation,
-          recipients,
-          bodyInput.value
-        )
-      )
-    }
+    props.onSend(props.account, props.conversation, recipients, {
+      mediaType: 'text/html',
+      string: marked(props.content)
+    })
   }
 
   return (
     <div style={styles.activityCard}>
       <Paper>
         <ComposeOptsMenu
-          dispatch={props.dispatch}
           style={styles.menu}
           showAddPeople={props.showAddPeople}
         />
@@ -81,9 +74,8 @@ export function ComposeReply (props: Props) {
             multiLine={true}
             fullWidth={true}
             name='body'
-            ref={input => {
-              bodyInput = input
-            }}
+            onChange={event => props.onContentChange(event.target.value)}
+            value={props.content}
           />
           <br />
 
@@ -99,7 +91,6 @@ export function ComposeReply (props: Props) {
 }
 
 type ComposeOptsMenuProps = {
-  dispatch: Dispatch<*>,
   showAddPeople: boolean
 }
 
@@ -139,11 +130,4 @@ function onMenuAction (
   }
 }
 
-function mapStateToProps (state: State, props: OwnProps): $Shape<Props> {
-  return {
-    loading: false, // TODO
-    showAddPeople: false, // TODO
-  }
-}
-
-export default connect(mapStateToProps)(ComposeReply)
+export default ComposeHOC(ComposeReply)

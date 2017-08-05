@@ -274,7 +274,7 @@ function foldPrimaryContent<T>(
 
   // signed: the first part is the primary content (which is signed);
   // there should be another part, which should be the signature
-  else if (subtype.indexOf('signature') > -1) {
+  else if (subtype.indexOf('signed') > -1) {
     const primary = m.first(nestedStructs)
     if (primary) {
       return foldPrimaryContent(f, result, filter, primary)

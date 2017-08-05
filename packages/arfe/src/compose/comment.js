@@ -2,12 +2,14 @@
 
 import * as AS from 'activitystrea.ms'
 import BuildMail from 'buildmail'
+import * as m from 'mori'
 import Address from '../models/Address'
 import Conversation from '../models/Conversation'
 import * as compose from './helpers'
 
 import type { Seqable } from 'mori'
 import type { Content } from './helpers'
+import type { MessageConfiguration } from './types'
 
 type CommentOptions = {
   from: Seqable<Address>,
@@ -18,7 +20,9 @@ type CommentOptions = {
   fallbackContent?: Content // default value is value of `content`
 }
 
-export default function comment (options: CommentOptions): BuildMail {
+export default function comment (
+  options: CommentOptions
+): MessageConfiguration {
   const activity = ({ activityUri, contentUri }) =>
     AS.create()
       .id(activityUri)
@@ -34,12 +38,15 @@ export default function comment (options: CommentOptions): BuildMail {
       )
       .get()
 
-  const root = compose.newMessage.bind(null, options)
-
-  return compose.buildAlternative({
+  const root = compose.buildAlternative({
     activity,
-    root,
+    root: compose.newMessage.bind(null, options),
     content: options.content,
     fallbackContent: options.fallbackContent
   })
+
+  return {
+    envelope: root.getEnvelope(),
+    raw: root.createReadStream()
+  }
 }

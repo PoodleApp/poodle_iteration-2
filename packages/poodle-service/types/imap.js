@@ -132,7 +132,7 @@ declare module "imap" {
   }
 
   declare export type Address = {
-    name:    string,  // e.g., person's full name
+    name?:   string,  // e.g., person's full name
     mailbox: string,  // username portion of email address
     host:    string,  // host portion of email address
   }

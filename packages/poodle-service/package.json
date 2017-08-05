@@ -45,6 +45,7 @@
     "libqp": "^1.1.0",
     "mailparser": "^2.0.1",
     "node-fetch": "^1.6.3",
+    "nodemailer": "^4.0.1",
     "pouchdb-find": "^0.10.5",
     "pouchdb-node": "^6.1.1",
     "sanitize-filename": "^1.6.1",
