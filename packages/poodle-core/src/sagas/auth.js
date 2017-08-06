@@ -72,7 +72,7 @@ function * initAccount (
     }
 
     const sync = new Sync({
-      boxes: ['\\Inbox'],
+      boxes: ['INBOX', '\\Sent'],
       connectionFactory,
       dbname: `poodle-${account}`,
       smtpConfig

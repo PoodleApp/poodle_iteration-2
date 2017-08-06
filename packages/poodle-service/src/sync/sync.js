@@ -96,11 +96,10 @@ function fetch(boxes: Boxes, timeFrame: number, cf: ConnectionFactory, db: Pouch
     .map(conn => conn.end())  // close the connection after all fetches are complete
 }
 
-function fetchFromBox(boxAttr: string, since: Date, conn: Connection, db: PouchDB): Observable<void, mixed> {
+function fetchFromBox(box: string, since: Date, conn: Connection, db: PouchDB): Observable<void, mixed> {
   // TODO: fetch any messages referenced by recent messages
   return kefir.fromPromise(
-    // TODO: just open INBOX for now
-    promises.lift1(cb => conn.openBox('INBOX', true, cb))
+    imaputil.openBox(box, true, conn)
   )
     .flatMap(box => {
       return actions.fetchRecent(since, box, conn)
