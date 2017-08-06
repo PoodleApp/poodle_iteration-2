@@ -102,9 +102,9 @@ function getThread (
 function fetchPartContent (
   db: PouchDB,
   msg: Message,
-  partId: string
+  contentId: string
 ): Promise<Readable> {
-  return db.getAttachment(msg.uriForPartId(partId), 'content').then(buffer => {
+  return db.getAttachment(msg.uriForContentId(contentId), 'content').then(buffer => {
     const rs = new stream.PassThrough()
     rs.end(buffer)
     return rs

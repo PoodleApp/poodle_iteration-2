@@ -23,15 +23,15 @@ import type { Observable } from 'kefir'
 
 const headersSelection = 'HEADER'
 
-export function fetchMessagePart(msg: Message, partId: string, box: Box, conn: Connection): Promise<Readable> {
-  const part = msg.getPart(partId)
+export function fetchMessagePart(msg: Message, contentId: string, box: Box, conn: Connection): Promise<Readable> {
+  const part = msg.getPart({ contentId })
   if (!part) {
-    return Promise.reject(new Error(`partId ${partId} does not exist in message ${msg.uid}`))
+    return Promise.reject(new Error(`contentId ${contentId} does not exist in message ${msg.uid}`))
   }
 
   const encoding = part.encoding
 
-  return fetch(([msg.uid]: number[]), { bodies: `${partId}` }, conn)
+  return fetch(([msg.uid]: number[]), { bodies: `${contentId}` }, conn)
   .flatMap(messageBodyStream)
   .map(body => encoding ? decode(encoding, body) : body)
   .toPromise()

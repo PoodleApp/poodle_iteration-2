@@ -46,10 +46,10 @@ describe('Message', ({ test }) => {
     t.ok(m.some(part => part.subtype === 'plain', contentParts), 'got a plain text part')
   })
 
-  test('gets a message part by ID', t => {
+  test('gets a message part by part ID', t => {
     t.plan(2)
 
-    const part = msg.getPart('2')
+    const part = msg.getPart({ partId: '2' })
     t.ok(part, 'found html part')
     if (!part) { throw new Error('Expected an HTML part') }
 
@@ -59,7 +59,7 @@ describe('Message', ({ test }) => {
   test('resolves relative `cid:` URIs', t => {
     t.plan(1)
     const uri = msg.resolveUri('cid:2')
-    t.equal(uri, 'mid:CAGM-pNuNmZ9tS1-4CA9s0Sb=dGSdi3w51NghoubSkqt5bUP6iA@mail.gmail.com/2')
+    t.equal(uri, `mid:${encodeURIComponent('CAGM-pNuNmZ9tS1-4CA9s0Sb=dGSdi3w51NghoubSkqt5bUP6iA@mail.gmail.com')}/2`)
   })
 
   test('returns not `cid:` strings unmodified', t => {

@@ -48,7 +48,7 @@ export const participants = {
 const defaultFrom = [participants.Merrilee]
 const defaultTo   = [participants.Reiko]
 
-export type FetchPartContent = (msg: Message, partId: string) => Promise<Readable>
+export type FetchPartContent = (msg: Message, contentId: string) => Promise<Readable>
 
 export function newThread(params: MessageParams[]): [Seq<Message>, FetchPartContent] {
   const withRefs = m.map(addReferences.bind(null, params), params)
@@ -56,11 +56,11 @@ export function newThread(params: MessageParams[]): [Seq<Message>, FetchPartCont
   const msgs     = m.map(([msg, _]) => msg, pairs)
   return [msgs, fetchPartContent]
 
-  function fetchPartContent(msg: Message, partId: string): Promise<Readable> {
+  function fetchPartContent(msg: Message, contentId: string): Promise<Readable> {
     const match = m.first(m.filter(([m, _]) => m.id === msg.id, pairs))
     if (match) {
       const [_, f] = match
-      return f(msg, partId)
+      return f(msg, contentId)
     }
     else {
       return Promise.reject(
@@ -150,26 +150,27 @@ function unwrapAddress({ name, mailbox, host }: Address): ImapAddress {
 
 function buildStruct(messageId: MessageId, params: MessageParams): [MessageStruct, FetchPartContent] {
   const parts = catMaybes([
-    buildContentPart('text', 'text', 'plain', params.text),
-    buildContentPart('html', 'text', 'html',  params.html),
+    buildContentPart('1.1', 'text', 'text', 'plain', params.text),
+    buildContentPart('1.2', 'html', 'text', 'html',  params.html),
     buildActivityParts(params),
   ])
   const struct = [{
-    partID: 'alternative',
+    partID: '1',
+    id: 'alternative',
     type: 'alternative',
     params: {},
   }, ...m.intoArray(parts)]
 
   return [struct, fetchPartContent]
 
-  function fetchPartContent(msg: Message, partId: string): Promise<Readable> {
+  function fetchPartContent(msg: Message, contentId: string): Promise<Readable> {
     function toStream(content: ?string): Promise<Readable> {
       if (content) {
         return Promise.resolve(stream(content))
       }
       else {
         return Promise.reject(
-          new Error(`no content for ${msg.uriForPartId(partId)}`)
+          new Error(`no content for ${msg.uriForContentId(contentId)}`)
         )
       }
     }
@@ -180,7 +181,7 @@ function buildStruct(messageId: MessageId, params: MessageParams): [MessageStruc
       )
     }
 
-    switch(partId) {
+    switch(contentId) {
       case 'text':     return toStream(params.text)
       case 'html':     return toStream(params.html)
       case 'activity': return toStream(params.activity && JSON.stringify(params.activity))
@@ -190,10 +191,11 @@ function buildStruct(messageId: MessageId, params: MessageParams): [MessageStruc
   }
 }
 
-function buildContentPart(partID: string, type: string, subtype: string, content: ?string): ?MessageStruct {
+function buildContentPart(partID: string, contentId: ?string, type: string, subtype: string, content: ?string): ?MessageStruct {
   if (!content) { return }
   return [{
     partID,
+    id: contentId,
     type,
     subtype,
     params: {},
@@ -202,9 +204,9 @@ function buildContentPart(partID: string, type: string, subtype: string, content
 
 function buildActivityParts(params: MessageParams): ?MessageStruct {
   const activityPart = params.activity
-    && buildContentPart('activity', 'application', 'activity+json', JSON.stringify(params.activity))
+    && buildContentPart('1.3', 'activity', 'application', 'activity+json', JSON.stringify(params.activity))
   const revisionPart = params.revision
-    && buildContentPart('revision', 'application', 'activity+json', JSON.stringify(params.revision))
+    && buildContentPart('1.4', 'revision', 'application', 'activity+json', JSON.stringify(params.revision))
   if (activityPart && revisionPart) {
     return [
       { type: 'related', params: {} },

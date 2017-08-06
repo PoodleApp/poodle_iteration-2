@@ -86,8 +86,8 @@ describe('compose/comment', ({ test }) => {
     if (!envelope) {
       return
     }
-    t.equal(envelope.from, loraine.headerValue, "reply is from Loraine")
-    t.equal(envelope.to[1], joseph.headerValue, "reply is to Joseph")
+    t.equal(envelope.from, loraine.email, "reply is from Loraine")
+    t.equal(envelope.to[0], joseph.email, "reply is to Joseph")
 
     // const rfc822 = await toString(reply.createReadStream())
     // console.log(rfc822)

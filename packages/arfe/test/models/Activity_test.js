@@ -27,7 +27,7 @@ describe('Activity', ({ test }) => {
     const act = m.first(acts)
     t.equal(
       act.id,
-      'mid:CAGM-pNuNmZ9tS1-4CA9s0Sb=dGSdi3w51NghoubSkqt5bUP6iA@mail.gmail.com'
+      msg.uri
     )
     t.ok(m.count(act.objectLinks) > 0, 'activity should have links to content')
 
@@ -53,7 +53,7 @@ describe('Activity', ({ test }) => {
   test('normalizes activity by adding `id`', async t => {
     t.plan(2)
     const messageId = MB.randomMessageId()
-    const partId    = 'activity'
+    const contentId = 'activity'
     const activity  = await asutil.exportActivity(
       AS.create().get()
     )
@@ -63,7 +63,7 @@ describe('Activity', ({ test }) => {
     t.equal(m.count(acts), 1, 'message contains one activity')
 
     const act = m.first(acts)
-    t.equal(act.id, `mid:${messageId}/${partId}`)
+    t.equal(act.id, `mid:${encodeURIComponent(messageId)}/${encodeURIComponent(contentId)}`)
   })
 
   test('expands relative `cid:` URIs in activities', async t => {
@@ -91,7 +91,7 @@ describe('Activity', ({ test }) => {
     t.equal(m.count(links), 1, 'activity contains a link to html content')
 
     const link = m.first(links)
-    t.equal(link.href, `mid:${messageId}/${partId}`, 'href is fully-qualified after normalization')
+    t.equal(link.href, `mid:${encodeURIComponent(messageId)}/${encodeURIComponent(partId)}`, 'href is fully-qualified after normalization')
   })
 
 })

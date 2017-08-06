@@ -46,7 +46,7 @@ function messages() {
         object: {
           type: "Link",
           mediaType: "application/activity+json",
-          href: `mid:${a}/activity`,
+          href: `mid:${encodeURIComponent(a)}/activity`,
         },
         result: {
           type: "Link",
@@ -102,7 +102,7 @@ describe('collapseEdits', ({ test }) => {
     t.equal(m.count(links), 1, 'activity has a link to content')
 
     const link = m.first(links)
-    t.equal(link.href, `mid:${b}/html`, 'content link points to revised content')
+    t.equal(link.href, `mid:${encodeURIComponent(b)}/html`, 'content link points to revised content')
   })
 
   test('preserves actor and type information from original activity', async t => {

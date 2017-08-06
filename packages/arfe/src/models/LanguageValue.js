@@ -9,13 +9,24 @@ export function getString (
   if (!value) {
     return defaultValue
   }
-  // TODO: assumes presence of `navigator` object
-  const langs = navigator.languages
-  for (const lang of langs) {
+  for (const lang of preferredLanguages()) {
     const str = value.get(lang)
     if (str) {
       return str
     }
   }
   return value.get()
+}
+
+// TODO: assumes presence of `navigator` object
+function preferredLanguages(): string[] {
+  if (typeof navigator !== 'undefined') {
+    if (navigator.languages && navigator.languages.length > 0) {
+      return navigator.languages
+    }
+    else if (navigator.language) {
+      return [navigator.language]
+    }
+  }
+  return []
 }

@@ -25,7 +25,7 @@ const transformers: Seqable<Transformer> = [
 ]
 
 export default function derive(
-  fetchPartContent: (msg: Message, partId: string) => Promise<Readable>,
+  fetchPartContent: (msg: Message, contentId: string) => Promise<Readable>,
   activities: Seqable<Activity>,
 ): Promise<Seqable<DerivedActivity>> {
   const f = fetcher(fetchPartContent, activities)
@@ -51,7 +51,7 @@ async function deriveRec(
 }
 
 function fetcher(
-  fetchPartContent: (msg: Message, partId: string) => Promise<Readable>,
+  fetchPartContent: (msg: Message, contentId: string) => Promise<Readable>,
   activities: Seqable<Activity>,
 ): Fetcher {
   return uri => {
@@ -62,8 +62,8 @@ function fetcher(
       )
     }
 
-    const { scheme, messageId, partId } = parsed
-    if (!messageId || !partId) {
+    const { scheme, messageId, contentId } = parsed
+    if (!messageId || !contentId) {
       return Promise.reject(
         new Error(`expected fully-qualified 'mid:' URI, but got: ${uri}`)
       )
@@ -79,7 +79,7 @@ function fetcher(
       )
     }
 
-    return fetchPartContent(msg, partId)
+    return fetchPartContent(msg, contentId)
   }
 }
 

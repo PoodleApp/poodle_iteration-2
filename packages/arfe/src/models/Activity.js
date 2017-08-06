@@ -121,10 +121,10 @@ function hasType(type: URI, object: AS.models.Object): boolean {
 /* reading activities from messages */
 
 export async function getActivities(
-  fetchPartContent: (msg: Message, partId: string) => Promise<Readable>,
+  fetchPartContent: (msg: Message, contentId: string) => Promise<Readable>,
   msg: Message,
 ): Promise<Seqable<Activity>> {
-  const activityParts = msg.activityParts
+  const activityParts = m.filter(part => !!part.id, msg.activityParts)
 
   if (!m.isEmpty(activityParts)) {
     return Promise.all(m.intoArray(
@@ -138,16 +138,16 @@ export async function getActivities(
 }
 
 async function getActivity(
-  fetchPartContent: (msg: Message, partId: string) => Promise<Readable>,
+  fetchPartContent: (msg: Message, contentId: string) => Promise<Readable>,
   msg: Message,
   part: MessagePart,
 ): Promise<Activity> {
-  const partId = part.partID
-  if (!partId) {
+  const contentId = part.id
+  if (!contentId) {
     throw new Error("cannot fetch content for message part with no ID")
   }
 
-  const stream = await fetchPartContent(msg, partId)
+  const stream = await fetchPartContent(msg, contentId)
   return importActivity(msg, stream, part)
 }
 

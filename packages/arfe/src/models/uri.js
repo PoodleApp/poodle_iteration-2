@@ -16,8 +16,26 @@ export function mailtoUri(email: Email): URI {
 
 export function midUri(messageId: string, contentId: ?string): URI {
   return contentId
-    ? `mid:${messageId}/${contentId}`
-    : `mid:${messageId}`
+    ? `mid:${encodeURIComponent(messageId)}/${encodeURIComponent(contentId)}`
+    : `mid:${encodeURIComponent(messageId)}`
+}
+
+const midExp = /(mid:|cid:)([^/]+)(?:\/(.+))?$/
+
+export function parseMidUri (
+  uri: URI
+): ?{ scheme: string, messageId: ?string, contentId: ?string } {
+  const matches = uri.match(midExp)
+  if (matches) {
+    const scheme = matches[1]
+    const messageId =
+      scheme === 'mid:' ? decodeURIComponent(matches[2]) : undefined
+    const contentId =
+      scheme === 'cid:'
+        ? decodeURIComponent(matches[2])
+        : decodeURIComponent(matches[3])
+    return { scheme, messageId, contentId }
+  }
 }
 
 export function sameUri(x: URI, y: URI): boolean {

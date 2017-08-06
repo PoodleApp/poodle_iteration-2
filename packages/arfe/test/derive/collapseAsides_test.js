@@ -7,6 +7,7 @@ import * as MB  from '../builders/message'
 import derive                      from '../../src/derive'
 import Activity, { getActivities } from '../../src/models/Activity'
 import { syntheticTypes }          from '../../src/models/DerivedActivity'
+import { midUri }                  from '../../src/models/uri'
 
 import type { Seqable } from 'mori'
 
@@ -79,8 +80,8 @@ describe('collapseAsides', ({ test }) => {
     if (!aside) { throw new Error('no aside') }
 
     t.equal(m.count(aside), 2, 'aside contains two activities')
-    t.ok(m.some(a => a.id === `mid:${b}`, aside), 'aside contains message `b`')
-    t.ok(m.some(a => a.id === `mid:${d}`, aside), 'aside contains message `d`')
+    t.ok(m.some(a => a.id === midUri(b), aside), 'aside contains message `b`')
+    t.ok(m.some(a => a.id === midUri(d), aside), 'aside contains message `d`')
   })
 
 })

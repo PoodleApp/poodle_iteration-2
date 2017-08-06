@@ -25,6 +25,7 @@ export type RootCallback     = (_: BuildMail) => void
 
 type ID = string
 
+// TODO: should `Content-ID` values be globally unique?
 
 /* Constructing MIME tree nodes */
 
@@ -115,8 +116,8 @@ function contentIsFallback(
   root(alternative) // callback sets message-level metadata
   const messageId = idFromHeaderValue(alternative.messageId())
 
-  const activityId = '1'
-  const contentId  = '2'
+  const activityId = 'activity'
+  const contentId  = 'content'
   const activity = f({
     activityUri: midUri(messageId, activityId),
     contentUri:  midUri(messageId, contentId),
@@ -145,9 +146,9 @@ function separateContentAndFallback(
   root(alternative) // callback sets message-level metadata
   const messageId = idFromHeaderValue(alternative.messageId())
 
-  const activityId = '1'
-  const contentId  = '2'
-  const fallbackId = '3'
+  const activityId = 'activity'
+  const contentId  = 'content'
+  const fallbackId = 'fallbackContent'
   const activity = f({
     activityUri: midUri(messageId, activityId),
     contentUri:  midUri(messageId, contentId),
