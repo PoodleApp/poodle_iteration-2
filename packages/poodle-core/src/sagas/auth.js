@@ -74,7 +74,7 @@ function * initAccount (
     const sync = new Sync({
       boxes: ['INBOX', '\\Sent'],
       connectionFactory,
-      dbname: `poodle-${account}`,
+      dbname: `poodle-${account.email}`,
       smtpConfig
     })
     yield put(auth.setSync(sync))
