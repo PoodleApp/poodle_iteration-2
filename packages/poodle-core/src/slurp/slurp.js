@@ -153,30 +153,27 @@ function subscribe<T, E> (
   propName: PropName,
   source: effects.Effect<T, E>
 ): Unsubscribe {
-  if (source.type === 'slurp/observable') {
-    return subscribeToObservable(
-      dispatch,
-      componentKey,
-      propName,
-      source.observableFn.apply(null, source.args)
-    )
-  } else if (source.type === 'slurp/promise') {
-    return subscribeToPromise(
-      dispatch,
-      componentKey,
-      propName,
-      source.promiseFn.apply(null, source.args)
-    )
+  if (source.type === effects.SUBSCRIBE) {
+    const obs = source.observableFn.apply(null, source.args)
+    if (typeof obs.observe === 'function') {
+      return subscribeToObservable(dispatch, componentKey, propName, (obs:any))
+    }
+    if (typeof obs.then === 'function') {
+      return subscribeToPromise(dispatch, componentKey, propName, (obs:any))
+    }
+    else {
+      throw new Error('First argument of `subscribe` effect must return an observable or a promise')
+    }
   } else {
     throw new Error('Unknown slurp effect type!')
   }
 }
 
-function subscribeToObservable<T, E> (
+function subscribeToObservable<T, E, Obs: kefir.Observable<T, E>> (
   dispatch: Dispatch<*>,
   componentKey: ComponentKey,
   propName: PropName,
-  source: kefir.Observable<T, E>
+  source: Obs
 ): Unsubscribe {
   const { unsubscribe } = source.observe({
     value (v: T) {

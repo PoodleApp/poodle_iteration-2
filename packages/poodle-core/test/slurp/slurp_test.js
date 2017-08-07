@@ -24,7 +24,7 @@ const states = (initialCount: number = 0) => {
 test('supplies data to component from an observable source', async t => {
   t.plan(2)
   const C = slurp.slurp(() => ({
-    count: effects.observable(states)
+    count: effects.subscribe(states)
   }))(Counter)
 
   const renderer = ReactTestRenderer.create(
@@ -51,7 +51,7 @@ test('accepts prop values that are not observable or promise effects', async t =
   }
 
   const C = slurp.slurp(() => ({
-    count: effects.observable(states),
+    count: effects.subscribe(states),
     foo: 1
   }))(Foo)
 
@@ -76,7 +76,7 @@ test('unsubscribes from streams when component unmounts', async t => {
     })
 
   const C = slurp.slurp(() => ({
-    count: effects.observable(observable)
+    count: effects.subscribe(observable)
   }))(Counter)
 
   let resolve
@@ -107,7 +107,7 @@ test('re-subscribes to sources when props change', async t => {
   }
 
   const C = slurp.slurp((state, { initialCount }) => ({
-    count: effects.observable(statesSpy, initialCount)
+    count: effects.subscribe(statesSpy, initialCount)
   }))(Counter)
 
   let emitProps
@@ -165,7 +165,7 @@ test('does not re-subscribe on props change if same effect is given', async t =>
   }
 
   const C = slurp.slurp((state, { initialCount }) => ({
-    count: effects.observable(observable, 0)
+    count: effects.subscribe(observable, 0)
   }))(Counter)
 
   let emitProps
@@ -215,7 +215,7 @@ test('`dispatch` function is available', async t => {
   }
 
   const C = slurp.slurp(() => ({
-    count: effects.observable(states)
+    count: effects.subscribe(states)
   }))(CheckForDispatch)
 
   const renderer = ReactTestRenderer.create(
@@ -240,7 +240,7 @@ test('local `dispatch` function does not shadow `dispatch` from use of `connect`
   const C = slurp.slurp((state, ownProps) => {
     t.true(ownProps.connected, 'receives props from redux state')
     return {
-      count: effects.observable(states)
+      count: effects.subscribe(states)
     }
   })(CheckForDispatch)
 

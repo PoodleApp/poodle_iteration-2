@@ -11,8 +11,7 @@ import spacing from 'material-ui/styles/spacing'
 import * as m from 'mori'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as q from 'poodle-core/lib/queries/conversation'
-import { type Slurp, slurp } from 'poodle-core/lib/slurp'
-import { observable } from 'poodle-core/lib/slurp/effects'
+import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import * as redux from 'react-redux'
@@ -146,7 +145,7 @@ const ComponentWithState = redux.connect(function mapStateToProps (
 
 const ComponentWithData = slurp(
   ({ auth }: State, { conversationId }: OwnProps) => ({
-    conversation: observable(q.fetchConversation, auth.sync, conversationId)
+    conversation: subscribe(q.fetchConversation, auth.sync, conversationId)
   })
 )(ComponentWithState)
 

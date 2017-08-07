@@ -14,8 +14,7 @@ import spacing from 'material-ui/styles/spacing'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as q from 'poodle-core/lib/queries/conversations'
-import { type Slurp, slurp } from 'poodle-core/lib/slurp'
-import { observable } from 'poodle-core/lib/slurp/effects'
+import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import { Link } from 'react-router-dom'
@@ -150,7 +149,7 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
 }
 
 const ActivityStreamWithData = slurp(({ auth }: State, { }: OwnProps) => ({
-  conversations: observable(q.fetchConversations, auth.sync, {
+  conversations: subscribe(q.fetchConversations, auth.sync, {
     labels: ['\\Inbox'],
     limit: 30,
     since: Moment().subtract(30, 'days').toISOString().slice(0, 10)

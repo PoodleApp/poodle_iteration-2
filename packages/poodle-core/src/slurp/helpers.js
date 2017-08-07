@@ -1,8 +1,10 @@
 /* @flow */
 
+import * as effects from './effects'
+
 export function isEffect (obj: Object): boolean {
   return (
-    !!obj && (obj.type === 'slurp/observable' || obj.type === 'slurp/promise')
+    !!obj && (obj.type === effects.SUBSCRIBE)
   )
 }
 
