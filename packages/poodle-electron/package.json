@@ -11,7 +11,7 @@
     "test": "flow",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
-    "postinstall": "electron-rebuild",
+    "postinstall": "make && electron-rebuild",
     "prepublishOnly": "yarn test && yarn run build",
     "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
     "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
