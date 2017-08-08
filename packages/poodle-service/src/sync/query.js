@@ -11,20 +11,24 @@ import type { Observable } from 'kefir'
 import type { Readable } from 'stream'
 import type { MessageRecord, QueryParams } from './types'
 
-export function createIndexes (db: PouchDB): Promise<void> {
+export async function createIndexes (db: PouchDB): Promise<void> {
   const indexes = [
     db.createIndex({
       index: {
-        fields: ['type', 'message.date']
-      }
+        fields: ['message.date', 'type']
+      },
+      ddoc: 'conversationIds',
+      name: 'conversationIds'
     }),
     db.createIndex({
       index: {
         fields: ['type', 'conversationId']
-      }
+      },
+      ddoc: 'messagesByConversation',
+      name: 'messagesByConversation'
     })
   ]
-  return Promise.all(indexes).then(_ => undefined)
+  await Promise.all(indexes)
 }
 
 export function queryConversations (
@@ -146,9 +150,6 @@ export function fetchContentByUri (db: PouchDB, uri: string): Promise<Readable> 
 
 function buildSelector (params: QueryParams): Object {
   const { labels, mailingList, since } = params
-  const selector: { [key: string]: any } = {
-    type: 'Message'
-  }
 
   // if (labels instanceof Array) {
   //   selector['message.x-gm-labels'] = { $elemMatch: { $in: labels } }
@@ -162,19 +163,17 @@ function buildSelector (params: QueryParams): Object {
   //   selector['headers'] = { $elemMatch:  }
   // }
 
-  if (since && typeof since.toISOString === 'function') {
-    selector['message.date'] = { $gte: since.toISOString().slice(0, 10) }
-  } else {
-    selector['message.date'] = { $gte: null }
-  }
+  const dateRange =
+    since && typeof since.toISOString === 'function'
+      ? { $gte: since.toISOString().slice(0, 10) }
+      : { $gt: null }
 
-  return selector
+  return {
+    type: 'Message',
+    'message.date': dateRange
+  }
 }
 
 function asMessage ({ message, headers }: MessageRecord): Message {
   return new Message(message, new Map(headers))
-}
-
-function angleBrackets (str: string): string {
-  return `<${str}>`
 }
