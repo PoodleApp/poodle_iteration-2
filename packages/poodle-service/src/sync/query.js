@@ -2,6 +2,7 @@
 
 import Conversation, * as Conv from 'arfe/lib/models/Conversation'
 import Message, * as Msg from 'arfe/lib/models/Message'
+import unique from 'array-unique'
 import * as kefir from 'kefir'
 import PouchDB from 'pouchdb-node'
 import stream from 'stream'
@@ -14,12 +15,12 @@ export function createIndexes (db: PouchDB): Promise<void> {
   const indexes = [
     db.createIndex({
       index: {
-        fields: ['message.date', 'type']
+        fields: ['type', 'message.date']
       }
     }),
     db.createIndex({
       index: {
-        fields: ['_id', 'messageIds', 'type']
+        fields: ['type', 'conversationId']
       }
     })
   ]
@@ -32,8 +33,7 @@ export function queryConversations (
 ): Observable<Conversation, mixed> {
   const selector = buildSelector(params)
   const query: { [key: string]: any } = {
-    fields: ['messageIds'],
-    limit: params.limit || 30,
+    fields: ['conversationId'],
     selector
   }
 
@@ -45,20 +45,37 @@ export function queryConversations (
   }
 
   return kefir
-    .fromPromise(db.find(query))
-    .flatMap(matchingMessages => {
-      const threads = matchingMessages.docs.map(({ messageIds }) =>
-        kefir.fromPromise(getThread(messageIds, db))
+    .fromPromise(fetchConversationIds(query, db, params.limit))
+    .flatMap(conversationIds => {
+      const convs = conversationIds.map(id =>
+        kefir.fromPromise(getConversationById(id, db))
       )
-      return kefir.merge(threads) // build convs in parallel
+      return kefir.merge(convs) // build conversations in parallel
     })
-    .skipDuplicates((a, b) => a[0]._id === b[0]._id) // avoid processing each conv more than once
-    .flatMap(thread => {
-      const messages = thread.map(asMessage)
-      return kefir.fromPromise(
-        Conv.messagesToConversation(fetchPartContent.bind(null, db), messages)
-      )
-    })
+}
+
+// Fetch the first `limit` distinct conversation IDs that match the given query
+async function fetchConversationIds (
+  query: Object,
+  db: PouchDB,
+  limit: number = 30, // total number of distinct values to fetch
+  skip: number = 0,
+  ids: string[] = [] // IDs that have been fetched so far
+): Promise<string[]> {
+  const { docs } = await db.find({
+    ...query,
+    limit,
+    skip
+  })
+  if (docs.length < 1) {
+    return ids
+  }
+  const newIds = docs.map(doc => doc.conversationId)
+  const updatedIds = unique(ids.concat(newIds))
+  if (updatedIds.length >= limit) {
+    return updatedIds.slice(0, limit)
+  }
+  return fetchConversationIds(query, db, limit, skip + limit, updatedIds)
 }
 
 export async function getConversation (
@@ -73,7 +90,17 @@ export async function getConversation (
   }
   const messageId = parsed.messageId
   const messageRecord = await db.get(messageId)
-  const messageRecords = await getThread(messageRecord.messageIds, db)
+  return getConversationById(messageRecord.conversationId, db)
+}
+
+async function getConversationById (
+  conversationId: string,
+  db: PouchDB
+): Promise<Conversation> {
+  if (!conversationId) {
+    throw new Error('Cannot fetch thread without a conversation ID')
+  }
+  const messageRecords = await getThread(conversationId, db)
   const messages = messageRecords.map(asMessage)
   return Conv.messagesToConversation(fetchPartContent.bind(null, db), messages)
 }
@@ -82,21 +109,17 @@ export async function getConversation (
  * Get all messages that reference or are referenced by the given message
  * (including the input message itself).
  */
-function getThread (
-  messageIds: string[],
+async function getThread (
+  conversationId: string,
   db: PouchDB
 ): Promise<MessageRecord[]> {
-  return db
-    .find({
-      selector: {
-        messageIds: {
-          $elemMatch: { $in: messageIds }
-        },
-        type: 'Message'
-      },
-      sort: ['_id']
-    })
-    .then(result => result.docs)
+  const result = await db.find({
+    selector: {
+      type: 'Message',
+      conversationId
+    }
+  })
+  return result.docs
 }
 
 function fetchPartContent (
@@ -104,11 +127,13 @@ function fetchPartContent (
   msg: Message,
   contentId: string
 ): Promise<Readable> {
-  return db.getAttachment(msg.uriForContentId(contentId), 'content').then(buffer => {
-    const rs = new stream.PassThrough()
-    rs.end(buffer)
-    return rs
-  })
+  return db
+    .getAttachment(msg.uriForContentId(contentId), 'content')
+    .then(buffer => {
+      const rs = new stream.PassThrough()
+      rs.end(buffer)
+      return rs
+    })
 }
 
 export function fetchContentByUri (db: PouchDB, uri: string): Promise<Readable> {
@@ -137,8 +162,10 @@ function buildSelector (params: QueryParams): Object {
   //   selector['headers'] = { $elemMatch:  }
   // }
 
-  if (typeof since === 'string') {
-    selector['message.date'] = { $gte: since }
+  if (since && typeof since.toISOString === 'function') {
+    selector['message.date'] = { $gte: since.toISOString().slice(0, 10) }
+  } else {
+    selector['message.date'] = { $gte: null }
   }
 
   return selector

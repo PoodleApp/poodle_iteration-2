@@ -101,6 +101,12 @@ export default class Message {
     return m.concat(this.htmlParts, this.textParts)
   }
 
+  // Assume that the first value in the references list is the first message in
+  // the thread
+  get conversationId (): MessageId {
+    return this.references.concat(this.id)[0]
+  }
+
   get htmlParts (): Vector<MessagePart> {
     return htmlParts(this.attributes)
   }

@@ -152,7 +152,7 @@ const ActivityStreamWithData = slurp(({ auth }: State, { }: OwnProps) => ({
   conversations: subscribe(q.fetchConversations, auth.sync, {
     labels: ['\\Inbox'],
     limit: 30,
-    since: Moment().subtract(30, 'days').toISOString().slice(0, 10)
+    since: Moment().subtract(30, 'days')
   })
 }))(ActivityStream)
 

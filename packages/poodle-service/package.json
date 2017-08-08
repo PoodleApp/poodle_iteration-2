@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "arfe": "link:../arfe",
+    "array-unique": "^0.3.2",
     "base64-stream": "^0.1.3",
     "cache-directory": "^1.1.0",
     "dateformat": "^2.0.0",
