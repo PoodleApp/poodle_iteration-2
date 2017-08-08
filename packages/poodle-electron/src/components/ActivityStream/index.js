@@ -94,7 +94,6 @@ export function ActivityStream (props: Props) {
     )
     content = (
       <Paper>
-        {errorDisplay}
         <List>
           {convs}
         </List>
