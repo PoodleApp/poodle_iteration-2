@@ -29,7 +29,7 @@ type OwnProps = {
 }
 
 type Props = OwnProps & {
-  conversations: Slurp<q.ConversationListItem[], mixed>
+  conversations: Slurp<q.ConversationListItem[], Error>
 }
 
 const styles = {
@@ -156,8 +156,7 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
 const ActivityStreamWithData = slurp(({ auth }: State, { }: OwnProps) => ({
   conversations: subscribe(q.fetchConversations, auth.sync, {
     labels: ['\\Inbox'],
-    limit: 30,
-    since: Moment().subtract(30, 'days')
+    limit: 30
   })
 }))(ActivityStream)
 
