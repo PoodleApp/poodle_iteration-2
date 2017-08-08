@@ -184,6 +184,7 @@ function subscribeToObservable<T, E, Obs: kefir.Observable<T, E>> (
     error (e: E) {
       dispatch(actions.onError(componentKey, propName, e))
       dispatch(chrome.showError((e: any))) // TODO: this is a hack
+      console.error(e)
     },
     end () {
       dispatch(actions.onComplete(componentKey, propName))
@@ -207,6 +208,7 @@ function subscribeToPromise<T> (
       dispatch(actions.onError(componentKey, propName, e))
       dispatch(actions.onComplete(componentKey, propName))
       dispatch(chrome.showError((e: any))) // TODO: this is a hack
+      console.error(e)
     })
   // Unsubscribing from a promise has no effect
   return noop
