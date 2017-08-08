@@ -13,14 +13,17 @@ import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
+import * as chrome from 'poodle-core/lib/actions/chrome'
 import * as q from 'poodle-core/lib/queries/conversations'
 import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
 import Sync from 'poodle-service/lib/sync'
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { type Dispatch } from 'redux'
 
 import Avatar from '../Avatar'
 import ChannelListSidebar from './ChannelListSidebar'
+import Errors from '../Errors'
 
 import type { State } from '../../reducers'
 
@@ -29,7 +32,9 @@ type OwnProps = {
 }
 
 type Props = OwnProps & {
-  conversations: Slurp<q.ConversationListItem[], Error>
+  conversations: Slurp<q.ConversationListItem[], Error>,
+  errors: ?(Error[]),
+  onDismissError: typeof chrome.dismissError
 }
 
 const styles = {
@@ -117,6 +122,7 @@ export function ActivityStream (props: Props) {
           <ChannelListSidebar />
         </nav>
       </div>
+      <Errors errors={props.errors} onDismiss={props.onDismissError} />
     </div>
   )
 }
@@ -153,11 +159,14 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
   )
 }
 
-const ActivityStreamWithData = slurp(({ auth }: State, { }: OwnProps) => ({
+const ActivityStreamWithData = slurp(({ auth, chrome }: State, { }: OwnProps) => ({
   conversations: subscribe(q.fetchConversations, auth.sync, {
     labels: ['\\Inbox'],
     limit: 30
-  })
+  }),
+  errors: chrome.errors
+}), (dispatch: Dispatch<*>) => ({
+  onDismissError(...args) { dispatch(chrome.dismissError(...args)) }
 }))(ActivityStream)
 
 export default ActivityStreamWithData

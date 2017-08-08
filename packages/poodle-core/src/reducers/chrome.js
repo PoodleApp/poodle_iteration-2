@@ -4,10 +4,10 @@
  * @flow
  */
 
-import type { Action } from '../actions/chrome'
+import * as actions from '../actions/chrome'
 
 export type State = {
-  error?:             ?Error,
+  errors?:            Error[],
   leftNavOpen:        boolean,
   loadingIndicators?: Indicator[],
   notification?:      ?string,
@@ -19,37 +19,38 @@ const inititialState: State = {
   leftNavOpen: false,
 }
 
-export default function reducer(state: State = inititialState, action: Action): State {
+export default function reducer(state: State = inititialState, action: actions.Action): State {
   switch (action.type) {
-    case 'dismissError':
+    case actions.DISMISS_ERROR:
+      const actionIndex = action.index
       return {
         ...state,
-        error: null,
+        errors: (state.errors || []).filter((_, index) => index !== actionIndex),
       }
-    case 'dismissNotify':
+    case actions.DISMISS_NOTIFY:
       return {
         ...state,
         notification: null,
       }
-    case 'leftNavToggle':
+    case actions.LEFT_NAV_TOGGLE:
       const open = typeof action.open === 'boolean' ? action.open : !state.leftNavOpen
       return {
         ...state,
         leftNavOpen: open,
       }
-    case 'showError':
+    case actions.SHOW_ERROR:
       return {
         ...state,
-        error: action.error,
+        errors: (state.errors || []).concat(action.error)
       }
-    case 'showNotification':
+    case actions.SHOW_NOTIFICATION:
       return {
         ...state,
         notification: action.notification,
       }
-    case 'indicateLoading':
+    case actions.INDICATE_LOADING:
       return incrementIndicator(action, state)
-    case 'doneLoading':
+    case actions.DONE_LOADING:
       return decrementIndicator(action.key, state)
     default:
       return state

@@ -3,6 +3,7 @@
 import deepEqual from 'deep-equal'
 import * as kefir from 'kefir'
 import { connect } from 'react-redux'
+import * as chrome from '../actions/chrome'
 import * as actions from './actions'
 import * as effects from './effects'
 import * as helpers from './helpers'
@@ -156,13 +157,14 @@ function subscribe<T, E> (
   if (source.type === effects.SUBSCRIBE) {
     const obs = source.observableFn.apply(null, source.args)
     if (typeof obs.observe === 'function') {
-      return subscribeToObservable(dispatch, componentKey, propName, (obs:any))
+      return subscribeToObservable(dispatch, componentKey, propName, (obs: any))
     }
     if (typeof obs.then === 'function') {
-      return subscribeToPromise(dispatch, componentKey, propName, (obs:any))
-    }
-    else {
-      throw new Error('First argument of `subscribe` effect must return an observable or a promise')
+      return subscribeToPromise(dispatch, componentKey, propName, (obs: any))
+    } else {
+      throw new Error(
+        'First argument of `subscribe` effect must return an observable or a promise'
+      )
     }
   } else {
     throw new Error('Unknown slurp effect type!')
@@ -181,6 +183,7 @@ function subscribeToObservable<T, E, Obs: kefir.Observable<T, E>> (
     },
     error (e: E) {
       dispatch(actions.onError(componentKey, propName, e))
+      dispatch(chrome.showError((e: any))) // TODO: this is a hack
     },
     end () {
       dispatch(actions.onComplete(componentKey, propName))
@@ -203,6 +206,7 @@ function subscribeToPromise<T> (
     .catch(e => {
       dispatch(actions.onError(componentKey, propName, e))
       dispatch(actions.onComplete(componentKey, propName))
+      dispatch(chrome.showError((e: any))) // TODO: this is a hack
     })
   // Unsubscribing from a promise has no effect
   return noop

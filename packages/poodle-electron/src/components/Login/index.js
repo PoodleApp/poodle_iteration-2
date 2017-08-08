@@ -4,12 +4,14 @@ import Dialog from 'material-ui/Dialog'
 import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
 import * as authActions from 'poodle-core/lib/actions/auth'
+import * as chromeActions from 'poodle-core/lib/actions/chrome'
 import * as chromeState from 'poodle-core/lib/reducers/chrome'
 import PropTypes from 'prop-types'
 import * as queryString from 'query-string'
 import React from 'react'
 import * as redux from 'react-redux'
 import { Redirect } from 'react-router-dom'
+import Errors from '../Errors'
 
 import type { Dispatch } from 'redux'
 import type { State } from '../../reducers'
@@ -59,8 +61,9 @@ function getStyles (palette: Object) {
 type LoginProps = {
   account: ?authActions.Account,
   dispatch: Dispatch<any>,
-  error: ?Error,
+  errors: ?(Error[]),
   oauthLoadingMessages: string[],
+  onDismissError: typeof chromeActions.dismissError,
   location: Object,
   loggedIn: boolean
 }
@@ -70,7 +73,8 @@ export function Login ({
   dispatch,
   location,
   loggedIn,
-  oauthLoadingMessages
+  oauthLoadingMessages,
+  ...props
 }: LoginProps) {
   const messages = oauthLoadingMessages.map((msg, idx) =>
     <p key={idx}>
@@ -91,6 +95,7 @@ export function Login ({
       <Dialog modal={true} open={messages.length > 0}>
         {messages}
       </Dialog>
+      <Errors errors={props.errors} onDismiss={props.onDismissError} />
     </div>
   )
 }
@@ -157,7 +162,7 @@ function onLogin (
 function mapStateToProps ({ auth, chrome }: State): $Shape<LoginProps> {
   return {
     account: auth.account,
-    error: chrome.error,
+    errors: chrome.errors,
     oauthLoadingMessages: chromeState.loadingMessagesFor(
       'authentication-flow',
       chrome
@@ -166,4 +171,10 @@ function mapStateToProps ({ auth, chrome }: State): $Shape<LoginProps> {
   }
 }
 
-export default redux.connect(mapStateToProps)(Login)
+function mapDispatchToProps (dispatch: Dispatch<*>) {
+  return {
+    onDismissError(...args) { dispatch(chromeActions.dismissError(...args)) }
+  }
+}
+
+export default redux.connect(mapStateToProps, mapDispatchToProps)(Login)
