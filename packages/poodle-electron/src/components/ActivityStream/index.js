@@ -61,13 +61,17 @@ const styles = {
 export function ActivityStream (props: Props) {
   const { value: conversations, error, latest, complete } = props.conversations
 
+  const errorDisplay = error
+    ? <p>
+        {String(error)}
+      </p>
+    : ''
+
   let content
   if (error && latest === error) {
     content = (
       <div>
-        <p>
-          {String(error)}
-        </p>
+        {errorDisplay}
         <RaisedButton
           label='Retry'
           onClick={() => alert('TODO: implement retry action')}
@@ -85,6 +89,7 @@ export function ActivityStream (props: Props) {
     )
     content = (
       <Paper>
+        {errorDisplay}
         <List>
           {convs}
         </List>

@@ -1,7 +1,7 @@
 /* @flow */
 
 import * as oauth from 'poodle-service/lib/oauth/google'
-import Sync from 'poodle-service/lib/sync'
+import { newSync } from 'poodle-service/lib/sync'
 import { takeLatest } from 'redux-saga'
 import { call, cancelled, fork, put } from 'redux-saga/effects'
 import * as auth from '../actions/auth'
@@ -71,7 +71,7 @@ function * initAccount (
       }
     }
 
-    const sync = new Sync({
+    const sync = yield call(newSync, {
       boxes: ['INBOX', '\\Sent'],
       connectionFactory,
       dbname: `poodle-${account.email}`,
