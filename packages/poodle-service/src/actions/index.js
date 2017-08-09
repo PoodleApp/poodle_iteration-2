@@ -25,14 +25,14 @@ const headersSelection = 'HEADER'
 
 export function fetchMessagePart (
   msg: Message,
-  contentId: string,
+  partId: string,
   box: Box,
   conn: Connection
 ): Promise<Readable> {
-  const part = msg.getPart({ contentId })
+  const part = msg.getPart({ partId })
   if (!part) {
     return Promise.reject(
-      new Error(`contentId ${contentId} does not exist in message ${msg.uid}`)
+      new Error(`part ID ${partId} does not exist in message ${msg.uid}`)
     )
   }
 
