@@ -139,10 +139,30 @@ export async function messagesToConversation (
   messages: Seqable<Message>
 ): Promise<Conversation> {
   const activitiesByMessage = await Promise.all(
-    m.intoArray(m.map(Act.getActivities.bind(null, fetchPartContent), messages))
+    m.intoArray(
+      m.map(tryToGetActivities.bind(null, fetchPartContent), messages)
+    )
   )
   const activities = m.flatten(activitiesByMessage)
   return threadToConversation(fetchPartContent, activities)
+}
+
+async function tryToGetActivities (
+  fetchPartContent: (msg: Message, partId: string) => Promise<Readable>,
+  message: Message
+): Promise<Seqable<Activity>> {
+  try {
+    // The `await` is necessary to catch errors
+    return await Act.getActivities(fetchPartContent, message)
+  } catch (err) {
+    return [
+      Drv.newSyntheticActivity(
+        AS.activity(Drv.syntheticTypes.Failure).object(AS.object().content(err.message)),
+        {},
+        message
+      ).activity
+    ]
+  }
 }
 
 type FlatActivity = {

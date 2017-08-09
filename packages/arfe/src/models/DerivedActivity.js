@@ -210,10 +210,11 @@ export function fromActivity (activity: Activity): DerivedActivity {
 
 export function newSyntheticActivity (
   activity: AS.models.Activity,
-  opts: ConstructorOpts = {}
+  opts: ConstructorOpts = {},
+  message?: Message
 ): DerivedActivity {
   const withId = asutil.modify(a => a.id(syntheticId()), activity)
-  return new DerivedActivity(new Activity(withId), opts)
+  return new DerivedActivity(new Activity(withId, message), opts)
 }
 
 /* synthetic types */
@@ -227,6 +228,7 @@ function syntheticType (t: string): string {
 export const syntheticTypes = {
   Aside: syntheticType('Aside'),
   Conflict: syntheticType('Conflict'),
+  Failure: syntheticType('Failure'),
   Join: syntheticType('Join')
 }
 

@@ -2,6 +2,7 @@
 
 import * as Actor from 'arfe/lib/models/Actor'
 import * as Drv from 'arfe/lib/models/DerivedActivity'
+import * as LV from 'arfe/lib/models/LanguageValue'
 import * as URI from 'arfe/lib/models/uri'
 import { Card, CardHeader } from 'material-ui/Card'
 import FlatButton from 'material-ui/FlatButton'
@@ -56,10 +57,12 @@ const contextTypes = {
 
 export default function ActivityView (props: ActivityViewProps) {
   const { activity } = props
-  const { Aside, Conflict, Join } = Drv.syntheticTypes
+  const { Aside, Conflict, Failure, Join } = Drv.syntheticTypes
 
   if (helpers.hasType(Conflict, activity)) {
     return <ConflictView {...props} />
+  } else if (helpers.hasType(Failure, activity)) {
+    return <FailureView {...props} />
   } else if (helpers.hasType(Join, activity)) {
     return <JoinView {...props} />
   } else if (activity.hasObjectType(Vocab.Note)) {
@@ -157,6 +160,41 @@ function ConflictView (props: ActivityViewProps) {
         <strong>Edit failed due to a conflict with another edit.</strong>
       </div>
       <DisplayContent activity={activity} />
+    </ActivityCard>
+  )
+}
+
+function FailureView (props: ActivityViewProps) {
+  const { activity, nestLevel } = props
+  const actor = activity.actor
+  const actorDisplayName = Actor.displayName(actor)
+  const dateStr = moment(activity.publishTime).fromNow()
+
+  const backgroundColor = 'red' // TODO
+
+  return (
+    <ActivityCard nestLevel={nestLevel} style={{ backgroundColor }}>
+      <CardHeader
+        title={actorDisplayName}
+        subtitle={dateStr}
+        avatar={<Avatar actor={actor} />}
+      >
+        <LikeButton style={{ float: 'right' }} {...props} />
+        <ActivityOptsMenu style={styles.menu} {...props} />
+      </CardHeader>
+      <div
+        className='html-content'
+        style={{
+          overflowWrap: 'break-word',
+          padding: `${spacing.desktopKeylineIncrement * 1}px`,
+          paddingTop: 0
+        }}
+      >
+        <p>
+          Failed to load message content:{' '}
+          {activity.object ? LV.getString(activity.object.content, '') : ''}
+        </p>
+      </div>
     </ActivityCard>
   )
 }
