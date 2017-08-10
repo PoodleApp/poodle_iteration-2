@@ -74,7 +74,7 @@ describe('compose/comment', ({ test }) => {
 
 
     const reply = compose.comment({
-      ...compose.defaultRecipients({ from: loraine, conversation }),
+      ...conversation.replyRecipients({ email: loraine.email, name: loraine.displayName }),
       content: {
         mediaType: 'text/html',
         stream:    stream(replyContent),

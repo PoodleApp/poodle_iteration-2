@@ -64,28 +64,6 @@ function contentNode(content: Content, options: Object = {}): BuildMail {
 
 /* helpers for building message headers */
 
-/*
- * Computes sets of recipients for a reply to a conversation based on sets of
- * participants, and the identity of the sender of the reply.
- */
-export function defaultRecipients({ from, conversation }: {
-  from: Address, conversation: Conversation
-}): { from: Seq<Address>, to: Seq<Address>, cc: Seq<Address> } {
-  const ppl = conversation.participants
-
-  const to = m.filter(
-    a => !sameEmail(a.email, from.email),
-    uniqBy(a => a.email, m.concat(ppl.to, ppl.from))
-  )
-
-  const cc = m.filter(
-    a => !sameEmail(a.email, from.email) && !m.some(b => sameEmail(a.email, b.email), to),
-    ppl.cc,
-  )
-
-  return { from: m.seq([from]), to, cc }
-}
-
 // TODO: remove references from list if necessary to keep length down (always
 // keep at least first and last reference)
 function references(conversation: Conversation): string {
