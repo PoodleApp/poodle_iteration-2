@@ -95,6 +95,8 @@ export default class Conversation {
 
   // It is critical that the first ID in the list corresponds to the first
   // message in the thread
+  // TODO: include IDs from references lists in messages that match up with
+  // messages that we do not have copies of
   get references (): Seqable<string> {
     const thread = Thrd.buildThread(this.allActivities)
     return Thrd.getReferences(thread)
