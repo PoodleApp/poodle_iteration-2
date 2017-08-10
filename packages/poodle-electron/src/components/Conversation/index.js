@@ -74,7 +74,7 @@ export function Conversation (props: Props) {
         </p>
         <RaisedButton
           label='Retry'
-          onClick={() => alert('TODO: implement "retry" action')}
+          onClick={props.conversation.reload}
         />
       </div>
     )
@@ -123,8 +123,7 @@ export function Conversation (props: Props) {
             <IconButton iconClassName='material-icons'>refresh</IconButton>
           }
           onLeftIconButtonTouchTap={() => dispatch(router.goBack())}
-          onRightIconButtonTouchTap={() =>
-            alert('TODO: implement refresh action')}
+          onRightIconButtonTouchTap={props.conversation.reload}
         />
       </header>
       <div style={styles.body}>

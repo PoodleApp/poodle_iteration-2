@@ -79,7 +79,7 @@ export function ActivityStream (props: Props) {
         {errorDisplay}
         <RaisedButton
           label='Retry'
-          onClick={() => alert('TODO: implement retry action')}
+          onClick={props.conversations.reload}
         />
       </div>
     )
@@ -109,8 +109,7 @@ export function ActivityStream (props: Props) {
           iconElementRight={
             <IconButton iconClassName='material-icons'>refresh</IconButton>
           }
-          onRightIconButtonTouchTap={() =>
-            alert('TODO: implement refresh action')}
+          onRightIconButtonTouchTap={props.conversations.reload}
         />
       </header>
       <div style={styles.body}>
