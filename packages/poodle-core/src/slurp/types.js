@@ -6,7 +6,8 @@ export type Slurp<T, E = Error> = {
   value?: T,
   error?: E,
   latest?: T | E,
-  complete: boolean
+  complete: boolean,
+  reload: () => void
 }
 
 export type ComponentKey = string

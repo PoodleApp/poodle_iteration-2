@@ -138,8 +138,19 @@ function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
       }
     }
 
+    function onReload (key: PropName): () => void {
+      return () => {
+        if (sources.hasOwnProperty(key)) {
+          const source = sources[key]
+          source.unsubscribe()
+          const unsubscribe = subscribe(dispatch, componentKey, key, source.source)
+          sources[key] = { source: source.source, unsubscribe }
+        }
+      }
+    }
+
     return {
-      ...selectors.props(state.slurp, componentKey, props),
+      ...selectors.props(state.slurp, componentKey, props, onReload),
       onWillUnmount
     }
   }

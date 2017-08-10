@@ -4,28 +4,33 @@ import * as kefir from 'kefir'
 
 import type { ComponentKey, PropName } from './types'
 
+export const ON_VALUE: 'slurp/on-value' = 'slurp/on-value'
+export const ON_ERROR: 'slurp/on-error' = 'slurp/on-error'
+export const ON_COMPLETE: 'slurp/on-complete' = 'slurp/on-complete'
+export const CLEANUP: 'slurp/cleanup' = 'slurp/cleanup'
+
 export type Action =
   | {
       componentKey: ComponentKey,
       propName: PropName,
-      type: 'slurp/on-value',
+      type: typeof ON_VALUE,
       value: any
     }
   | {
       componentKey: ComponentKey,
       propName: PropName,
-      type: 'slurp/on-error',
+      type: typeof ON_ERROR,
       error: any
     }
   | {
       componentKey: ComponentKey,
       propName: PropName,
-      type: 'slurp/on-complete'
+      type: typeof ON_COMPLETE
     }
   | {
       componentKey: ComponentKey,
       propName: PropName, // Included for symmetry with other actions
-      type: 'slurp/cleanup'
+      type: typeof CLEANUP
     }
 
 export function onValue<Value> (
@@ -36,7 +41,7 @@ export function onValue<Value> (
   return {
     componentKey,
     propName,
-    type: 'slurp/on-value',
+    type: ON_VALUE,
     value
   }
 }
@@ -49,7 +54,7 @@ export function onError<Error> (
   return {
     componentKey,
     propName,
-    type: 'slurp/on-error',
+    type: ON_ERROR,
     error
   }
 }
@@ -58,9 +63,9 @@ export function onComplete (
   componentKey: ComponentKey,
   propName: PropName
 ): Action {
-  return { componentKey, propName, type: 'slurp/on-complete' }
+  return { componentKey, propName, type: ON_COMPLETE }
 }
 
-export function cleanup(componentKey: ComponentKey): Action {
-  return { componentKey, propName: '', type: 'slurp/cleanup' }
+export function cleanup (componentKey: ComponentKey): Action {
+  return { componentKey, propName: '', type: CLEANUP }
 }
