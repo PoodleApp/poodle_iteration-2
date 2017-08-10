@@ -1,4 +1,4 @@
 /* @flow */
 
-export { defaultRecipients }  from './helpers'
 export { default as comment } from './comment'
+export { default as like } from './like'

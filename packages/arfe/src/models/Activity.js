@@ -10,6 +10,7 @@ import Message from './Message'
 import * as Part from './MessagePart'
 import * as U from './uri'
 import * as asutil from '../util/activity'
+import { catMaybes } from '../util/maybe'
 import { uniqBy } from '../util/mori'
 
 import type { ValueIterator } from 'activitystrea.ms'
@@ -65,13 +66,9 @@ export default class Activity {
 
   get objectLinks (): Seq<AS.models.Link> {
     const objs = arrayFromIterable(this.activity.object)
-    const bareUris = m.map(
-      uri => AS.link().href(uri).get(),
-      m.filter(obj => typeof obj === 'string', objs)
-    )
     const bareLinks = m.filter(obj => hasType(Vocab.Link, obj), objs)
     const nestedLinks = m.mapcat(obj => arrayFromIterable(obj.url), objs)
-    return m.concat(bareUris, bareLinks, nestedLinks)
+    return m.concat(bareLinks, nestedLinks)
   }
 
   get objectUri (): ?URI {
@@ -79,7 +76,12 @@ export default class Activity {
   }
 
   get objectUris (): Seq<URI> {
-    return m.map(l => l.href, this.objectLinks)
+    const linkHrefs = m.map(l => l.href, this.objectLinks)
+    const objectIds = m.map(
+      obj => obj.id,
+      arrayFromIterable(this.activity.object)
+    )
+    return catMaybes(m.concat(linkHrefs, objectIds))
   }
 
   get publishTime (): ?Moment {

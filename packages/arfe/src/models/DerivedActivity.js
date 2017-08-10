@@ -6,7 +6,7 @@ import * as Vocab from 'vocabs-as'
 import * as asutil from '../util/activity'
 import Activity from './Activity'
 import Message from './Message'
-import { mailtoUri } from './uri'
+import { mailtoUri, sameUri } from './uri'
 
 import type { List, Map, Seq, Seqable } from 'mori'
 import type Moment from 'moment'
@@ -116,10 +116,6 @@ export default class DerivedActivity {
     }
   }
 
-  get likeCount (): number {
-    return this.likes ? m.count(this.likes) : 0
-  }
-
   get isEdited (): boolean {
     return !m.isEmpty(this.prevRevisions)
   }
@@ -149,8 +145,16 @@ export default class DerivedActivity {
   // If the activity has been revised, there are certain circumstances where it
   // should be addressable by the ID of any of its revisions. (E.g., when
   // computing like counts.)
-  hasId (uri: URI): ?boolean {
-    return m.some(({ revision }) => uri === revision.id, this.revisions)
+  hasId (uri: URI): boolean {
+    return !!m.some(({ revision }) => sameUri(uri, revision.id), this.revisions)
+  }
+
+  // As with `hasId`, but for object references
+  hasObjectUri (uri: URI): boolean {
+    return !!m.some(
+      ({ revision }) => m.some(uri_ => sameUri(uri, uri_), revision.objectUris),
+      this.revisions
+    )
   }
 
   get message (): ?Message {
