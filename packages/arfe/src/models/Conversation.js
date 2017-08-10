@@ -93,6 +93,13 @@ export default class Conversation {
     return reduceConversation(f, init, this)
   }
 
+  // It is critical that the first ID in the list corresponds to the first
+  // message in the thread
+  get references (): Seqable<string> {
+    const thread = Thrd.buildThread(this.allActivities)
+    return Thrd.getReferences(thread)
+  }
+
   replyRecipients (actor: { email: string, name?: string }): Participants {
     const { to, from, cc } = this.participants
     const replyFrom = m.seq([Addr.build(actor)])

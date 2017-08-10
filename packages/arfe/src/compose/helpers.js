@@ -86,11 +86,10 @@ export function defaultRecipients({ from, conversation }: {
   return { from: m.seq([from]), to, cc }
 }
 
-// TODO: make sure that references are ordered from earliest to latest
 // TODO: remove references from list if necessary to keep length down (always
 // keep at least first and last reference)
 function references(conversation: Conversation): string {
-  return m.intoArray(m.map(msg => `<${msg.id}>`, conversation.messages)).join(' ')
+  return m.intoArray(m.map(id => `<${id}>`, conversation.references)).join(' ')
 }
 
 
