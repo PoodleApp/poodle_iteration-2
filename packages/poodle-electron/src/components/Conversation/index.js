@@ -32,7 +32,8 @@ type OwnProps = {
 type Props = OwnProps & {
   conversation: Slurp<ArfeConversation>,
   dispatch: Dispatch<any>,
-  editing: ?ActivityId
+  editing: ?ActivityId,
+  pendingLikes: ActivityId[]
 }
 
 type ActivityId = string
@@ -88,7 +89,7 @@ export function Conversation (props: Props) {
             conversation={conversation}
             dispatch={props.dispatch}
             editing={props.editing}
-            loading={false}
+            pendingLikes={props.pendingLikes}
           />,
         conversation.activities
       )
@@ -135,18 +136,10 @@ export function Conversation (props: Props) {
   )
 }
 
-const ComponentWithState = redux.connect(function mapStateToProps (
-  state: State
-): $Shape<Props> {
-  return {
-    editing: null // TODO
-  }
-})(Conversation)
-
-const ComponentWithData = slurp(
-  ({ auth }: State, { conversationId }: OwnProps) => ({
-    conversation: subscribe(q.fetchConversation, auth.sync, conversationId)
+export default slurp(
+  ({ auth, queue }: State, { conversationId }: OwnProps) => ({
+    conversation: subscribe(q.fetchConversation, auth.sync, conversationId),
+    editing: null, // TODO
+    pendingLikes: queue.pendingLikes || []
   })
-)(ComponentWithState)
-
-export default ComponentWithData
+)(Conversation)

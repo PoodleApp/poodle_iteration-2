@@ -2,6 +2,7 @@
 
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import * as URI from 'arfe/lib/models/uri'
+import * as m from 'mori'
 
 import type { ActivityViewProps } from './types'
 
@@ -20,4 +21,8 @@ export function myContent (activity: DerivedActivity, email: string): boolean {
   const me = URI.mailtoUri(email)
   const them = activity.actor
   return !!them && URI.equals(them.id, me)
+}
+
+export function pendingLike(activity: DerivedActivity, pendingLikes: URI.URI[]): boolean {
+  return m.some(objectUri => pendingLikes.includes(objectUri), activity.objectUris)
 }

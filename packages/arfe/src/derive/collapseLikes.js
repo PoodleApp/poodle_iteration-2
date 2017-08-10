@@ -23,8 +23,8 @@ function _collapseLikes(
   }
 
   const likes = m.reduce((ls, otherAct) => {
-    const objectUri = otherAct.objectUri
-    if (otherAct.hasType(Vocab.Like) && objectUri && activity.hasId(objectUri)) {
+    const objectUris = otherAct.objectUris
+    if (otherAct.hasType(Vocab.Like) && m.some(uri => activity.hasId(uri), objectUris)) {
       const actor = otherAct.actor
       return actor ? m.assoc(ls, actor.uri, otherAct) : ls
     }

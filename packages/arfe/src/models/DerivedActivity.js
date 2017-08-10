@@ -174,6 +174,10 @@ export default class DerivedActivity {
     return this.activity.objectUri
   }
 
+  get objectUris (): Seq<URI> {
+    return this.activity.objectUris
+  }
+
   get objects (): AS.models.Object[] {
     return this.activity.objects
   }

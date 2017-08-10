@@ -10,6 +10,8 @@ import Paper from 'material-ui/Paper'
 import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import moment from 'moment'
+import * as m from 'mori'
+import * as queue from 'poodle-core/lib/queue/actions'
 import * as q from 'poodle-core/lib/queries/conversation'
 import PropTypes from 'prop-types'
 import React from 'react'
@@ -285,15 +287,14 @@ type LikeButtonProps = ActivityViewProps & {
 }
 
 function LikeButton (props: LikeButtonProps) {
-  const { account, activity, loading, style } = props
+  const { account, activity, conversation, dispatch, pendingLikes, style } = props
   const me = URI.mailtoUri(account.email)
   const alreadyLiked = activity.likedBy(me)
   const mine = helpers.myContent(activity, account.email)
 
   function like () {
-    // TODO:
-    // const { activity, conversation, dispatch } = props
-    // dispatch(A.like(activity, conversation))
+    const recipients = conversation.replyRecipients(props.account)
+    dispatch(queue.sendLikes(account, conversation, m.intoArray(activity.objectUris), recipients))
   }
 
   return (
@@ -301,7 +302,7 @@ function LikeButton (props: LikeButtonProps) {
       style={style || {}}
       label={`+${activity.likeCount + 1}`} // `
       onTouchTap={like}
-      disabled={mine || alreadyLiked || loading}
+      disabled={mine || alreadyLiked || helpers.pendingLike(activity, pendingLikes)}
     />
   )
 }
