@@ -37,6 +37,9 @@ export function fetchConversations (
 ): kefir.Observable<ConversationListItem[], mixed> {
   return sync
     .queryConversations(queryParams)
+    // A conversation with only non-visible activities (likes, edits, etc.) will
+    // effectively be empty, so let's not display it
+    .filter(conversation => !m.isEmpty(conversation.activities))
     .flatMap(processConversation.bind(null, sync))
     .scan((cs, conv) => cs.concat(conv), [])
 }
