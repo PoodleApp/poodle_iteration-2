@@ -121,7 +121,7 @@ export default class Message {
 
   get references (): MessageId[] {
     const refs = getHeaderValue('references', this.headers)
-    return (refs || []).map(idFromHeaderValue)
+    return (refs || []).map(idFromHeaderValue).filter(id => !!id)
   }
 
   get uid (): number {
