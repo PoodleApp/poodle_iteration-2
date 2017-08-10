@@ -15,7 +15,7 @@ type URI = string
 
 export default function Avatar ({ actor, ...rest }: Props) {
   const id = actor ? actor.id : ''
-  const displayName = (actor && actor.name) ? Actor.displayName(actor) : '?'
+  const displayName = actor ? Actor.displayName(actor) : '?'
   const [color, backgroundColor] = getColors(id)
   const letter = getLetter(displayName)
   return (
