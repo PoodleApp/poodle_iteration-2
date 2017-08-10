@@ -25,5 +25,5 @@ export function displayName (actor: ?Actor): string {
 }
 
 export function email (actor: Actor): string {
-  return actor.id.replace(/^[a-z]:/, '')
+  return actor.id.replace(/^[a-z]+:/, '')
 }
