@@ -29,7 +29,7 @@ function _collapseLikes (
         isLikeTarget(activity, otherAct)
       ) {
         const actor = otherAct.actor
-        return actor ? m.assoc(ls, actor.uri, otherAct) : ls
+        return actor ? m.assoc(ls, actor.id, otherAct) : ls
       } else {
         return ls
       }
