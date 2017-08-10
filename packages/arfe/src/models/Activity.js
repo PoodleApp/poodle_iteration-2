@@ -111,7 +111,13 @@ export default class Activity {
 
   get title (): ?AS.models.LanguageValue {
     const object = this.object
-    return object && object.name
+    const name = object && object.name
+    if (name) {
+      return name
+    }
+    if (this.message) {
+      return this.message.subject
+    }
   }
 
   get types (): URI[] {
