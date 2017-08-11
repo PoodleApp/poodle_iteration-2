@@ -5,13 +5,15 @@ const contextMenu = require('electron-context-menu')
 const path = require('path')
 const url = require('url')
 
-const {
-  default: installExtension,
-  REACT_DEVELOPER_TOOLS
-} = require('electron-devtools-installer')
-installExtension(REACT_DEVELOPER_TOOLS)
-  .then(name => console.log(`Added Extension:  ${name}`))
-  .catch(err => console.log('An error occurred: ', err))
+if (process.env.NODE_ENV === 'development') {
+  const {
+    default: installExtension,
+    REACT_DEVELOPER_TOOLS
+  } = require('electron-devtools-installer')
+  installExtension(REACT_DEVELOPER_TOOLS)
+    .then(name => console.log(`Added Extension:  ${name}`))
+    .catch(err => console.log('An error occurred: ', err))
+}
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is GCed.
@@ -33,8 +35,10 @@ function createWindow () {
     })
   )
 
-  // Open the dev tools panel
-  mainWindow.openDevTools()
+  if (process.env.NODE_ENV === 'development') {
+    // Open the dev tools panel
+    mainWindow.openDevTools()
+  }
 
   mainWindow.on('closed', () => {
     // Dereference the window to allow GC

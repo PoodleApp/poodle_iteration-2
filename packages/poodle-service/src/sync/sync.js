@@ -46,7 +46,7 @@ export function startBackgroundSync({ boxes, connectionFactory, db, ...opts }: O
   const timeFrame     = (opts.timeFrame || 30) * days
 
   let lastFetchTime: ?Date
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV === 'development') {
     // Avoid running a sync immediately on startup when in development mode
     lastFetchTime = new Date()
   }
