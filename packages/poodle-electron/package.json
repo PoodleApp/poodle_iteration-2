@@ -11,7 +11,9 @@
     "test": "flow",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
-    "postinstall": "make && electron-rebuild",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "postinstall": "make && electron-builder install-app-deps",
     "prepublishOnly": "yarn test && yarn run build",
     "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
     "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
@@ -33,11 +35,15 @@
       ]
     ]
   },
+  "build": {
+    "mac": {
+      "category": "public.app-category.productivity"
+    }
+  },
   "dependencies": {
     "arfe": "link:../arfe",
     "electron": "^1.6.11",
     "electron-context-menu": "^0.9.1",
-    "electron-rebuild": "^1.5.11",
     "history": "^4.6.1",
     "kefir": "^3.7.3",
     "keytar": "^3.0.2",
@@ -64,6 +70,7 @@
   },
   "devDependencies": {
     "ava": "^0.20.0",
+    "electron-builder": "^19.19.1",
     "electron-devtools-installer": "^2.2.0",
     "in-publish": "^2",
     "react-test-renderer": "^15",
