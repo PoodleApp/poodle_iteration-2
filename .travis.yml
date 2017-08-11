@@ -29,7 +29,9 @@ addons:
     packages:
       - graphicsmagick
       - icnsutils
+      - libgnome-keyring-dev
       - libsecret-1-0
+      - libsecret-1-dev
       - xz-utils
 
 before_install:
