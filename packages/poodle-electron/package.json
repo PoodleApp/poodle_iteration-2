@@ -16,6 +16,7 @@
     "postinstall": "make && electron-builder install-app-deps",
     "prepublishOnly": "yarn test && yarn run build",
     "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
+    "release": "make && electron-builder",
     "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
   },
   "bin": {

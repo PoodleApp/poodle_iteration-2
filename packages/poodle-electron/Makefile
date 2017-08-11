@@ -57,6 +57,7 @@ lib/%.js.flow: src/%.js
 
 clean:
 	rm -rf lib
+	rm -rf dist
 
 define package_dir
 ../$(notdir $(1))
