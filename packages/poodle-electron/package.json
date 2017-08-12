@@ -39,6 +39,10 @@
   "build": {
     "mac": {
       "category": "public.app-category.productivity"
+    },
+    "productName": "Poodle",
+    "publish": {
+      "provider": "github"
     }
   },
   "dependencies": {
