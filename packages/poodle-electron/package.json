@@ -42,8 +42,7 @@
     },
     "productName": "Poodle",
     "publish": [{
-      "provider": "github",
-      "owner": "hallettj"
+      "provider": "github"
     }]
   },
   "dependencies": {
