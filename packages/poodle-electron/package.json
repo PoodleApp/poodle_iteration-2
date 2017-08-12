@@ -1,6 +1,6 @@
 {
   "name": "poodle-electron",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Desktop version of Poodle, an email client with social features",
   "main": "index.js",
   "repository": "git+https://github.com/PoodleApp/poodle-electron.git",
