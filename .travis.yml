@@ -17,11 +17,13 @@ os:
   - osx
 
 cache:
+  yarn: true
   directories:
-    - node_modules
-    - packages/poodle-electron/node_modules
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
+    - $HOME/.electron
+    - $HOME/.electron-gyp
+    - $HOME/.node-gyp
     - $HOME/.npm/_prebuilds
 
 addons:
@@ -32,7 +34,6 @@ addons:
       - libgnome-keyring-dev
       - libsecret-1-0
       - libsecret-1-dev
-      - make
       - xz-utils
 
 before_install:
