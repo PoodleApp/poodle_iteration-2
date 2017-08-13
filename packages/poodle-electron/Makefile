@@ -36,7 +36,7 @@ all: build
 
 # Ask `make` to build all of the transpiled `.js` and `.js.flow` files that we
 # want to end up with in `lib/`.
-build: $(flow_files) $(transpiled_files) remove_symlinks $(packages)
+build: $(flow_files) $(transpiled_files) $(packages)
 
 # This rule tells `make` how to transpile a source file using `babel`.
 # Transpiled files will be written to `lib/`
