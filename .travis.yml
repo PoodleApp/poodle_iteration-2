@@ -40,11 +40,12 @@ before_install:
   - export PATH="$HOME/.yarn/bin:$PATH"
 
 install:
-  - yarn && (cd packages/poodle-electron; yarn)
+  - yarn && (cd packages/poodle-core; yarn) && (cd packages/poodle-electron; yarn)
 
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then (cd packages/poodle-electron; yarn release); fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then (cd packages/poodle-electron; yarn release -- --mac --win); fi
+  - make test
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then (cd packages/poodle-electron; yarn dist); fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then (cd packages/poodle-electron; yarn dist -- --mac --win); fi
 
 before_cache:
   - rm -rf $HOME/.cache/electron-builder/wine
