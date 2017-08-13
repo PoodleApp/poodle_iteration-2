@@ -4,7 +4,6 @@
 packages = node_modules/arfe node_modules/poodle-core node_modules/poodle-service
 
 .PHONY: all build clean remove_symlinks
-.ONESHELL:
 
 # Install `babel-cli` in a project to get the transpiler.
 project_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -70,10 +69,10 @@ endef
 
 define package_template
 $(1): $(call package_dir,$(1))/package.json $(shell find '$(call package_dir,$(1))/src/' -type f)
-	if test -L '$$@'; then rm '$$@'; else rm -rf '$$@'; fi
-	$$(MAKE) -C '$$(call package_dir,$$@)'
-	archive=$$$$(npm pack '$$(call package_dir,$$@)' | grep '.tgz$$$$')
-	tar -xzf "$$$$archive" --transform='s/^package/node_modules\/$$(notdir $$@)/'
+	if test -L '$$@'; then rm '$$@'; else rm -rf '$$@'; fi && \
+	$$(MAKE) -C '$$(call package_dir,$$@)' && \
+	archive=$$$$(npm pack '$$(call package_dir,$$@)' | grep '.tgz$$$$') && \
+	tar -xzf "$$$$archive" --transform='s/^package/node_modules\/$$(notdir $$@)/' && \
 	rm "$$$$archive"
 endef
 
