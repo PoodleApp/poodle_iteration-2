@@ -8,14 +8,14 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "NODE_ENV=development electron .",
-    "pretest": "yarn run build",
+    "pretest": "make",
     "test": "flow",
     "build": "make",
-    "build:watch": "watch 'yarn run build' src",
-    "pack": "yarn run build && electron-builder --dir",
-    "dist": "yarn run build && electron-builder",
+    "build:watch": "watch make src",
+    "pack": "make && electron-builder --dir",
+    "dist": "make && electron-builder",
     "postinstall": "electron-builder install-app-deps",
-    "prepublishOnly": "yarn test && yarn run build"
+    "prepublishOnly": "yarn test && make"
   },
   "bin": {
     "poodle": "./bin/poodle"
