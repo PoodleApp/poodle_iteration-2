@@ -6,9 +6,7 @@
     "test": "tape -r babel-register test/**/*_test.js | tap-summary",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
-    "prepublishOnly": "npm test && npm run build",
-    "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
-    "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
+    "prepublishOnly": "npm test && npm run build"
   },
   "repository": {
     "type": "git",
@@ -37,12 +35,10 @@
     "babel-preset-react": "^6.22.0",
     "babel-preset-stage-3": "^6.22.0",
     "babel-register": "^6.22.0",
-    "in-publish": "^2.0.0",
     "string-to-stream": "^1.1.0",
     "tap-summary": "^3.0.1",
     "tape": "^4.6.3",
-    "tape-async": "^2.3.0",
-    "watch": "^1.0.1"
+    "tape-async": "^2.3.0"
   },
   "dependencies": {
     "activitystrea.ms": "hallettj/activitystrea.ms#fix/template-idempotency",

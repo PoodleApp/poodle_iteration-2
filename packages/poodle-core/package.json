@@ -20,9 +20,7 @@
     "test": "ava",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
-    "prepublishOnly": "yarn test && yarn run build",
-    "prepublish": "(not-in-publish && echo 'Skipping prepublish') || npm run require-npm4-to-publish",
-    "require-npm4-to-publish": "semver -r '>=4.0.0' $(npm --version) || (echo 'NPM 4+ required to publish' && exit 1)"
+    "prepublishOnly": "yarn test && yarn run build"
   },
   "babel": {
     "presets": [
@@ -54,9 +52,7 @@
   },
   "devDependencies": {
     "ava": "^0.21.0",
-    "in-publish": "^2",
-    "react-test-renderer": "^15.6.1",
-    "watch": "^1"
+    "react-test-renderer": "^15.6.1"
   },
   "files": [
     "lib/"
