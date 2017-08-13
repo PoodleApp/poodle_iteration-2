@@ -3,7 +3,7 @@
 
 packages = node_modules/arfe node_modules/poodle-core node_modules/poodle-service
 
-.PHONY: all build clean
+.PHONY: all build clean remove_symlinks
 .ONESHELL:
 
 # Install `babel-cli` in a project to get the transpiler.
@@ -36,7 +36,7 @@ all: build
 
 # Ask `make` to build all of the transpiled `.js` and `.js.flow` files that we
 # want to end up with in `lib/`.
-build: $(flow_files) $(transpiled_files) $(packages)
+build: $(flow_files) $(transpiled_files) remove_symlinks $(packages)
 
 # This rule tells `make` how to transpile a source file using `babel`.
 # Transpiled files will be written to `lib/`
@@ -58,6 +58,11 @@ lib/%.js.flow: src/%.js
 clean:
 	rm -rf lib
 	rm -rf dist
+
+remove_symlinks:
+	for file in $(packages); \
+	do if test -L "$$file"; then rm "$$file"; fi; \
+	done
 
 define package_dir
 ../$(notdir $(1))
