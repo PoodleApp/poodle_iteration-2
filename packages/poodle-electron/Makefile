@@ -72,7 +72,8 @@ $(1): $(call package_dir,$(1))/package.json $(shell find '$(call package_dir,$(1
 	if test -L '$$@'; then rm '$$@'; else rm -rf '$$@'; fi && \
 	$$(MAKE) -C '$$(call package_dir,$$@)' && \
 	archive=$$$$(npm pack '$$(call package_dir,$$@)' | grep '.tgz$$$$') && \
-	tar -xzf "$$$$archive" --transform='s/^package/node_modules\/$$(notdir $$@)/' && \
+	mkdir -p 'node_modules/$$(notdir $$@)' && \
+	tar -xzf "$$$$archive" --strip-components 1 -C 'node_modules/$$(notdir $$@)' && \
 	rm "$$$$archive"
 endef
 
