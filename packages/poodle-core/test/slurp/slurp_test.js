@@ -36,7 +36,7 @@ test('supplies data to component from an observable source', async t => {
   const display = getCounterDisplay(renderer)
   t.is(display, 'loading')
 
-  await delay(100)
+  await delay(250)
 
   t.is(getCounterDisplay(renderer), 3)
 })
@@ -94,7 +94,7 @@ test('unsubscribes from streams when component unmounts', async t => {
   )
 
   await unmount
-  await delay(100)
+  await delay(250)
 })
 
 test('re-subscribes to sources when props change', async t => {
@@ -134,7 +134,7 @@ test('re-subscribes to sources when props change', async t => {
   emitProps && emitProps({ initialCount: 10 })
 
   await firstRender
-  await delay(100)
+  await delay(250)
 
   t.is(getCounterDisplay(renderer), 13)
   t.is(callCount, 1)
@@ -142,7 +142,7 @@ test('re-subscribes to sources when props change', async t => {
   emitProps && emitProps({ initialCount: 100 })
 
   await secondRender
-  await delay(100)
+  await delay(250)
 
   t.is(getCounterDisplay(renderer), 103)
   t.is(callCount, 2)
@@ -192,7 +192,7 @@ test('does not re-subscribe on props change if same effect is given', async t =>
   emitProps && emitProps({ initialCount: 10 })
 
   await firstRender
-  await delay(100)
+  await delay(250)
 
   t.is(getCounterDisplay(renderer), 3)
   t.is(callCount, 1)
@@ -200,7 +200,7 @@ test('does not re-subscribe on props change if same effect is given', async t =>
   emitProps && emitProps({ initialCount: 100 })
 
   await secondRender
-  await delay(100)
+  await delay(250)
 
   t.is(getCounterDisplay(renderer), 3)
   t.is(callCount, 1)
