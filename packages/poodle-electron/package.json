@@ -41,7 +41,9 @@
     "productName": "Poodle",
     "publish": [
       {
-        "provider": "github"
+        "provider": "github",
+        "owner": "PoodleApp",
+        "repo": "poodle"
       }
     ]
   },
