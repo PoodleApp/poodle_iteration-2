@@ -36,7 +36,7 @@ all: build
 
 # Ask `make` to build all of the transpiled `.js` and `.js.flow` files that we
 # want to end up with in `lib/`.
-build: $(flow_files) $(transpiled_files) $(packages)
+build: $(flow_files) $(transpiled_files) remove_symlinks $(packages)
 
 # This rule tells `make` how to transpile a source file using `babel`.
 # Transpiled files will be written to `lib/`
@@ -68,7 +68,7 @@ define package_dir
 ../$(notdir $(1))
 endef
 
-define package_template =
+define package_template
 $(1): $(call package_dir,$(1))/package.json $(shell find '$(call package_dir,$(1))/src/' -type f)
 	if test -L '$$@'; then rm '$$@'; else rm -rf '$$@'; fi
 	$$(MAKE) -C '$$(call package_dir,$$@)'

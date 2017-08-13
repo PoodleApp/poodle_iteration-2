@@ -10,7 +10,6 @@
     "start": "NODE_ENV=development electron .",
     "pretest": "yarn run build",
     "test": "flow",
-    "prebuild": "make remove_symlinks",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
     "pack": "yarn run build && electron-builder --dir",
