@@ -32,6 +32,7 @@ addons:
       - libgnome-keyring-dev
       - libsecret-1-0
       - libsecret-1-dev
+      - make
       - xz-utils
 
 before_install:
