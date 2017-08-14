@@ -7,6 +7,7 @@
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
   "scripts": {
+    "prestart": "make",
     "start": "NODE_ENV=development electron .",
     "pretest": "make",
     "test": "flow",
