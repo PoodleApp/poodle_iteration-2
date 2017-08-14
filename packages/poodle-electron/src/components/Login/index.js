@@ -105,7 +105,7 @@ type LoginFormProps = {
 }
 
 function LoginForm (props: LoginFormProps, context) {
-  let emailInput: ?HTMLInputElement
+  let emailInput: ?Object
 
   function onSubmit (event) {
     onLogin(props, emailInput, event)
@@ -146,14 +146,14 @@ LoginForm.contextTypes = {
 
 function onLogin (
   { dispatch }: LoginFormProps,
-  emailInput: ?HTMLInputElement,
+  emailInput: ?Object,
   event: Event
 ) {
   event.preventDefault()
-  if (!emailInput) {
+  if (!emailInput || !emailInput.getValue) {
     throw new Error('email input could not be found')
   }
-  const email = emailInput.value
+  const email = emailInput.getValue()
   if (email) {
     dispatch(authActions.setAccount({ email }))
   }
