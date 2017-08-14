@@ -10,12 +10,12 @@
     "prestart": "make",
     "start": "NODE_ENV=development electron .",
     "pretest": "make",
-    "test": "flow",
+    "test": "../../node_modules/.bin/flow",
     "build": "make",
-    "build:watch": "watch make src",
+    "build:watch": "../../node_modules/.bin/watch make src",
     "pack": "make && electron-builder --dir",
     "dist": "make && electron-builder",
-    "postinstall": "electron-builder install-app-deps",
+    "postinstall": "make && electron-builder install-app-deps",
     "prepublishOnly": "yarn test && make"
   },
   "bin": {
