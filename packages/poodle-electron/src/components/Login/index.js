@@ -60,17 +60,16 @@ function getStyles (palette: Object) {
 
 type LoginProps = {
   account: ?authActions.Account,
-  dispatch: Dispatch<any>,
   errors: ?(Error[]),
   oauthLoadingMessages: string[],
   onDismissError: typeof chromeActions.dismissError,
+  onLogin: typeof authActions.setAccount,
   location: Object,
   loggedIn: boolean
 }
 
 export function Login ({
   account,
-  dispatch,
   location,
   loggedIn,
   oauthLoadingMessages,
@@ -91,7 +90,7 @@ export function Login ({
 
   return (
     <div>
-      <LoginForm dispatch={dispatch} />
+      <LoginForm onLogin={props.onLogin} />
       <Dialog modal={true} open={messages.length > 0}>
         {messages}
       </Dialog>
@@ -101,7 +100,7 @@ export function Login ({
 }
 
 type LoginFormProps = {
-  dispatch: Dispatch<any>
+  onLogin: typeof authActions.setAccount
 }
 
 function LoginForm (props: LoginFormProps, context) {
@@ -145,7 +144,7 @@ LoginForm.contextTypes = {
 }
 
 function onLogin (
-  { dispatch }: LoginFormProps,
+  { onLogin }: LoginFormProps,
   emailInput: ?Object,
   event: Event
 ) {
@@ -155,7 +154,7 @@ function onLogin (
   }
   const email = emailInput.getValue()
   if (email) {
-    dispatch(authActions.setAccount({ email }))
+    onLogin({ email })
   }
 }
 
@@ -173,6 +172,7 @@ function mapStateToProps ({ auth, chrome }: State): $Shape<LoginProps> {
 
 function mapDispatchToProps (dispatch: Dispatch<*>) {
   return {
+    onLogin(...args) { dispatch(authActions.setAccount(...args)) },
     onDismissError(...args) { dispatch(chromeActions.dismissError(...args)) }
   }
 }
