@@ -255,7 +255,7 @@ test('local `dispatch` function does not shadow `dispatch` from use of `connect`
   )
 })
 
-test('calling `reload` recreates subscription', async t => {
+test('before subscription has emitted a value, calling `reload` recreates subscription', async t => {
   t.plan(2)
 
   let subscribeCount = 0
@@ -275,6 +275,51 @@ test('calling `reload` recreates subscription', async t => {
   function MyComponent (props) {
     const value = props.count.value
     if (firstRender) {
+      props.count.reload()
+      firstRender = false
+    }
+    return (
+      <div>
+        {value ? value.count : 'loading'}
+      </div>
+    )
+  }
+
+  const C = slurp.slurp(() => ({
+    count: effects.subscribe(observable)
+  }))(MyComponent)
+
+  const renderer = ReactTestRenderer.create(
+    <Provider store={store}>
+      <C />
+    </Provider>
+  )
+
+  await delay(250)
+  t.is(subscribeCount, 2)
+  t.is(unsubscribeCount, 1)
+})
+
+test('after subscription has emitted a value, calling `reload` recreates subscription', async t => {
+  t.plan(2)
+
+  let subscribeCount = 0
+  let unsubscribeCount = 0
+  const observable = () =>
+    kefir.stream(emitter => {
+      subscribeCount += 1
+      states().onValue(v => {
+        emitter.emit(v)
+      })
+      return function unsubscribe () {
+        unsubscribeCount += 1
+      }
+    })
+
+  let firstRender = true
+  function MyComponent (props) {
+    const value = props.count.value
+    if (firstRender && value) {
       props.count.reload()
       firstRender = false
     }

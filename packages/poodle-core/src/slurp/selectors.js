@@ -1,5 +1,6 @@
 /* @flow */
 
+import mapValues from 'lodash.mapvalues'
 import * as helpers from './helpers'
 import type {
   ComponentKey,
@@ -15,12 +16,15 @@ export function props (
   defaultProps: Object,
   reload: (propName: PropName) => () => void
 ): Object {
-  const ss = subscriptionStates(state, key)
+  const ss = mapValues(subscriptionStates(state, key), (s, propName) => ({
+    ...s,
+    reload: reload(propName)
+  }))
   const props = { ...defaultProps, ...ss }
-  for (const key of Object.keys(props)) {
-    if (helpers.isEffect(props[key])) {
+  for (const propName of Object.keys(props)) {
+    if (helpers.isEffect(props[propName])) {
       // Replace any Observables that are not yet represented in redux state
-      props[key] = initSlurp(reload(key))
+      props[propName] = initSlurp(reload(propName))
     }
   }
   return props
