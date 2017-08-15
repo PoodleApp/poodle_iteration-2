@@ -4,7 +4,7 @@ import keytar from 'keytar'
 import * as auth from 'poodle-core/lib/actions/auth'
 import authSaga from 'poodle-core/lib/sagas/auth'
 import queueSaga from 'poodle-core/lib/queue/saga'
-import { fork } from 'redux-saga/effects'
+import { all, fork } from 'redux-saga/effects'
 import * as oauth from '../oauth'
 
 import type { Effect } from 'redux-saga'
@@ -49,8 +49,5 @@ const authDeps = {
 }
 
 export default function * root (): Generator<Effect, void, any> {
-  yield [
-    fork(authSaga, authDeps),
-    fork(queueSaga)
-  ]
+  yield all([fork(authSaga, authDeps), fork(queueSaga)])
 }

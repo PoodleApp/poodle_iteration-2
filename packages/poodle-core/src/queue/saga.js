@@ -2,8 +2,15 @@
 
 import composeLike from 'arfe/lib/compose/like'
 import Sync from 'poodle-service/lib/sync'
-import { type Effect, takeEvery } from 'redux-saga'
-import { call, fork, put, select } from 'redux-saga/effects'
+import {
+  type Effect,
+  all,
+  call,
+  fork,
+  put,
+  select,
+  takeEvery
+} from 'redux-saga/effects'
 import stringToStream from 'string-to-stream'
 import * as chrome from '../actions/chrome'
 import * as queue from './actions'
@@ -46,8 +53,5 @@ function * sendLike (action: queue.Action): Generator<Effect, void, any> {
 }
 
 export default function * root (): Generator<Effect, void, any> {
-  yield [
-    fork(takeEvery, queue.SEND_LIKES, sendLike)
-  ]
+  yield all([fork(takeEvery, queue.SEND_LIKES, sendLike)])
 }
-

@@ -77,10 +77,7 @@ export function ActivityStream (props: Props) {
     content = (
       <div>
         {errorDisplay}
-        <RaisedButton
-          label='Retry'
-          onClick={props.conversations.reload}
-        />
+        <RaisedButton label='Retry' onClick={props.conversations.reload} />
       </div>
     )
   } else if (!conversations) {
@@ -107,9 +104,13 @@ export function ActivityStream (props: Props) {
         <AppBar
           title={<span style={styles.title}>Poodle</span>}
           iconElementRight={
-            <IconButton iconClassName='material-icons'>refresh</IconButton>
+            <IconButton
+              iconClassName='material-icons'
+              onClick={props.conversations.reload}
+            >
+              refresh
+            </IconButton>
           }
-          onRightIconButtonTouchTap={props.conversations.reload}
         />
       </header>
       <div style={styles.body}>
@@ -157,14 +158,19 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
   )
 }
 
-const ActivityStreamWithData = slurp(({ auth, chrome }: State, { }: OwnProps) => ({
-  conversations: subscribe(q.fetchConversations, auth.sync, {
-    labels: ['\\Inbox'],
-    limit: 30
+const ActivityStreamWithData = slurp(
+  ({ auth, chrome }: State, { }: OwnProps) => ({
+    conversations: subscribe(q.fetchConversations, auth.sync, {
+      labels: ['\\Inbox'],
+      limit: 30
+    }),
+    errors: chrome.errors
   }),
-  errors: chrome.errors
-}), (dispatch: Dispatch<*>) => ({
-  onDismissError(...args) { dispatch(chrome.dismissError(...args)) }
-}))(ActivityStream)
+  (dispatch: Dispatch<*>) => ({
+    onDismissError (...args) {
+      dispatch(chrome.dismissError(...args))
+    }
+  })
+)(ActivityStream)
 
 export default ActivityStreamWithData

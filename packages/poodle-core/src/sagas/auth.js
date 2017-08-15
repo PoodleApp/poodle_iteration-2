@@ -2,8 +2,7 @@
 
 import * as oauth from 'poodle-service/lib/oauth/google'
 import { newSync } from 'poodle-service/lib/sync'
-import { takeLatest } from 'redux-saga'
-import { call, cancelled, fork, put } from 'redux-saga/effects'
+import { all, call, cancelled, fork, put, takeLatest } from 'redux-saga/effects'
 import * as auth from '../actions/auth'
 import * as chrome from '../actions/chrome'
 import { client_id, client_secret } from '../constants'
@@ -128,8 +127,8 @@ async function getTokenGenerator (
 export default function * root (
   deps: Dependencies
 ): Generator<Effect, void, any> {
-  yield [
+  yield all([
     fork(takeLatest, 'auth/setAccount', initAccount, deps),
     fork(lookupAccount, deps)
-  ]
+  ])
 }
