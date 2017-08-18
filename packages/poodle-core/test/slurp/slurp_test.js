@@ -2,17 +2,17 @@
 
 import test from 'ava'
 import kefir from 'kefir'
-import React from 'react'
-import { Provider, connect } from 'react-redux'
+import * as React from 'react'
+import { type ConnectedComponentClass, Provider, connect } from 'react-redux'
 import ReactTestRenderer from 'react-test-renderer'
 import { combineReducers, createStore } from 'redux'
 
-import * as slurp from '../../src/slurp'
+import { type Slurp, reducer as slurpReducer, slurp } from '../../src/slurp'
 import * as effects from '../../src/slurp/effects'
 
 const store = createStore(
   combineReducers({
-    slurp: slurp.reducer
+    slurp: slurpReducer
   })
 )
 
@@ -23,7 +23,7 @@ const states = (initialCount: number = 0) => {
 
 test('supplies data to component from an observable source', async t => {
   t.plan(2)
-  const C = slurp.slurp(() => ({
+  const C = slurp(() => ({
     count: effects.subscribe(states)
   }))(Counter)
 
@@ -50,7 +50,7 @@ test('accepts prop values that are not observable or promise effects', async t =
     return <div>props.foo</div>
   }
 
-  const C = slurp.slurp(() => ({
+  const C = slurp(() => ({
     count: effects.subscribe(states),
     foo: 1
   }))(Foo)
@@ -75,7 +75,7 @@ test('unsubscribes from streams when component unmounts', async t => {
       }
     })
 
-  const C = slurp.slurp(() => ({
+  const C = slurp(() => ({
     count: effects.subscribe(observable)
   }))(Counter)
 
@@ -106,7 +106,7 @@ test('re-subscribes to sources when props change', async t => {
     return states(initialCount)
   }
 
-  const C = slurp.slurp((state, { initialCount }) => ({
+  const C = slurp((state, { initialCount }) => ({
     count: effects.subscribe(statesSpy, initialCount)
   }))(Counter)
 
@@ -115,7 +115,7 @@ test('re-subscribes to sources when props change', async t => {
     emitProps = emitter.emit
   })
 
-  let onRender
+  let onRender = noop
   const renders = kefir.stream(emitter => {
     onRender = v => emitter.emit(v)
   })
@@ -164,7 +164,7 @@ test('does not re-subscribe on props change if same effect is given', async t =>
     })
   }
 
-  const C = slurp.slurp((state, { initialCount }) => ({
+  const C = slurp((state, { initialCount }) => ({
     count: effects.subscribe(observable, 0)
   }))(Counter)
 
@@ -173,7 +173,7 @@ test('does not re-subscribe on props change if same effect is given', async t =>
     emitProps = emitter.emit
   })
 
-  let onRender
+  let onRender = noop
   const renders = kefir.stream(emitter => {
     onRender = v => emitter.emit(v)
   })
@@ -214,7 +214,7 @@ test('`dispatch` function is available', async t => {
     return <div />
   }
 
-  const C = slurp.slurp(() => ({
+  const C = slurp(() => ({
     count: effects.subscribe(states)
   }))(CheckForDispatch)
 
@@ -237,7 +237,7 @@ test('local `dispatch` function does not shadow `dispatch` from use of `connect`
     return <div />
   }
 
-  const C = slurp.slurp((state, ownProps) => {
+  const C = slurp((state, ownProps) => {
     t.true(ownProps.connected, 'receives props from redux state')
     return {
       count: effects.subscribe(states)
@@ -285,7 +285,7 @@ test('before subscription has emitted a value, calling `reload` recreates subscr
     )
   }
 
-  const C = slurp.slurp(() => ({
+  const C = slurp(() => ({
     count: effects.subscribe(observable)
   }))(MyComponent)
 
@@ -330,7 +330,7 @@ test('after subscription has emitted a value, calling `reload` recreates subscri
     )
   }
 
-  const C = slurp.slurp(() => ({
+  const C = slurp(() => ({
     count: effects.subscribe(observable)
   }))(MyComponent)
 
@@ -353,7 +353,10 @@ function MinimalComponent (props) {
   return <div />
 }
 
-function Counter (props) {
+function Counter (props: {
+  count: Slurp<{ count: number }, empty>,
+  initialCount?: number
+}) {
   const value = props.count.value
 
   if (value) {
@@ -375,11 +378,10 @@ function getCounterDisplay (renderer) {
 }
 
 class PropUpdater extends React.Component<
-  void,
   {
     onRender: (props: Object) => void,
     props: kefir.Observable<Object>,
-    children: React.Element<*>[]
+    children: React.Element<any>
   },
   { props?: Object }
 > {
@@ -395,7 +397,7 @@ class PropUpdater extends React.Component<
     if (this.state.props) {
       this.props.onRender(this.props)
       const child = React.Children.only(this.props.children)
-      return React.cloneElement(child, this.state.props)
+      return React.cloneElement(child, (this.state.props: any))
     } else {
       return <div />
     }
@@ -403,8 +405,7 @@ class PropUpdater extends React.Component<
 }
 
 class MountChildBriefly extends React.Component<
-  void,
-  { children: React.Element<*>[], onUnmount: Function },
+  { children: React.Element<any>, onUnmount: Function },
   { childMounted: boolean }
 > {
   state: { childMounted: boolean }
@@ -434,3 +435,5 @@ function delay (t) {
     setTimeout(resolve, t)
   })
 }
+
+function noop () {}

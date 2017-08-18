@@ -1,25 +1,17 @@
 /* @flow */
 
-import React from 'react'
-import type { StatelessComponent } from 'react-redux'
-
-type Lifecycle = (<P>(
-  c: StatelessComponent<P>
-) => Class<React.Component<void, P & LifecycleProps, void>>) &
-  (<Def, P, S>(
-    c: Class<React.Component<Def, P, S>>
-  ) => Class<React.Component<Def, P & LifecycleProps, void>>)
+import * as React from 'react'
 
 type LifecycleProps = {
   onWillUnmount: () => any
 }
 
-const lifecycle: Lifecycle = (WrappedComponent: *) => {
+function lifecycle<P>(WrappedComponent: React.ComponentType<P>): Class<React.Component<P>> {
   const wrappedComponentName =
     WrappedComponent.displayName || WrappedComponent.name || 'Component'
-  const displayName = `Lifecycle(${wrappedComponentName})`
+  const displayName = `Lifecycle(${String(wrappedComponentName)})`
 
-  class Lifecycle extends React.Component<*, *, *> {
+  class Lifecycle extends React.Component<*> {
     componentWillUnmount () {
       const onWillUnmount = this.props.onWillUnmount
       onWillUnmount()

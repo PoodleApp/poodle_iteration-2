@@ -28,7 +28,8 @@ import type {
 
 // Map an `Effect` that produces an observable or a promise to a value or an
 // error
-type FromEffect = <T, E>(eff: effects.Effect<T, E>) => Slurp<T, E>
+type FromEffect = (<T, E>(eff: effects.Effect<T, E>) => Slurp<T, E>) &
+  (<T>(other: T) => T)
 
 const getKey = (function () {
   let lastKey = 1
@@ -143,7 +144,12 @@ function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
         if (sources.hasOwnProperty(key)) {
           const source = sources[key]
           source.unsubscribe()
-          const unsubscribe = subscribe(dispatch, componentKey, key, source.source)
+          const unsubscribe = subscribe(
+            dispatch,
+            componentKey,
+            key,
+            source.source
+          )
           sources[key] = { source: source.source, unsubscribe }
         }
       }
