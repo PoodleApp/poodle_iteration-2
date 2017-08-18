@@ -7,7 +7,7 @@ import MenuItem from 'material-ui/MenuItem'
 import * as colors from 'material-ui/styles/colors'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import * as q from 'poodle-core/lib/queries/conversation'
-import React from 'react'
+import * as React from 'react'
 import * as helpers from './helpers'
 
 import type { ActivityViewProps } from './types'

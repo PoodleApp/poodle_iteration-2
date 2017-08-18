@@ -1,10 +1,9 @@
 [ignore]
 .*/arfe/test/.*
-.*/graphql-imap/test/.*
-.*/mailcomposer/.*
-.*/poodle-electron/lib/.*
 .*/kefir/test/flow/.*
-.*/redux-slurp/test/.*
+.*/mailcomposer/.*
+.*/node_modules/react-event-listener/.*
+.*/poodle-electron/lib/.*
 
 [include]
 

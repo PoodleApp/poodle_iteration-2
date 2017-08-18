@@ -3,7 +3,7 @@
 import * as authActions from 'poodle-core/lib/actions/auth'
 import Sync from 'poodle-service/lib/sync'
 import * as queryString from 'query-string'
-import React from 'react'
+import * as React from 'react'
 import * as redux from 'react-redux'
 import { Redirect, Route } from 'react-router-dom'
 
@@ -12,17 +12,15 @@ import type { State } from '../reducers'
 
 type Props = {
   account: ?authActions.Account,
-  component?: ReactClass<*>,
-  render?: (router: ContextRouter) => React.Element<*>,
+  component?: React.ComponentType<*>,
+  render?: (router: ContextRouter) => React.Element<any>,
   sync: ?Sync,
-  children?: (router: ContextRouter) => React.Element<*>,
   path?: string,
   exact?: boolean,
   strict?: boolean
 }
 
 export function AuthenticatedRoute ({
-  children,
   component,
   render,
   ...rest
