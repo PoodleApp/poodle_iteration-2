@@ -1,6 +1,6 @@
 /* @flow */
 
-import composeComment from 'arfe/lib/compose/comment'
+import * as compose from 'arfe/lib/compose'
 import Sync from 'poodle-service/lib/sync'
 import {
   type Effect,
@@ -12,19 +12,39 @@ import {
 } from 'redux-saga/effects'
 import stringToStream from 'string-to-stream'
 import * as chrome from '../actions/chrome'
-import * as compose from './actions'
+import * as composeActions from './actions'
 
 // Generator type parameters are of the form: `Generator<+Yield,+Return,-Next>`
 
+function * sendEdit (
+  sync: Sync,
+  action: composeActions.Action
+): Generator<Effect, void, any> {
+  if (action.type !== composeActions.EDIT) {
+    return
+  }
+  const { account, activity, conversation, recipients, content } = action
+  const message = compose.edit({
+    ...recipients,
+    content: {
+      mediaType: content.mediaType,
+      stream: stringToStream(content.string)
+    },
+    conversation,
+    activity
+  })
+  yield * transmit(sync, message)
+}
+
 function * sendReply (
   sync: Sync,
-  action: compose.Action
+  action: composeActions.Action
 ): Generator<Effect, void, any> {
-  if (action.type !== compose.SEND) {
+  if (action.type !== composeActions.SEND) {
     return
   }
   const { account, conversation, recipients, content } = action
-  const message = composeComment({
+  const message = compose.comment({
     ...recipients,
     content: {
       mediaType: content.mediaType,
@@ -32,17 +52,27 @@ function * sendReply (
     },
     conversation
   })
+  yield * transmit(sync, message)
+}
+
+function * transmit (
+  sync: Sync,
+  message: compose.MessageConfiguration
+): Generator<Effect, void, any> {
   try {
-    yield put(compose.sending())
+    yield put(composeActions.sending())
     const result = yield call([sync, 'send'], message)
     console.log('DeliveryResult')
     console.dir(result)
-    yield put(compose.sent())
+    yield put(composeActions.sent())
   } catch (err) {
     yield put(chrome.showError(err))
   }
 }
 
 export default function * root (sync: Sync): Generator<Effect, void, any> {
-  yield all([fork(takeEvery, compose.SEND, sendReply, sync)])
+  yield all([
+    fork(takeEvery, composeActions.EDIT, sendEdit, sync),
+    fork(takeEvery, composeActions.SEND, sendReply, sync)
+  ])
 }

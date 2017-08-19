@@ -13,15 +13,29 @@ import rootSaga from './sagas'
 
 type ExpectedProps = {
   conversation: Conversation,
+  initialContent?: string,
   sync: Sync
 }
 
-export function ComposeHOC<OwnProps: ExpectedProps, TopState: { auth: AuthState }> (component: *) {
+export type ComposeProps = State & {
+  onContentChange: typeof compose.setContent,
+  onEdit: typeof compose.edit,
+  onSend: typeof compose.send
+}
+
+export function ComposeHOC<
+  OwnProps: ExpectedProps,
+  TopState: { auth: AuthState }
+> (component: *) {
   const withCompose = local({
     key: (props: OwnProps) => `compose-${props.conversation.id}`,
     createStore: (props: OwnProps) => {
       const sagaMiddleware = createSagaMiddleware()
-      const store = createStore(reducer, applyMiddleware(sagaMiddleware))
+      const store = createStore(
+        reducer,
+        { ...initialState, content: props.initialContent || '' },
+        applyMiddleware(sagaMiddleware)
+      )
       sagaMiddleware.run(rootSaga, props.sync)
       // TODO
       // return { store, cleanup: () => sagaMiddleware.cancel() }
@@ -39,11 +53,14 @@ export function ComposeHOC<OwnProps: ExpectedProps, TopState: { auth: AuthState 
 
 function mapDispatchToProps (dispatch: Dispatch<*>) {
   return {
-    onContentChange(...args) {
-      dispatch(compose.setContent.apply(null, args))
+    onContentChange (...args) {
+      dispatch(compose.setContent(...args))
+    },
+    onEdit (...args) {
+      dispatch(compose.edit(...args))
     },
     onSend (...args) {
-      dispatch(compose.send.apply(null, args))
+      dispatch(compose.send(...args))
     }
   }
 }
