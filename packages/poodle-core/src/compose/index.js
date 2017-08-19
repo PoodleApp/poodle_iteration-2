@@ -1,5 +1,6 @@
 /* @flow */
 
+import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import Conversation from 'arfe/lib/models/Conversation'
 import Sync from 'poodle-service/lib/sync'
 import { connect } from 'react-redux'
@@ -12,6 +13,7 @@ import reducer, { type State, initialState } from './reducer'
 import rootSaga from './sagas'
 
 type ExpectedProps = {
+  activity?: DerivedActivity,
   conversation: Conversation,
   initialContent?: string,
   sync: Sync
@@ -29,7 +31,10 @@ export function ComposeHOC<
   TopState: { auth: AuthState }
 > (component: *) {
   const withCompose = local({
-    key: (props: OwnProps) => `compose-${props.conversation.id}`,
+    key: (props: OwnProps) =>
+      props.activity
+        ? `edit-${props.activity.id}`
+        : `reply-${props.conversation.id}`,
     createStore: (props: OwnProps) => {
       const sagaMiddleware = createSagaMiddleware()
       const store = createStore(
