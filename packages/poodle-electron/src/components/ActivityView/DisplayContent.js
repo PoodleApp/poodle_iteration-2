@@ -4,13 +4,9 @@ import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import marked from 'marked'
 import spacing from 'material-ui/styles/spacing'
 import opn from 'opn'
-import * as q from 'poodle-core/lib/queries/conversation'
-import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
-import Sync from 'poodle-service/lib/sync'
-import React from 'react'
+import * as React from 'react'
 import repa from 'repa'
-
-import type { State } from '../../reducers'
+import provideContent, { type ContentProps } from './provideContent'
 
 const styles = {
   body: {
@@ -25,9 +21,7 @@ type OwnProps = {
   style?: Object
 }
 
-type Props = OwnProps & {
-  content: Slurp<?q.Content, Error>
-}
+type Props = OwnProps & ContentProps
 
 export function DisplayContent ({ activity, content, style }: Props) {
   const { value, error, latest } = content
@@ -50,12 +44,6 @@ export function DisplayContent ({ activity, content, style }: Props) {
     return displayUnknown(value, style)
   }
 }
-
-const ComponentWithData = slurp(({ auth }: State, { activity }: Props) => ({
-  content: subscribe(q.fetchActivityContent, auth.sync, activity)
-}))(DisplayContent)
-
-export default ComponentWithData
 
 // TODO: remove quoted replies from HTML content
 function displayHtml (text: string, style?: Object) {
@@ -113,3 +101,5 @@ function handleExternalLink (event: Event) {
     opn(target.href)
   }
 }
+
+export default (provideContent(DisplayContent): React.ComponentType<OwnProps>)

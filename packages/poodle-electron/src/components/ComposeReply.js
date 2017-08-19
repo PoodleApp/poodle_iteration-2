@@ -7,7 +7,6 @@ import {
   IconButton,
   IconMenu,
   Paper,
-  Styles,
   TextField
 } from 'material-ui'
 import MenuItem from 'material-ui/MenuItem'
@@ -17,23 +16,17 @@ import * as m from 'mori'
 import PropTypes from 'prop-types'
 import * as React from 'react'
 import * as auth from 'poodle-core/lib/actions/auth'
-import { ComposeHOC } from 'poodle-core/lib/compose'
-import * as compose from 'poodle-core/lib/compose/actions'
+import { type ComposeProps, ComposeHOC } from 'poodle-core/lib/compose'
 import { type State } from '../reducers'
 
 type OwnProps = {
   account: auth.Account,
   conversation: Conversation,
-  hintText?: string
+  hintText?: string,
+  showAddPeople?: boolean
 }
 
-type Props = OwnProps & {
-  content: string,
-  loading: boolean,
-  onContentChange: typeof compose.setContent,
-  onSend: typeof compose.send,
-  showAddPeople: boolean
-}
+type Props = OwnProps & ComposeProps
 
 const styles = {
   activityCard: {
@@ -67,21 +60,21 @@ export function ComposeReply (props: Props) {
           showAddPeople={props.showAddPeople}
         />
         <form style={styles.body} onSubmit={onSend}>
-          {props.showAddPeople ? <div>TODO</div> : ''}
+          {props.showAddPeople ? <div>TODO: UI to edit recipients</div> : ''}
 
           <TextField
             hintText={props.hintText || 'Compose reply'}
             multiLine={true}
             fullWidth={true}
             name='body'
-            onChange={event => props.onContentChange(event.target.value)}
+            onChange={event => props.onContentChange(event.currentTarget.value)}
             value={props.content}
           />
           <br />
 
           <FlatButton
             label='Reply'
-            disabled={props.loading}
+            disabled={props.sending}
             onTouchTap={onSend}
           />
         </form>
@@ -91,7 +84,7 @@ export function ComposeReply (props: Props) {
 }
 
 type ComposeOptsMenuProps = {
-  showAddPeople: boolean
+  showAddPeople?: boolean
 }
 
 function ComposeOptsMenu (props: ComposeOptsMenuProps, context) {
@@ -130,4 +123,4 @@ function onMenuAction (
   }
 }
 
-export default ComposeHOC(ComposeReply)
+export default (ComposeHOC(ComposeReply): React.ComponentType<OwnProps>)
