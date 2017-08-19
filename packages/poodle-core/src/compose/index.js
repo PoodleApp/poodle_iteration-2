@@ -18,6 +18,7 @@ type ExpectedProps = {
 }
 
 export type ComposeProps = State & {
+  dispatch: (action: any) => void,
   onContentChange: typeof compose.setContent,
   onEdit: typeof compose.edit,
   onSend: typeof compose.send
@@ -53,6 +54,7 @@ export function ComposeHOC<
 
 function mapDispatchToProps (dispatch: Dispatch<*>) {
   return {
+    dispatch,
     onContentChange (...args) {
       dispatch(compose.setContent(...args))
     },

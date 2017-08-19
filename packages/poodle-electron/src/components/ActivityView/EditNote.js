@@ -7,6 +7,7 @@ import MenuItem from 'material-ui/MenuItem'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import spacing from 'material-ui/styles/spacing'
 import * as auth from 'poodle-core/lib/actions/auth'
+import * as chrome from 'poodle-core/lib/actions/chrome'
 import { type ComposeProps, ComposeHOC } from 'poodle-core/lib/compose'
 import PropTypes from 'prop-types'
 import provideContent, { type ContentProps } from './provideContent'
@@ -76,6 +77,12 @@ export function EditNote (props: Props) {
             label='Save Changes'
             disabled={props.sending}
             onTouchTap={onEdit}
+          />
+
+          <FlatButton
+            label='Cancel'
+            disabled={props.sending}
+            onTouchTap={event => props.dispatch(chrome.stopEditing(props.activity.id))}
           />
         </form>
       </Paper>
