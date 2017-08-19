@@ -11,6 +11,8 @@ import type { Seqable } from 'mori'
 import type { Content } from './helpers'
 import type { MessageConfiguration } from './types'
 
+// TODO: include markdown source with message
+
 type CommentOptions = {
   from: Seqable<Address>,
   to: Seqable<Address>,
