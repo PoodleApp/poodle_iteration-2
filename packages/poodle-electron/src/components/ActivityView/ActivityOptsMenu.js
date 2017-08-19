@@ -6,7 +6,7 @@ import IconButton from 'material-ui/IconButton'
 import MenuItem from 'material-ui/MenuItem'
 import * as colors from 'material-ui/styles/colors'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
-import * as q from 'poodle-core/lib/queries/conversation'
+import * as chrome from 'poodle-core/lib/actions/chrome'
 import * as React from 'react'
 import * as helpers from './helpers'
 
@@ -19,11 +19,9 @@ export default function ActivityOptsMenu (props: ActivityViewProps) {
     const { value } = item.props
     if (value === 'edit') {
       if (helpers.editing(props, activity)) {
-        // TODO
-        // dispatch(new CE.Reset())
+        dispatch(chrome.stopEditing(activity.id))
       } else {
-        // TODO
-        // dispatch(new CE.Edit(activity))
+        dispatch(chrome.startEditing(activity.id))
       }
     } else if (value === 'link') {
       // TODO

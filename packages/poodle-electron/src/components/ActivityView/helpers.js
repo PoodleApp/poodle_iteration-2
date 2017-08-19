@@ -10,7 +10,7 @@ export function editing (
   props: ActivityViewProps,
   activity: DerivedActivity
 ): boolean {
-  return !!props.editing && props.editing === activity.id
+  return !!props.editing && props.editing.some(id => id === activity.id)
 }
 
 export function hasType (type: string, activity: DerivedActivity): boolean {

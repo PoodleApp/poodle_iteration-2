@@ -11,7 +11,7 @@ export type ActivityViewProps = {
   activity: DerivedActivity,
   conversation: Conversation,
   dispatch: Dispatch<any>,
-  editing: ?ActivityId,
+  editing?: ActivityId[],
   nestLevel?: number,
   pendingLikes: ActivityId[]
 }

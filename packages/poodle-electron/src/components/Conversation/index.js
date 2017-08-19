@@ -32,7 +32,7 @@ type OwnProps = {
 type Props = OwnProps & {
   conversation: Slurp<ArfeConversation>,
   dispatch: Dispatch<any>,
-  editing: ?ActivityId,
+  editing?: ActivityId[],
   pendingLikes: ActivityId[]
 }
 
@@ -136,9 +136,9 @@ export function Conversation (props: Props) {
 }
 
 export default slurp(
-  ({ auth, queue }: State, { conversationId }: OwnProps) => ({
+  ({ auth, chrome, queue }: State, { conversationId }: OwnProps) => ({
     conversation: subscribe(q.fetchConversation, auth.sync, conversationId),
-    editing: null, // TODO
+    editing: chrome.editing,
     pendingLikes: queue.pendingLikes || []
   })
 )(Conversation)
