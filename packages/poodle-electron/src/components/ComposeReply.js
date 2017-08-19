@@ -48,7 +48,7 @@ export function ComposeReply (props: Props) {
     event.preventDefault()
     props.onSend(props.account, props.conversation, recipients, {
       mediaType: 'text/html',
-      string: marked(props.content)
+      string: marked(props.content || '')
     })
   }
 
@@ -68,7 +68,7 @@ export function ComposeReply (props: Props) {
             fullWidth={true}
             name='body'
             onChange={event => props.onContentChange(event.currentTarget.value)}
-            value={props.content}
+            value={props.content || ''}
           />
           <br />
 

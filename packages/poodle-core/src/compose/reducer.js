@@ -4,12 +4,12 @@ import * as compose from './actions'
 import { type Action } from './actions'
 
 export type State = {
-  content: string,
+  content: ?string,
   sending: boolean
 }
 
 export const initialState = {
-  content: '',
+  content: null,
   sending: false
 }
 

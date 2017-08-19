@@ -9,13 +9,12 @@ import { local } from 'redux-fractal'
 import createSagaMiddleware from 'redux-saga'
 import { type State as AuthState } from '../reducers/auth'
 import * as compose from './actions'
-import reducer, { type State, initialState } from './reducer'
+import reducer, { type State } from './reducer'
 import rootSaga from './sagas'
 
 type ExpectedProps = {
   activity?: DerivedActivity,
   conversation: Conversation,
-  initialContent?: string,
   sync: Sync
 }
 
@@ -37,11 +36,7 @@ export function ComposeHOC<
         : `reply-${props.conversation.id}`,
     createStore: (props: OwnProps) => {
       const sagaMiddleware = createSagaMiddleware()
-      const store = createStore(
-        reducer,
-        { ...initialState, content: props.initialContent || '' },
-        applyMiddleware(sagaMiddleware)
-      )
+      const store = createStore(reducer, applyMiddleware(sagaMiddleware))
       sagaMiddleware.run(rootSaga, props.sync)
       // TODO
       // return { store, cleanup: () => sagaMiddleware.cancel() }

@@ -38,6 +38,7 @@ const styles = {
 
 export function EditNote (props: Props) {
   const recipients = props.conversation.replyRecipients(props.account)
+  const content = typeof props.content === 'string' ? props.content : props.initialContent
 
   function onEdit (event) {
     event.preventDefault()
@@ -48,7 +49,7 @@ export function EditNote (props: Props) {
       recipients,
       {
         mediaType: 'text/html',
-        string: props.content
+        string: content
       }
     )
   }
@@ -69,7 +70,7 @@ export function EditNote (props: Props) {
             fullWidth={true}
             name='body'
             onChange={event => props.onContentChange(event.currentTarget.value)}
-            value={props.content}
+            value={content}
           />
           <br />
 
