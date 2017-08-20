@@ -62,13 +62,13 @@
     "poodle-service": "link:../poodle-service",
     "query-string": "^5.0.0",
     "react": "^15.6.1",
-    "react-dom": "^15.5.4",
-    "react-redux": "^5.0.5",
-    "react-router-dom": "^4.1.1",
+    "react-dom": "^15.6.1",
+    "react-redux": "^5.0.6",
+    "react-router-dom": "^4.1.2",
     "react-router-redux": "next",
     "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.7.2",
-    "redux-fractal": "^1",
+    "redux-fractal": "^1.7.1",
     "redux-logger": "^3.0.6",
     "redux-saga": "^0.15.6",
     "repa": "^1.0.0",
@@ -80,7 +80,7 @@
     "electron": "^1.7.5",
     "electron-builder": "^19.19.1",
     "electron-devtools-installer": "^2.2.0",
-    "react-test-renderer": "^15"
+    "react-test-renderer": "^15.6.1"
   },
   "files": [
     "bin/",
