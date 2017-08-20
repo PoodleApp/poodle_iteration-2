@@ -135,8 +135,8 @@ function build (
 
   const activityPart = compose.contentNode(activity)
   const contentPart = compose.contentNode(fallbackContent)
-  const relatedParts = relatedContent.map(compose.contentNode)
-  const attachmentParts = attachments.map(compose.contentNode)
+  const relatedParts = relatedContent.map(content => compose.contentNode(content))
+  const attachmentParts = attachments.map(content => compose.contentNode(content))
 
   root.appendChild(contentPart)
   root.appendChild(bundleParts('related', activityPart, relatedParts))
