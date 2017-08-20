@@ -3,7 +3,7 @@
 import Connection from 'imap'
 import * as promises from './promises'
 
-import type { Box, Boxes } from 'imap'
+import type { Box, BoxList, BoxListItem } from 'imap'
 
 /*
  * Recursively searches boxes on an IMAP server to find one that matches the
@@ -33,10 +33,10 @@ export function openAllMail (readonly: boolean, imap: Connection): Promise<Box> 
 }
 
 function findBox (
-  p: (box: Box, boxName: string) => boolean,
-  boxes: Boxes,
+  p: (box: BoxListItem, boxName: string) => boolean,
+  boxes: BoxList,
   path?: string = ''
-): ?[string, Box] {
+): ?[string, BoxListItem] {
   const pairs = Object.keys(boxes).map(k => [k, boxes[k]])
   const match = pairs.find(([n, b]) => p(b, n))
   if (match) {
@@ -52,10 +52,10 @@ function findBox (
   }
 }
 
-export function boxByAttribute (attribute: string): (box: Box) => boolean {
+export function boxByAttribute (attribute: string): (box: BoxListItem) => boolean {
   return box => box.attribs.some(a => a === attribute)
 }
 
-export function boxByName (name: string): (_: Box, boxName: string) => boolean {
+export function boxByName (name: string): (_: BoxListItem, boxName: string) => boolean {
   return (_, boxName) => boxName === name
 }
