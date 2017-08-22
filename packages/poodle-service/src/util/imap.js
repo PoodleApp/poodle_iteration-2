@@ -5,57 +5,72 @@ import * as promises from './promises'
 
 import type { Box, BoxList, BoxListItem } from 'imap'
 
-/*
- * Recursively searches boxes on an IMAP server to find one that matches the
- * given predicate.
- */
-export async function openBox (
-  nameOrAttrib: string,
+export function openBox (
+  boxName: string,
   readonly: boolean,
   conn: Connection
 ): Promise<Box> {
+  return promises.lift1(cb => conn.openBox(boxName, readonly, cb))
+}
+
+// TODO: capability check for 'All' mailbox
+export async function openAllMail (
+  readonly: boolean,
+  conn: Connection
+): Promise<Box> {
+  const all = await findBox('\\All', conn)
+  if (all) {
+    return openBox(all.name, readonly, conn)
+  } else {
+    throw new Error('Could not find box for all mail')
+  }
+}
+
+/*
+ * Recursively searches boxes on an IMAP server to find one that matches the
+ * given predicate. Returns an object where the `name` property is the qualified
+ * name (includes parent box names, separated by delimiters), and the `box`
+ * property provides some metadata.
+ */
+export async function findBox (
+  nameOrAttrib: string,
+  conn: Connection
+): Promise<?{ name: string, box: BoxListItem }> {
   const matcher = nameOrAttrib.startsWith('\\')
     ? boxByAttribute(nameOrAttrib)
     : boxByName(nameOrAttrib)
   const boxes = await promises.lift1(cb => conn.getBoxes(cb))
-  const match = findBox(matcher, boxes)
-  if (match) {
-    const [path, box] = match
-    return promises.lift1(cb => conn.openBox(path, readonly, cb))
-  } else {
-    return Promise.reject(new Error('Box not found'))
-  }
+  return findBoxByPredicate(matcher, boxes)
 }
 
-// TODO: capability check for 'All' mailbox
-export function openAllMail (readonly: boolean, imap: Connection): Promise<Box> {
-  return openBox('\\All', readonly, imap)
-}
-
-function findBox (
+function findBoxByPredicate (
   p: (box: BoxListItem, boxName: string) => boolean,
   boxes: BoxList,
   path?: string = ''
-): ?[string, BoxListItem] {
-  const pairs = Object.keys(boxes).map(k => [k, boxes[k]])
+): ?{ box: BoxListItem, name: string } {
+  const pairs = Object.keys(boxes).map(k => ({ name: k, box: boxes[k] }))
   const match = pairs.find(([n, b]) => p(b, n))
   if (match) {
-    const [name, box] = match
-    return [path + name, box]
+    const { name, box } = match
+    return { name: path + name, box }
   } else {
     return pairs
       .map(
         ([n, b]) =>
-          b.children ? findBox(p, b.children, n + b.delimiter) : null
+          b.children ? findBoxByPredicate(p, b.children, n + b.delimiter) : null
       )
       .filter(child => !!child)[0]
   }
 }
 
-export function boxByAttribute (attribute: string): (box: BoxListItem) => boolean {
+export function boxByAttribute (
+  attribute: string
+): (box: BoxListItem) => boolean {
   return box => box.attribs.some(a => a === attribute)
 }
 
-export function boxByName (name: string): (_: BoxListItem, boxName: string) => boolean {
+export function boxByName (
+  name: string
+): (_: BoxListItem, boxName: string) => boolean {
   return (_, boxName) => boxName === name
 }
