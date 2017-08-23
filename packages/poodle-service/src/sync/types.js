@@ -1,11 +1,8 @@
 /* @flow */
 
-import Connection from 'imap'
-
 import type { Flag, MessageAttributes, MessagePart } from 'imap'
 
 export type QueryParams = { [key: string]: any }
-export type ConnectionFactory = () => Promise<Connection>
 
 export type BoxRecord = {
   _id: string,

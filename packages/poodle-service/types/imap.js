@@ -64,7 +64,7 @@ declare module "imap" {
     language?:    ?string,
     location?:    ?string,
     md5?:         ?string,
-    size?:        number,
+    size?:        number, // in bytes, only set if requested in `fetch()`
     lines?:       number,
   }
 
@@ -164,7 +164,8 @@ declare module "imap" {
             cb: (err: Error, mailbox: Box) => void): void;
     openBox(mailboxName: string,
             cb: (err: Error, mailbox: Box) => void): void;
-    closeBox(autoExpunge?: boolean, cb: (err: Error) => void): void;
+    closeBox(cb: (err: Error) => void): void;
+    closeBox(autoExpunge: boolean, cb: (err: Error) => void): void;
     addBox(mailboxName: string, cb: (err: Error) => void): void;
     delBox(mailboxName: string, cb: (err: Error) => void): void;
     renameBox(oldName: string, newName: string, cb: (err: Error, box: Box) => void): void;

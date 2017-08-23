@@ -2,10 +2,10 @@
 
 import Message from 'arfe/lib/models/Message'
 import dateformat from 'dateformat'
-import Connection from 'imap'
 import * as kefir from 'kefir'
 import { simpleParser } from 'mailparser'
 import { decode } from '../encoding'
+import { type Connection, type OpenBox } from '../models/connection'
 import * as imap from '../util/imap'
 import * as kefirutil from '../util/kefir'
 import * as promises from '../util/promises'
@@ -26,8 +26,7 @@ const headersSelection = 'HEADER'
 export function fetchMessagePart (
   msg: Message,
   partId: string,
-  box: Box,
-  conn: Connection
+  openBox: OpenBox
 ): Promise<Readable> {
   const part = msg.getPart({ partId })
   if (!part) {
@@ -38,7 +37,7 @@ export function fetchMessagePart (
 
   const encoding = part.encoding
 
-  return fetch(([msg.uid]: number[]), { bodies: part.partID }, conn)
+  return fetch(([msg.uid]: number[]), { bodies: part.partID }, openBox)
     .flatMap(messageBodyStream)
     .map(body => (encoding ? decode(encoding, body) : body))
     .toPromise()
@@ -46,42 +45,35 @@ export function fetchMessagePart (
 
 export function search (
   criteria: mixed[],
-  box: Box,
-  conn: Connection
-): Observable<Message, mixed> {
-  const uidsPromise = promises.lift1(cb => conn.search(criteria, cb))
-  return kefir
-    .fromPromise(uidsPromise)
-    .flatMap(uids => fetchMetadata(uids, conn))
+  openBox: OpenBox
+): Promise<UID[]> {
+  return promises.lift1(cb => openBox.connection.search(criteria, cb))
 }
 
-export function searchUids (
-  criteria: mixed[],
-  box: Box,
-  conn: Connection
-): Observable<UID[], mixed> {
-  const uidsPromise = promises.lift1(cb => conn.search(criteria, cb))
-  return kefir.fromPromise(uidsPromise)
-}
+// export function searchUids (
+//   criteria: mixed[],
+//   box: Box,
+//   conn: Connection
+// ): Promise<UID[]> {
+//   const uidsPromise = promises.lift1(cb => conn.search(criteria, cb))
+//   return kefir.fromPromise(uidsPromise)
+// }
 
 export function fetchRecent (
   since: Date,
-  box: Box,
-  conn: Connection
+  openBox: OpenBox
 ): Observable<Message, mixed> {
   const q = dateformat(since, 'mmmm d, yyyy')
-  return search([['SINCE', q]], box, conn)
+  return search([['SINCE', q]], openBox)
 }
 
-// TODO: Use 'changedsince' option defined by RFC4551
-// TODO: should we require an open box here?
 export function fetch (
   source: MessageSource,
   opts: FetchOptions,
-  conn: Connection
+  openBox: OpenBox
 ): Observable<ImapMessage, mixed> {
   return kefirutil.fromEventsWithEnd(
-    conn.fetch(source, opts),
+    openBox.connection.fetch(source, opts),
     'message',
     (msg, seqno) => msg
   )
@@ -89,7 +81,7 @@ export function fetch (
 
 export function fetchMetadata (
   source: MessageSource,
-  conn: Connection
+  openBox: OpenBox
 ): Observable<Message, mixed> {
   const respStream = fetch(
     source,
@@ -98,7 +90,7 @@ export function fetchMetadata (
       envelope: true,
       struct: true
     },
-    conn
+    openBox
   )
 
   return respStream.flatMap(imapMsg => {
