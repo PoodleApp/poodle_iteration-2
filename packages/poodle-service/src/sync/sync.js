@@ -16,7 +16,7 @@ import * as persist from './persist'
 
 import type { Box } from 'imap'
 import type { Observable } from 'kefir'
-import type { ConnectionFactory } from './types'
+import type { ConnectionFactory } from '../models/ImapAccount'
 
 type Options = {
   boxes: BoxName[],
@@ -113,47 +113,49 @@ function fetchFromBox (
   conn: Connection,
   db: PouchDB
 ): Observable<void, mixed> {
-  // TODO: fetch any messages referenced by recent messages
-  return kefir
-    .fromPromise(imaputil.openBox(boxName, true, conn))
-    .flatMap(box =>
-      kefir
-        .fromPromise(persist.persistBoxMetadata(box, db))
-        .flatMap(_ =>
-          actions
-            .fetchRecent(since, box, conn)
-            .flatMap(message =>
-              kefir
-                .fromPromise(persist.persistMessage(message, db))
-                .flatMap(_ => fetchParts(message, box, conn, db))
-            )
-        )
-    )
-    .beforeEnd(() =>
-      kefir.fromPromise(promises.lift0(cb => conn.closeBox(false, cb)))
-    )
-    .last()
-    .map(_ => undefined)
+  // TODO: redesign sync
+  return kefir.constant(undefined)
+  // // TODO: fetch any messages referenced by recent messages
+  // return kefir
+  //   .fromPromise(imaputil.openBox(boxName, true, conn))
+  //   .flatMap(box =>
+  //     kefir
+  //       .fromPromise(persist.persistBoxMetadata(box, db))
+  //       .flatMap(_ =>
+  //         actions
+  //           .fetchRecent(since, box, conn)
+  //           .flatMap(message =>
+  //             kefir
+  //               .fromPromise(persist.persistMessage(message, db))
+  //               .flatMap(_ => fetchParts(message, box, conn, db))
+  //           )
+  //       )
+  //   )
+  //   .beforeEnd(() =>
+  //     kefir.fromPromise(promises.lift0(cb => conn.closeBox(false, cb)))
+  //   )
+  //   .last()
+  //   .map(_ => undefined)
 }
 
-function fetchParts (
-  message: Message,
-  box: Box,
-  conn: Connection,
-  db: PouchDB
-): Observable<string, mixed> {
-  return kefir
-    .sequentially(0, message.parts)
-    .filter(part => !!part.partID) // TODO: skip parts with no ID
-    .filter(part => !!part.subtype) // skip multipart parts
-    .flatMap(part =>
-      kefir.fromPromise(
-        actions
-          .fetchMessagePart(message, part.partID || '', box, conn)
-          .then(data => persist.persistPart(db, message, part, data))
-          .then(_ => message.uriForPart(part))
-      )
-    )
-}
+// function fetchParts (
+//   message: Message,
+//   box: Box,
+//   conn: Connection,
+//   db: PouchDB
+// ): Observable<string, mixed> {
+//   return kefir
+//     .sequentially(0, message.parts)
+//     .filter(part => !!part.partID) // TODO: skip parts with no ID
+//     .filter(part => !!part.subtype) // skip multipart parts
+//     .flatMap(part =>
+//       kefir.fromPromise(
+//         actions
+//           .fetchMessagePart(message, part.partID || '', box, conn)
+//           .then(data => persist.persistPart(db, message, part, data))
+//           .then(_ => message.uriForPart(part))
+//       )
+//     )
+// }
 
 function noop () {}

@@ -1,8 +1,8 @@
 /* @flow */
 
-import * as google       from '../src/oauth/google'
 import * as capabilities from '../src/capabilities'
-import * as googletest   from './oauth/google'
+import * as google       from '../src/models/ImapAccount/google'
+import * as googletest   from './models/ImapAccount/google'
 
 export default async function testGetCapabilities() {
   const tokGen = await googletest.getTokenGenerator()

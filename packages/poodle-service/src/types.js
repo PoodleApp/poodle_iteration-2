@@ -1,5 +1,8 @@
 /* @flow */
 
-import type Connection from 'imap'
+export type AccountMetadata = {
+  name: Email,
+  capabilities: string[]
+}
 
-export type ConnectionFactory = () => Promise<Connection>
+export type Email = string

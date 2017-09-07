@@ -1,35 +1,32 @@
 /* @flow */
 
-import google        from 'googleapis'
-import Connection    from 'imap'
-import { stringify } from 'querystring';
-import fetch         from 'node-fetch'
-import xoauth2       from 'xoauth2'
-import { lift1 }     from '../util/promises'
+import google from 'googleapis'
+import Connection from 'imap'
+import { stringify } from 'querystring'
+import fetch from 'node-fetch'
+import xoauth2 from 'xoauth2'
+import { lift1 } from '../../../util/promises'
+import {
+  type ConnectionFactory,
+  type GoogleAccount,
+  type OauthCredentials
+} from '../types'
 
 import type { ImapOpts } from 'imap'
 
-export type OauthCredentials = {
-  access_token:  string,
-  token_type:    string,  // "Bearer"
-  expires_in:    number,  // seconds
-  id_token:      string,
-  refresh_token: string,
-}
-
 export type AccessTokenOpts = {
-  scopes:                  string[],
-  client_id:               string,
-  client_secret:           string,
-  login_hint?:             string,
-  include_granted_scopes?: boolean,
+  scopes: string[],
+  client_id: string,
+  client_secret: string,
+  login_hint?: string,
+  include_granted_scopes?: boolean
 }
 
 export type TokenGeneratorOpts = {
-  email:         string,
-  client_id:     string,
+  email: string,
+  client_id: string,
   client_secret: string,
-  credentials:   OauthCredentials,
+  credentials: OauthCredentials
 }
 
 // An object that satisfies this `BrowserWindow` is required to open a window to
@@ -40,16 +37,16 @@ export type TokenGeneratorOpts = {
 export interface BrowserWindow extends events$EventEmitter {
   close(): mixed,
   getTitle(): string,
-  loadURL(url: string): mixed,
+  loadURL(url: string): mixed
 }
 
 export type XOAuth2Generator = Generator
 
 declare class Generator extends stream$Readable {
-  constructor(options?: Object): void;
-  getToken(cb: (err: Error, token: string) => mixed): void;
-  updateToken(accessToken: string, timeout: number): void;
-  generateToken(cb: (err: Error, token: string) => mixed): void;
+  constructor(options?: Object): void,
+  getToken(cb: (err: Error, token: string) => mixed): void,
+  updateToken(accessToken: string, timeout: number): void,
+  generateToken(cb: (err: Error, token: string) => mixed): void
 }
 
 // // Example scopes:
@@ -59,52 +56,67 @@ declare class Generator extends stream$Readable {
 //   'https://www.googleapis.com/auth/contacts.readonly',  // contacts, read-only
 // ]
 
-export function getAccessToken(openWindow: () => BrowserWindow, opts: AccessTokenOpts
+export function getAccessToken (
+  openWindow: () => BrowserWindow,
+  opts: AccessTokenOpts
 ): Promise<OauthCredentials> {
   const { client_id, client_secret } = opts
-  return getAuthorizationCode(openWindow, opts).then(authorizationCode => {
-    const body = stringify({
-      code: authorizationCode,
-      client_id,
-      client_secret,
-      grant_type: 'authorization_code',
-      redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
+  return getAuthorizationCode(openWindow, opts)
+    .then(authorizationCode => {
+      const body = stringify({
+        code: authorizationCode,
+        client_id,
+        client_secret,
+        grant_type: 'authorization_code',
+        redirect_uri: 'urn:ietf:wg:oauth:2.0:oob'
+      })
+      return fetch('https://accounts.google.com/o/oauth2/token', {
+        method: 'post',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body
+      })
     })
-    return fetch('https://accounts.google.com/o/oauth2/token', {
-      method: 'post',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body,
-    })
-  })
-  .then(res => res.json())
+    .then(res => res.json())
 }
 
-
-export function getTokenGenerator(opts: TokenGeneratorOpts): Promise<XOAuth2Generator> {
+export function getTokenGenerator (
+  opts: TokenGeneratorOpts
+): Promise<XOAuth2Generator> {
   const { credentials: creds } = opts
   if (creds && creds.refresh_token) {
     return Promise.resolve(tokenGenerator(opts))
-  }
-  else {
+  } else {
     return Promise.reject(new Error('OAuth credentials are not available.'))
   }
 }
 
-export async function getConnection(tokenGen: XOAuth2Generator): Promise<Connection> {
+export async function getConnection (
+  tokenGen: XOAuth2Generator
+): Promise<Connection> {
   const token = await lift1(cb => tokenGen.getToken(cb))
   return initImap(token)
 }
 
-export function initImap(token: string, opts: ImapOpts = {}): Promise<Connection> {
+export async function getConnectionFactory (
+  account: GoogleAccount
+): Promise<ConnectionFactory> {
+  const tokGen = await getTokenGenerator(account)
+  return () => getConnection(tokGen)
+}
+
+export function initImap (
+  token: string,
+  opts: ImapOpts = {}
+): Promise<Connection> {
   const imap = new Connection({
     ...opts,
     xoauth2: token,
     host: 'imap.gmail.com',
     port: 993,
-    tls: true,
+    tls: true
   })
   const p = new Promise((resolve, reject) => {
     imap.once('ready', () => resolve(imap))
@@ -114,32 +126,37 @@ export function initImap(token: string, opts: ImapOpts = {}): Promise<Connection
   return p
 }
 
-function tokenGenerator(opts: TokenGeneratorOpts): XOAuth2Generator {
+function tokenGenerator (opts: TokenGeneratorOpts): XOAuth2Generator {
   const { email, client_id, client_secret, credentials } = opts
   return xoauth2.createXOAuth2Generator({
-    user:         email,
+    user: email,
     // accessUrl:    'https://accounts.google.com/oauth2/v3/token',
-    clientId:     client_id,
+    clientId: client_id,
     clientSecret: client_secret,
     refreshToken: credentials.refresh_token,
     customParams: {
-      redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
-    },
+      redirect_uri: 'urn:ietf:wg:oauth:2.0:oob'
+    }
   })
 }
 
-function getAuthorizationCode(openWindow: () => BrowserWindow, {
-  scopes,
-  client_id,
-  client_secret,
-  login_hint,
-  include_granted_scopes,
-}: AccessTokenOpts): Promise<string> {
+function getAuthorizationCode (
+  openWindow: () => BrowserWindow,
+  {
+    scopes,
+    client_id,
+    client_secret,
+    login_hint,
+    include_granted_scopes
+  }: AccessTokenOpts
+): Promise<string> {
   const params: Object = {
     access_type: 'offline',
-    scope:       scopes,
+    scope: scopes
   }
-  if (login_hint) { params.login_hint = login_hint }
+  if (login_hint) {
+    params.login_hint = login_hint
+  }
   if (typeof include_granted_scopes === 'boolean') {
     params.include_granted_scopes = include_granted_scopes
   }
@@ -147,14 +164,20 @@ function getAuthorizationCode(openWindow: () => BrowserWindow, {
   return authorizeApp(openWindow, url)
 }
 
-export type OauthClient = Object  // TODO
+export type OauthClient = Object // TODO
 
-export function oauthClient(client_id: string, client_secret: string): OauthClient {
+export function oauthClient (
+  client_id: string,
+  client_secret: string
+): OauthClient {
   const OAuth2 = google.auth.OAuth2
   return new OAuth2(client_id, client_secret, 'urn:ietf:wg:oauth:2.0:oob')
 }
 
-function authorizeApp(openWindow: () => BrowserWindow, url: string): Promise<string> {
+function authorizeApp (
+  openWindow: () => BrowserWindow,
+  url: string
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const win = openWindow()
     setImmediate(() => {
@@ -172,8 +195,7 @@ function authorizeApp(openWindow: () => BrowserWindow, url: string): Promise<str
           reject(new Error(title.split(/[ =]/)[2]))
           win.removeAllListeners('closed')
           win.close()
-        }
-        else if (title.startsWith('Success')) {
+        } else if (title.startsWith('Success')) {
           resolve(title.split(/[ =]/)[2])
           win.removeAllListeners('closed')
           win.close()

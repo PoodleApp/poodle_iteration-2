@@ -8,15 +8,18 @@
  * @flow
  */
 
+import { type URI } from 'arfe/lib/models/uri'
 import type EventEmitter from 'events'
 import Connection, * as imap from 'imap'
-import * as actions from '../actions'
-import { type ConnectionFactory } from '../types'
+import * as kefir from 'kefir'
+import { type ConnectionFactory } from '../models/ImapAccount'
+import * as kefirUtil from '../util/kefir'
 import * as promises from '../util/promises'
+import * as actions from './actions/imap'
 import JobQueue from './JobQueue'
-import * as tasks from './tasks'
 
-type Result = any // TODO
+// TODO
+type Result = any
 
 /*
  * Given a `connectionFactory`, manages connection state and acts as an
@@ -24,20 +27,22 @@ type Result = any // TODO
  * should be authenticated and ready (the factory should wait for the connection
  * to emit a `'ready'` event before resolving the returned promise).
  */
-export class ImapInterface {
+export default class ConnectionManager {
   _conn: ?Promise<Connection>
   _connectionFactory: ConnectionFactory
-  _queue: JobQueue<tasks.Task, Result>
+  _lock: ?Promise<void>
+  _queue: JobQueue<actions.Action, Result>
 
   constructor (connectionFactory: ConnectionFactory) {
     this._connectionFactory = connectionFactory
-    this._queue = new JobQueue(this._processTask.bind(this))
+    this._queue = new JobQueue(this._process.bind(this))
   }
 
-  process (task: tasks.Task): Promise<Result> {
-    return this._queue.process(task)
+  handle (action: actions.Action): kefir.Observable<Result> {
+    return this._queue.process(action)
   }
 
+  // TODO: close connection after a period of inactivity
   async _getConn (): Promise<Connection> {
     if (!this._conn) {
       const connPromise = this._connectionFactory().then(conn => {
@@ -55,27 +60,32 @@ export class ImapInterface {
     return this._conn
   }
 
-  async _processTask (task: tasks.Task): Promise<Result> {
-    const conn = await this._getConn()
-    checkCapabilities(task, conn)
-    switch (task.type) {
-      case tasks.FETCH:
-
-      case tasks.SEARCH:
-        return promises.lift1(cb => conn.search(task.criteria, cb))
-      default:
-        throw new Error(`Unknown task type: ${task.type}`)
-    }
+  _process (action: actions.Action): kefir.Observable<Result> {
+    return kefir
+      .fromPromise(this._getConn())
+      .flatMap(conn => process(action, conn))
   }
 }
 
-function checkCapabilities (task: tasks.Task, conn: Connection) {
-  const missing = task.capabilities.filter(cap => !conn.serverSupports(cap))
-  if (missing.length > 0) {
-    throw new Error(
-      `Task one or more capabilities that the server does not support: ${missing.join(
-        ', '
-      )}`
-    )
+function process (
+  action: actions.Action,
+  conn: Connection
+): kefir.Observable<Result> {
+  switch (action.type) {
+    case actions.FETCH_THREADS:
+      return kefir.constant({ recordIds: [] })
+    case actions.FETCH_PARTS:
+      return kefir.constant({ recordIds: [] })
+    case actions.GET_CAPABILITIES:
+      return kefir.constant(conn._caps || [])
+    case actions.SEARCH:
+      const criteria = action.criteria
+      return kefir.fromPromise(
+        promises.lift1(cb => conn.search(criteria, cb)).then(uids => ({ uids }))
+      )
+    default:
+      return kefir.constantError(
+        new Error(`Unknown action type: ${action.type}`)
+      )
   }
 }

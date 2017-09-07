@@ -23,7 +23,7 @@ import type { Observable } from 'kefir'
 
 const headersSelection = 'HEADER'
 
-export function fetchMessagePart (
+export function fetchMessageParts (
   msg: Message,
   partId: string,
   openBox: OpenBox
@@ -59,13 +59,13 @@ export function search (
 //   return kefir.fromPromise(uidsPromise)
 // }
 
-export function fetchRecent (
-  since: Date,
-  openBox: OpenBox
-): Observable<Message, mixed> {
-  const q = dateformat(since, 'mmmm d, yyyy')
-  return search([['SINCE', q]], openBox)
-}
+// export function fetchRecent (
+//   since: Date,
+//   openBox: OpenBox
+// ): Promise<UID[]> {
+//   const q = dateformat(since, 'mmmm d, yyyy')
+//   return search([['SINCE', q]], openBox)
+// }
 
 export function fetch (
   source: MessageSource,
