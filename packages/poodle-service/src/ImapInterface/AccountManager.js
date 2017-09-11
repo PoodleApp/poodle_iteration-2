@@ -24,7 +24,7 @@ export default class AccountManager {
       .handle(imapActions.getCapabilities())
       .toPromise()
     const metadata = {
-      name: account.email,
+      email: account.email,
       capabilities
     }
     this._metadata = m.assoc(this._metadata, account.email, metadata)

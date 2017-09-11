@@ -21,6 +21,4 @@
  * @flow
  */
 
-export { default as Client } from './ImapInterface/Client'
-export { default as Server } from './ImapInterface/Server'
 export * from './types'

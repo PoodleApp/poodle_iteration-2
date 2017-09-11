@@ -24,30 +24,33 @@ declare module "imap" {
 
   declare export type Headers = { [key:string]: string[] }
 
-  // declare type Box = {
-  //   name:           string,
-  //   readyOnly?:     boolean,  // only available with openBox() calls
-  //   newKeywords:    boolean,
-  //   uidvalidity:    number,
-  //   uidnext:        number,
-  //   flags:          Flag[],
-  //   permFlags:      Flag[],
-  //   persistentUIDs: boolean,
-  //   messages: {
-  //     total:   number,
-  //     new:     number,
-  //     unseen?: number,  // only available with status() calls
-  //   }
-  // }
-
   declare export type Box = {
+    flags: Flag[],
+    highestmodseq: string, // formatted as a number
+    keywords: string[],
+    messages: {
+      total: number,
+      new: number,
+      unseen?: number, // only available with status() calls
+    },
+    name: string, // full name hierarchy, separated by delimiters
+    newKeywords: boolean,
+    nomodseq: boolean,
+    permFlags: Flag[],
+    persistentUIDs: boolean,
+    readyOnly?: boolean, // only available with openBox() calls
+    uidnext: number,
+    uidvalidity: number,
+  }
+
+  declare export type BoxListItem = {
     attribs:   string[],
     delimiter: string,
-    children:  ?Boxes,
+    children:  ?BoxList,
     parent:    ?Object,
   }
 
-  declare export type Boxes = { [key:string]: Box }
+  declare export type BoxList = { [key:string]: BoxListItem }
 
   declare export type MessagePart = {
     partID?:      string,
@@ -61,7 +64,7 @@ declare module "imap" {
     language?:    ?string,
     location?:    ?string,
     md5?:         ?string,
-    size?:        number,
+    size?:        number, // in bytes, only set if requested in `fetch()`
     lines?:       number,
   }
 
@@ -75,11 +78,12 @@ declare module "imap" {
    */
   declare export type MessageStruct = (MessagePart | MessageStruct)[]
 
-  declare export type Flag = '\\Seen'
-    | '\\Answered'
-    | '\\Flagged'
-    | '\\Deleted'
-    | '\\Draft'
+  declare export type Flag = string
+  // declare export type Flag = '\\Seen'
+  //   | '\\Answered'
+  //   | '\\Flagged'
+  //   | '\\Deleted'
+  //   | '\\Draft'
 
   declare export type FetchOptions = {
     markSeen?:  boolean,
@@ -160,16 +164,17 @@ declare module "imap" {
             cb: (err: Error, mailbox: Box) => void): void;
     openBox(mailboxName: string,
             cb: (err: Error, mailbox: Box) => void): void;
-    closeBox(autoExpunge?: boolean, cb: (err: Error) => void): void;
+    closeBox(cb: (err: Error) => void): void;
+    closeBox(autoExpunge: boolean, cb: (err: Error) => void): void;
     addBox(mailboxName: string, cb: (err: Error) => void): void;
     delBox(mailboxName: string, cb: (err: Error) => void): void;
     renameBox(oldName: string, newName: string, cb: (err: Error, box: Box) => void): void;
     subscribeBox(mailboxName: string, cb: (err: Error) => void): void;
     unsubscribeBox(mailboxName: string, cb: (err: Error) => void): void;
     status(mailboxName: string, cb: (err: Error, box: Box) => void): void;
-    getBoxes(nsPrefix: string, cb: (err: Error, boxes: Boxes) => void): void;
-    getBoxes(cb: (err: Error, boxes: Boxes) => void): void;
-    getSubscribedBoxes(nsPrefix?: string, cb: (err: Error, boxes: Boxes) => void): void;
+    getBoxes(nsPrefix: string, cb: (err: Error, boxes: BoxList) => void): void;
+    getBoxes(cb: (err: Error, boxes: BoxList) => void): void;
+    getSubscribedBoxes(nsPrefix?: string, cb: (err: Error, boxes: BoxList) => void): void;
 
     search(criteria: any[], cb: (err: Error, uids: UID[]) => any): void;
 

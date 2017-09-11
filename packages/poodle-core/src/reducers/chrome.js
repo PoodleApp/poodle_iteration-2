@@ -12,7 +12,8 @@ export type State = {
   errors?: Error[],
   leftNavOpen: boolean,
   loadingIndicators?: Indicator[],
-  notification?: ?string
+  notification?: ?string,
+  searchQuery?: ?string
 }
 
 type Indicator = { key: string, message: string }
@@ -69,6 +70,11 @@ export default function reducer (
       return incrementIndicator(action, state)
     case actions.DONE_LOADING:
       return decrementIndicator(action.key, state)
+    case actions.SEARCH:
+      return {
+        ...state,
+        searchQuery: action.query
+      }
     default:
       return state
   }

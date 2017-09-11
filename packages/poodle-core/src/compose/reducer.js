@@ -13,7 +13,10 @@ export const initialState = {
   sending: false
 }
 
-export default function reducer(state: State = initialState, action: Action): State {
+export default function reducer (
+  state: State = initialState,
+  action: Action
+): State {
   switch (action.type) {
     case compose.SENDING:
       return {

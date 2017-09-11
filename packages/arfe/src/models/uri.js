@@ -38,12 +38,12 @@ export function parseMidUri (
   }
 }
 
-export function sameUri(x: URI, y: URI): boolean {
-  // TODO: normalization?
-  return x === y
+export function sameUri(x: ?URI, y: ?URI): boolean {
+  // TODO: normalization
+  return !!x && !!y && (x === y)
 }
 
-export function sameEmail(x: Email, y: Email): boolean {
+export function sameEmail(x: ?Email, y: ?Email): boolean {
   // TODO: normalization
-  return x === y
+  return !!x && !!y && (x === y)
 }

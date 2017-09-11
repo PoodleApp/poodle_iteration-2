@@ -7,6 +7,8 @@ import { type Action as ImapAction } from './imap'
 export const ACCOUNT_ACTION = 'requests/accountAction'
 export const IMAP_ACTION = 'requests/imapAction'
 
+export const types = [ACCOUNT_ACTION, IMAP_ACTION]
+
 export type Action =
   | { type: typeof ACCOUNT_ACTION, action: AccountAction }
   | { type: typeof IMAP_ACTION, action: ImapAction, accountName: Email }

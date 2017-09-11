@@ -44,7 +44,7 @@ type MapSubscriptionsToProps<S, OP: Object, SP: Object> = (
   ownProps: OP
 ) => SP
 
-declare function slurp<S, A, OP, SP>(
+declare function slurp<S: { slurp: SlurpState }, A, OP, SP>(
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: Null,
   mergeProps: Null,
@@ -54,28 +54,28 @@ declare function slurp<S, A, OP, SP>(
   $Supertype<$ObjMap<SP, FromEffect> & { dispatch: Dispatch<A> } & OP>
 >
 
-declare function slurp<S, A, OP, SP, DP>(
+declare function slurp<S: { slurp: SlurpState }, A, OP, SP, DP>(
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: MapDispatchToProps<A, OP, DP>,
   mergeProps: Null,
   options?: ConnectOptions
 ): Connector<OP, $Supertype<$ObjMap<SP, FromEffect> & DP & OP>>
 
-declare function slurp<S, A, OP, SP, DP, P>(
+declare function slurp<S: { slurp: SlurpState }, A, OP, SP, DP, P>(
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: Null,
   mergeProps: MergeProps<$ObjMap<SP, FromEffect>, DP, OP, P>,
   options?: ConnectOptions
 ): Connector<OP, P>
 
-declare function slurp<S, A, OP, SP, DP, P>(
+declare function slurp<S: { slurp: SlurpState }, A, OP, SP, DP, P>(
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: MapDispatchToProps<A, OP, DP>,
   mergeProps: MergeProps<$ObjMap<SP, FromEffect>, DP, OP, P>,
   options?: ConnectOptions
 ): Connector<OP, P>
 
-export function slurp<S, OP: Object, SP: Object> (
+export function slurp<S: { slurp: SlurpState }, OP: Object, SP: Object> (
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: *,
   mergeProps: *,

@@ -1,7 +1,7 @@
 /* @flow */
 
 export type AccountMetadata = {
-  name: Email,
+  email: Email,
   capabilities: string[]
 }
 

@@ -2,9 +2,8 @@
 
 import { remote } from 'electron'
 import { client_id, client_secret } from 'poodle-core/lib/constants'
-import * as oauth from 'poodle-service/lib/oauth/google'
-
-export type OauthCredentials = oauth.OauthCredentials
+import { type OauthCredentials } from 'poodle-service/lib/models/ImapAccount'
+import * as google from 'poodle-service/lib/models/ImapAccount/google'
 
 const scopes = [
   'email', // get user's email address
@@ -12,8 +11,8 @@ const scopes = [
   'https://www.googleapis.com/auth/contacts.readonly' // contacts, read-only
 ]
 
-export function getAccessToken (email: string): Promise<oauth.OauthCredentials> {
-  return oauth.getAccessToken(openWindow, {
+export function getAccessToken (email: string): Promise<OauthCredentials> {
+  return google.getAccessToken(openWindow, {
     scopes,
     client_id,
     client_secret,

@@ -17,6 +17,7 @@ export const SHOW_NOTIFICATION: 'chrome/showNotification' =
 export const INDICATE_LOADING: 'chrome/indicateLoading' =
   'chrome/indicateLoading'
 export const DONE_LOADING: 'chrome/doneLoading' = 'chrome/doneLoading'
+export const SEARCH: 'chrome/search' = 'chrome/search'
 
 export type Action =
   | { type: typeof START_EDITING, activityId: URI }
@@ -28,6 +29,7 @@ export type Action =
   | { type: typeof SHOW_NOTIFICATION, notification: string }
   | { type: typeof INDICATE_LOADING, key: string, message: string }
   | { type: typeof DONE_LOADING, key: string }
+  | { type: typeof SEARCH, query: ?string }
 
 export function startEditing (activityId: URI): Action {
   return { type: START_EDITING, activityId }
@@ -78,5 +80,12 @@ export function doneLoading (key: string): Action {
   return {
     type: DONE_LOADING,
     key
+  }
+}
+
+export function search (query: ?string): Action {
+  return {
+    type: SEARCH,
+    query
   }
 }

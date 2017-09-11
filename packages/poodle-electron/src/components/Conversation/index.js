@@ -12,10 +12,11 @@ import * as m from 'mori'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as q from 'poodle-core/lib/queries/conversation'
 import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
-import Sync from 'poodle-service/lib/sync'
+import * as Imap from 'poodle-service/lib/ImapInterface/Client'
 import React from 'react'
 import * as redux from 'react-redux'
 import * as router from 'react-router-redux'
+import imapClient from '../../imapClient'
 
 import ActivityView from '../ActivityView'
 import ComposeReply from '../ComposeReply'
@@ -137,7 +138,7 @@ export function Conversation (props: Props) {
 
 export default slurp(
   ({ auth, chrome, queue }: State, { conversationId }: OwnProps) => ({
-    conversation: subscribe(q.fetchConversation, auth.sync, conversationId),
+    conversation: subscribe(Imap.fetchConversation, conversationId, auth.account, imapClient),
     editing: chrome.editing,
     pendingLikes: queue.pendingLikes || []
   })

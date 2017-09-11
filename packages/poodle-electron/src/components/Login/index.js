@@ -6,6 +6,7 @@ import TextField from 'material-ui/TextField'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chromeActions from 'poodle-core/lib/actions/chrome'
 import * as chromeState from 'poodle-core/lib/reducers/chrome'
+import * as selectors from 'poodle-core/lib/selectors'
 import PropTypes from 'prop-types'
 import * as queryString from 'query-string'
 import React from 'react'
@@ -158,7 +159,8 @@ function onLogin (
   }
 }
 
-function mapStateToProps ({ auth, chrome }: State): $Shape<LoginProps> {
+function mapStateToProps (state: State): $Shape<LoginProps> {
+  const { auth, chrome } = state
   return {
     account: auth.account,
     errors: chrome.errors,
@@ -166,7 +168,7 @@ function mapStateToProps ({ auth, chrome }: State): $Shape<LoginProps> {
       'authentication-flow',
       chrome
     ),
-    loggedIn: !!auth.authenticatedAs
+    loggedIn: selectors.loggedIn(state)
   }
 }
 
