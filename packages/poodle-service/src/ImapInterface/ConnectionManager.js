@@ -12,7 +12,10 @@ import { type URI } from 'arfe/lib/models/uri'
 import type EventEmitter from 'events'
 import Connection, * as imap from 'imap'
 import * as kefir from 'kefir'
+import type PouchDB from 'pouchdb-node'
+import * as Conn from '../connection'
 import { type ConnectionFactory } from '../models/ImapAccount'
+import { withBox } from '../models/connection'
 import * as kefirUtil from '../util/kefir'
 import * as promises from '../util/promises'
 import * as actions from './actions/imap'
@@ -30,11 +33,13 @@ type Result = any
 export default class ConnectionManager {
   _conn: ?Promise<Connection>
   _connectionFactory: ConnectionFactory
+  _db: PouchDB
   _lock: ?Promise<void>
   _queue: JobQueue<actions.Action, Result>
 
-  constructor (connectionFactory: ConnectionFactory) {
+  constructor (connectionFactory: ConnectionFactory, db: PouchDB) {
     this._connectionFactory = connectionFactory
+    this._db = db
     this._queue = new JobQueue(this._process.bind(this))
   }
 
@@ -63,26 +68,32 @@ export default class ConnectionManager {
   _process (action: actions.Action): kefir.Observable<Result> {
     return kefir
       .fromPromise(this._getConn())
-      .flatMap(conn => process(action, conn))
+      .flatMap(conn => process(action, conn, this._db))
   }
 }
 
 function process (
   action: actions.Action,
-  conn: Connection
+  conn: Connection,
+  db: PouchDB
 ): kefir.Observable<Result> {
   switch (action.type) {
-    case actions.FETCH_THREADS:
-      return kefir.constant({ recordIds: [] })
-    case actions.FETCH_PARTS:
-      return kefir.constant({ recordIds: [] })
+    // case actions.FETCH_THREADS:
+    //   return kefir.constant({ recordIds: [] })
+    case actions.FETCH_PART:
+      const { messageId, uid, part } = action
+      return withBox(action.box, conn, true, openBox => kefir.fromPromise(
+        Conn.downloadPartContent(messageId, uid, part, openBox, db)
+      ))
     case actions.GET_CAPABILITIES:
       return kefir.constant(conn._caps || [])
-    case actions.SEARCH:
-      const criteria = action.criteria
-      return kefir.fromPromise(
-        promises.lift1(cb => conn.search(criteria, cb)).then(uids => ({ uids }))
-      )
+    // case actions.SEARCH:
+    //   const criteria = action.criteria
+    //   return kefir.fromPromise(
+    //     promises.lift1(cb => conn.search(criteria, cb)).then(uids => ({ uids }))
+    //   )
+    case actions.QUERY_CONVERSATIONS:
+      return Conn.queryConversations(action, conn, db)
     default:
       return kefir.constantError(
         new Error(`Unknown action type: ${action.type}`)

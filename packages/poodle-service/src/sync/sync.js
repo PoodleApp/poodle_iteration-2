@@ -9,8 +9,6 @@ import Connection from 'imap'
 import * as kefir from 'kefir'
 import PouchDB from 'pouchdb-node'
 
-import * as actions from '../actions'
-import * as imaputil from '../util/imap'
 import * as promises from '../util/promises'
 import * as persist from './persist'
 

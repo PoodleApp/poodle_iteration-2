@@ -1,12 +1,14 @@
 /* @flow */
 
 import Message from 'arfe/lib/models/Message'
+import { type URI } from 'arfe/lib/models/uri'
 import dateformat from 'dateformat'
 import * as kefir from 'kefir'
 import { simpleParser } from 'mailparser'
+import type PouchDB from 'pouchdb-node'
+import * as cache from '../cache/persist'
 import { decode } from '../encoding'
 import { type Connection, type OpenBox } from '../models/connection'
-import * as imap from '../util/imap'
 import * as kefirutil from '../util/kefir'
 import * as promises from '../util/promises'
 
@@ -15,63 +17,62 @@ import type {
   FetchOptions,
   ImapMessage,
   MessageAttributes,
+  MessagePart,
   MessageSource,
   UID
 } from 'imap'
 import type { Readable } from 'stream'
 import type { Observable } from 'kefir'
 
+type ID = string
+
 const headersSelection = 'HEADER'
 
-export function fetchMessageParts (
-  msg: Message,
-  partId: string,
+/*
+ * Downloads and saves messages; emits IDs of the messages in PouchDB
+ */
+export function downloadMessages (
+  source: MessageSource,
+  openBox: OpenBox,
+  db: PouchDB
+): Observable<URI> {
+  return fetchMessages(source, openBox).flatMap(message =>
+    kefir.fromPromise(cache.persistMessage(message, db)).map(() => message.id)
+  )
+}
+
+export async function downloadPartContent (
+  messageId: string,
+  uid: UID,
+  part: MessagePart,
+  openBox: OpenBox,
+  db: PouchDB
+): Promise<ID> {
+  const data = await fetchMessagePart(uid, part, openBox)
+  return cache.persistPart(messageId, part, data, db)
+}
+
+export function fetchMessagePart (
+  uid: UID,
+  part: MessagePart,
   openBox: OpenBox
 ): Promise<Readable> {
-  const part = msg.getPart({ partId })
-  if (!part) {
-    return Promise.reject(
-      new Error(`part ID ${partId} does not exist in message ${msg.uid}`)
-    )
-  }
-
   const encoding = part.encoding
-
-  return fetch(([msg.uid]: number[]), { bodies: part.partID }, openBox)
+  return fetch(([uid]: string[]), { bodies: part.partID }, openBox)
     .flatMap(messageBodyStream)
     .map(body => (encoding ? decode(encoding, body) : body))
     .toPromise()
 }
 
-export function search (
-  criteria: mixed[],
-  openBox: OpenBox
-): Promise<UID[]> {
+export function search (criteria: mixed[], openBox: OpenBox): Promise<UID[]> {
   return promises.lift1(cb => openBox.connection.search(criteria, cb))
 }
-
-// export function searchUids (
-//   criteria: mixed[],
-//   box: Box,
-//   conn: Connection
-// ): Promise<UID[]> {
-//   const uidsPromise = promises.lift1(cb => conn.search(criteria, cb))
-//   return kefir.fromPromise(uidsPromise)
-// }
-
-// export function fetchRecent (
-//   since: Date,
-//   openBox: OpenBox
-// ): Promise<UID[]> {
-//   const q = dateformat(since, 'mmmm d, yyyy')
-//   return search([['SINCE', q]], openBox)
-// }
 
 export function fetch (
   source: MessageSource,
   opts: FetchOptions,
   openBox: OpenBox
-): Observable<ImapMessage, mixed> {
+): Observable<ImapMessage, Error> {
   return kefirutil.fromEventsWithEnd(
     openBox.connection.fetch(source, opts),
     'message',
@@ -79,10 +80,13 @@ export function fetch (
   )
 }
 
-export function fetchMetadata (
+/*
+ * Downloads message structure and metadata, but not content parts
+ */
+export function fetchMessages (
   source: MessageSource,
   openBox: OpenBox
-): Observable<Message, mixed> {
+): Observable<Message, Error> {
   const respStream = fetch(
     source,
     {
@@ -92,13 +96,13 @@ export function fetchMetadata (
     },
     openBox
   )
-
   return respStream.flatMap(imapMsg => {
     const attrStream = getAttributes(imapMsg)
     const headersStream = getHeaders(imapMsg)
+    const perBoxMetadata = { [openBox.box.name]: openBox.box }
     return kefir.zip(
       [attrStream, headersStream],
-      (imapMsg, headers) => new Message(imapMsg, headers)
+      (imapMsg, headers) => new Message(imapMsg, headers, perBoxMetadata)
     )
   })
 }
@@ -110,7 +114,7 @@ function messageBodyStream (msg: ImapMessage): Observable<Readable, mixed> {
 
 export function getAttributes (
   message: ImapMessage
-): Observable<MessageAttributes, mixed> {
+): Observable<MessageAttributes, Error> {
   return kefirutil.fromEventsWithEnd(message, 'attributes')
 }
 
@@ -124,7 +128,7 @@ type HeaderValue =
       params: { charset: string }
     }
 
-function getHeaders (message: ImapMessage): Observable<Headers, mixed> {
+function getHeaders (message: ImapMessage): Observable<Headers, Error> {
   const bodies = kefirutil.fromEventsWithEnd(
     message,
     'body',

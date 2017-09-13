@@ -16,6 +16,23 @@ export type OpenBox = {
   connection: Connection
 }
 
+/*
+ * Recursively searches boxes on an IMAP server to find one that matches the
+ * given predicate. Returns an object where the `name` property is the qualified
+ * name (includes parent box names, separated by delimiters), and the `box`
+ * property provides some metadata.
+ */
+export async function findBox (
+  nameOrAttrib: string,
+  conn: Connection
+): Promise<?{ name: string, box: imap.BoxListItem }> {
+  const matcher = nameOrAttrib.startsWith('\\')
+    ? boxByAttribute(nameOrAttrib)
+    : boxByName(nameOrAttrib)
+  const boxes = await promises.lift1(cb => conn.getBoxes(cb))
+  return findBoxByPredicate(matcher, boxes)
+}
+
 export async function openBox (
   boxName: string,
   readonly: boolean,
@@ -25,6 +42,19 @@ export async function openBox (
     connection.openBox(boxName, readonly, cb)
   )
   return { box, connection }
+}
+
+// TODO: capability check for 'All' mailbox
+export async function openAllMail (
+  readonly: boolean,
+  conn: Connection
+): Promise<OpenBox> {
+  const all = await findBox('\\All', conn)
+  if (all) {
+    return openBox(all.name, readonly, conn)
+  } else {
+    throw new Error('Could not find box for all mail')
+  }
 }
 
 export async function closeBox (
@@ -45,4 +75,47 @@ export function withBox<T, E, OT: kefir.Observable<T, E>> (
     kefir.fromPromise(openBox(boxName, readonly, connection)).flatMap(callback),
     () => kefir.fromPromise(promises.lift0(cb => connection.closeBox(cb)))
   ): any) // TODO
+}
+
+export function withAllMail<T, E, OT: kefir.Observable<T, E>> (
+  connection: Connection,
+  readonly: boolean,
+  callback: (openBox: OpenBox) => OT
+): OT {
+  return (kefirUtil.ensure(
+    kefir.fromPromise(openAllMail(readonly, connection)).flatMap(callback),
+    () => kefir.fromPromise(promises.lift0(cb => connection.closeBox(cb)))
+  ): any) // TODO
+}
+
+function findBoxByPredicate (
+  p: (box: imap.BoxListItem, boxName: string) => boolean,
+  boxes: imap.BoxList,
+  path?: string = ''
+): ?{ box: imap.BoxListItem, name: string } {
+  const pairs = Object.keys(boxes).map(k => ({ name: k, box: boxes[k] }))
+  const match = pairs.find(([n, b]) => p(b, n))
+  if (match) {
+    const { name, box } = match
+    return { name: path + name, box }
+  } else {
+    return pairs
+      .map(
+        ([n, b]) =>
+          b.children ? findBoxByPredicate(p, b.children, n + b.delimiter) : null
+      )
+      .filter(child => !!child)[0]
+  }
+}
+
+export function boxByAttribute (
+  attribute: string
+): (box: imap.BoxListItem) => boolean {
+  return box => box.attribs.some(a => a === attribute)
+}
+
+export function boxByName (
+  name: string
+): (_: imap.BoxListItem, boxName: string) => boolean {
+  return (_, boxName) => boxName === name
 }

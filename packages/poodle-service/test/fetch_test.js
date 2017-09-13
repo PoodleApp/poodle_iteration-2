@@ -1,10 +1,7 @@
 /* @flow */
 
 import * as json          from 'format-json'
-import * as actions       from '../src/actions'
-import * as googleactions from '../src/actions/google'
 import * as google        from '../src/models/ImapAccount/google'
-import * as imaputil      from '../src/util/imap'
 import * as googletest    from './models/ImapAccount/google'
 import * as promises      from '../src/util/promises'
 

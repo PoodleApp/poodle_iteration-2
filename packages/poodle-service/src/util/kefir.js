@@ -4,9 +4,13 @@ import * as kefir from 'kefir'
 
 import type { Observable } from 'kefir'
 
+export function catMaybes<T, E> (obs: Observable<T, E>): Observable<$NonMaybeType<T>, E> {
+  return obs.filter(x => !!x)
+}
+
 export function collectData<S: events$EventEmitter> (
   eventSource: S
-): Observable<Buffer, mixed> {
+): Observable<Buffer, Error> {
   const chunkEvents = fromEventsWithEnd(eventSource, 'data')
   return chunkEvents
     .scan((chunks: Buffer[], chunk) => chunks.concat(chunk), [])
@@ -36,14 +40,14 @@ export function fromEventsWithEnd<T, S: events$EventEmitter> (
   eventSource: S,
   eventName: string,
   transform: ?(...values: any) => T = null
-): Observable<T, mixed> {
+): Observable<T, Error> {
   return kefir.stream(emitter => {
     eventSource.on(eventName, (...values) => {
       const value = transform ? transform(...values) : values[0]
       emitter.emit(value)
     })
     eventSource.once('error', err => {
-      emitter.error(err)
+      emitter.error(err instanceof Error ? err : new Error(err))
       emitter.end()
     })
     eventSource.once('end', () => {
