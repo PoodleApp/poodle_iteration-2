@@ -1,26 +1,38 @@
 /* @flow */
 
 import * as kefir from 'kefir'
+import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chromeActions from 'poodle-core/lib/actions/chrome'
 import * as q from 'poodle-core/lib/queries/conversations'
 import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
-import { type AccountMetadata } from 'poodle-service'
+import * as Imap from 'poodle-service/lib/ImapInterface/Client'
 import imapClient from '../../imapClient'
 import ActivityStream from '../ActivityStream'
 
 import type { State } from '../../reducers'
 
 type OwnProps = {
-  account: AccountMetadata
+  account: authActions.Account
 }
 
 const WithData = slurp(
-  ({ auth, chrome }: State, { account }: OwnProps) => ({
-    conversations: chrome.searchQuery
-      ? subscribe(imapClient.search, chrome.searchQuery, auth.account)
-      : subscribe(kefir.constant, []),
-    errors: chrome.errors
-  }),
+  ({ auth, chrome }: State, { account }: OwnProps) => {
+    const email = auth.account && auth.account.email
+    return {
+      conversations:
+        email && chrome.searchQuery
+          ? subscribe(
+              Imap.query,
+            {
+              account: email,
+              query: chrome.searchQuery
+            },
+              imapClient
+            )
+          : subscribe(kefir.constant, []),
+      errors: chrome.errors
+    }
+  },
   (dispatch: Dispatch<*>) => ({
     onDismissError (...args) {
       dispatch(chromeActions.dismissError(...args))
