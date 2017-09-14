@@ -29,8 +29,8 @@ export function request<T, R> (action: T, channel: EventEmitter): kefir.Observab
     // Listen for responses
     const responseListener = (response: Response<R>) => {
       if (response.transactionId === transactionId) {
-        if (response.value) {
-          emitter.value((response.value: any))
+        if (response.hasOwnProperty('value')) {
+          emitter.value((response: any).value)
         } else if (response.complete) {
           emitter.end()
           channel.removeListener(RESPONSE, responseListener)
