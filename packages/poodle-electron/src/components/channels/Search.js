@@ -22,7 +22,7 @@ const WithData = slurp(
       conversations:
         email && chrome.searchQuery
           ? subscribe(
-              Imap.query,
+              Imap.queryForListView,
             {
               account: email,
               query: chrome.searchQuery

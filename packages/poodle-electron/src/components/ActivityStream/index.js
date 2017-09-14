@@ -15,9 +15,8 @@ import SearchBar from 'material-ui-search-bar'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chrome from 'poodle-core/lib/actions/chrome'
-import * as q from 'poodle-core/lib/queries/conversations'
 import { type Slurp } from 'poodle-core/lib/slurp'
-import Sync from 'poodle-service/lib/sync'
+import { type ConversationListItem } from 'poodle-service/lib/ImapInterface/Client'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { type Dispatch } from 'redux'
@@ -28,7 +27,7 @@ import Errors from '../Errors'
 
 type Props = {
   account: authActions.Account,
-  conversations: Slurp<q.ConversationListItem[], Error>,
+  conversations: Slurp<ConversationListItem[], Error>,
   errors: ?(Error[]),
   onDismissError: typeof chrome.dismissError,
   onSearch: typeof chrome.search
@@ -127,7 +126,7 @@ export default function ActivityStream (props: Props) {
 }
 
 type ConversationRowProps = {
-  conversation: q.ConversationListItem
+  conversation: ConversationListItem
 }
 
 function ConversationRow ({ conversation }: ConversationRowProps) {
