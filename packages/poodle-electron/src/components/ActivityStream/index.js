@@ -112,6 +112,7 @@ export default function ActivityStream (props: Props) {
       <div style={styles.body}>
         <main style={styles.content}>
           <SearchBar
+            onChange={() => {}}
             onRequestSearch={props.onSearch}
             />
           {content}
