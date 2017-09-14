@@ -11,7 +11,6 @@ import Paper from 'material-ui/Paper'
 import RaisedButton from 'material-ui/RaisedButton'
 import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
-import SearchBar from 'material-ui-search-bar'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chrome from 'poodle-core/lib/actions/chrome'
@@ -24,6 +23,7 @@ import { type Dispatch } from 'redux'
 import Avatar from '../Avatar'
 import ChannelListSidebar from './ChannelListSidebar'
 import Errors from '../Errors'
+import SearchBar from '../SearchBar'
 
 type Props = {
   account: authActions.Account,
@@ -111,10 +111,7 @@ export default function ActivityStream (props: Props) {
       </header>
       <div style={styles.body}>
         <main style={styles.content}>
-          <SearchBar
-            onChange={() => {}}
-            onRequestSearch={props.onSearch}
-            />
+          <SearchBar onSearch={props.onSearch} />
           {content}
         </main>
         <nav style={styles.leftNav}>
