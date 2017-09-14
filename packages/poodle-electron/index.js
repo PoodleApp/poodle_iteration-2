@@ -48,8 +48,12 @@ function createWindow () {
   })
 }
 
+let server
 app.on('ready', () => {
-  const server = new S.NewServer(ipcMain, db) // Listen for IMAP requests
+  // Run the IMAP interface in the main process in production
+  if (process.env.NODE_ENV !== 'development') {
+    server = new S.NewServer(ipcMain, db) // Listen for IMAP requests
+  }
   createWindow()
 })
 
