@@ -2,6 +2,7 @@
 
 import deepEqual from 'deep-equal'
 import * as kefir from 'kefir'
+import nextTick from 'process-nextick-args'
 import { connect } from 'react-redux'
 import * as chrome from '../actions/chrome'
 import * as actions from './actions'
@@ -99,6 +100,7 @@ function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
   options: *
 ) {
   const componentKey = getKey()
+  const delayedDispatch = delayed(dispatch)
   let sources: {
     [key: string]: {
       source: effects.Effect<any, any>,
@@ -134,7 +136,9 @@ function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
         if (existing) {
           existing.unsubscribe()
         }
-        const unsubscribe = subscribe(dispatch, componentKey, key, newSource)
+        // Dispatch on next tick to avoid a tight loop in cases where, e.g.,
+        // a subscription ends synchronously.
+        const unsubscribe = subscribe(delayedDispatch, componentKey, key, newSource)
         sources[key] = { source: newSource, unsubscribe }
       }
     }
@@ -236,6 +240,12 @@ function unsubscribe (sources: {
 }) {
   for (const key of Object.keys(sources)) {
     sources[key].unsubscribe()
+  }
+}
+
+function delayed (fn: Function): Function {
+  return (...args) => {
+    nextTick(() => fn(...args))
   }
 }
 
