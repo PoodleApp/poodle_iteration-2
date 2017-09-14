@@ -30,7 +30,7 @@ export default class JobQueue<A, B> {
   }
 
   _run () {
-    if (!this._busy || this._jobs.length < 1) {
+    if (this._busy || this._jobs.length < 1) {
       return
     }
     this._busy = true
