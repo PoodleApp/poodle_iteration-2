@@ -2,6 +2,7 @@
 
 import * as kefir from 'kefir'
 import * as m from 'mori'
+import type PouchDB from 'pouchdb-node'
 import { type ImapAccount, getConnectionFactory } from '../models/ImapAccount'
 import { type AccountMetadata, type Email } from '../types'
 import * as imapActions from './actions/imap'
@@ -9,16 +10,18 @@ import ConnectionManager from './ConnectionManager'
 
 export default class AccountManager {
   _accounts: m.Map<Email, ConnectionManager>
+  _db: PouchDB
   _metadata: m.Map<Email, AccountMetadata>
 
-  constructor () {
+  constructor (db: PouchDB) {
     this._accounts = m.hashMap()
+    this._db = db
     this._metadata = m.hashMap()
   }
 
   async add (account: ImapAccount): Promise<void> {
     const cf = await getConnectionFactory(account)
-    const cm = new ConnectionManager(cf)
+    const cm = new ConnectionManager(cf, this._db)
     this._accounts = m.assoc(this._accounts, account.email, cm)
     const capabilities = await cm
       .handle(imapActions.getCapabilities())

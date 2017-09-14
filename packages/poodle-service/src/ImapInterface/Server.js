@@ -2,6 +2,7 @@
 
 import type EventEmitter from 'events'
 import * as kefir from 'kefir'
+import type PouchDB from 'pouchdb-node'
 import { type ImapAccount } from '../models/ImapAccount'
 import { type AccountMetadata, type Email } from '../types'
 import AccountManager from './AccountManager'
@@ -20,9 +21,9 @@ export opaque type Server = {
   channel: EventEmitter
 }
 
-export function NewServer (channel: EventEmitter): Server {
+export function NewServer (channel: EventEmitter, db: PouchDB): Server {
   const server = {
-    accountManager: new AccountManager(),
+    accountManager: new AccountManager(db),
     channel
   }
   Channel.serve(action => handle(action, server), channel)

@@ -117,6 +117,11 @@ async function getConversationById (
   return Conv.messagesToConversation(fetchPartContent.bind(null, db), messages)
 }
 
+export async function getMessage (id: string, db: PouchDB): Promise<Message> {
+  const record = await db.get(id)
+  return asMessage(record.doc)
+}
+
 export async function getMessagesByThreadId (
   threadId: string,
   db: PouchDB
@@ -170,6 +175,8 @@ export function fetchPartContent (
     })
 }
 
+// TODO: in case URI was constructed using a partID instead of a contentID, fall
+// back to looking for a record with the matching partID
 export function fetchContentByUri (db: PouchDB, uri: string): Promise<Readable> {
   return db.getAttachment(uri, 'content').then(buffer => {
     const rs = new stream.PassThrough()

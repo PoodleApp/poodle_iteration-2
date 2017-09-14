@@ -4,14 +4,19 @@
  * @flow
  */
 
+import * as AS from 'activitystrea.ms'
 import Conversation, * as Conv from 'arfe/lib/models/Conversation'
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import Message from 'arfe/lib/models/Message'
+import { type URI, parseMidUri } from 'arfe/lib/models/uri'
 import type EventEmitter from 'events'
 import * as imap from 'imap'
 import * as kefir from 'kefir'
+import type Moment from 'moment'
+import * as m from 'mori'
 import type PouchDB from 'pouchdb-node'
 import { type Readable } from 'stream'
+import toString from 'stream-to-string'
 import * as cache from '../cache/query'
 import * as capabilities from '../capabilities'
 import { type ImapAccount } from '../models/ImapAccount'
@@ -22,6 +27,8 @@ import { type Action, accountAction, imapAction } from './actions'
 import * as accountActions from './actions/account'
 import * as imapActions from './actions/imap'
 import * as constants from './constants'
+
+type Actor = AS.models.Object
 
 export type Content = {
   content: string,
@@ -77,20 +84,53 @@ export function accounts (client: Client): kefir.Observable<AccountMetadata[]> {
   return client.accounts
 }
 
-export function activityContent (
+export async function activityContent (
   activity: DerivedActivity,
-  accountName: Email,
-  client: Client
-): kefir.Observable<?Content> {
-  return kefir.constantError(new Error('TODO: activityContent')) // TODO
+  account: Email,
+  client: Client,
+  preferences: string[] = ['text/html', 'text/plain']
+): Promise<?Content> {
+  const links = m.mapcat(
+    pref => m.filter(l => l.mediaType === pref, activity.objectLinks),
+    preferences
+  )
+  const link = m.first(links)
+
+  if (!link) {
+    return // no content
+  }
+
+  const href = link.href
+  if (!href) {
+    throw new Error(
+      `object link does not have an \`href\` property in activity ${activity.id}`
+    )
+  }
+
+  const stream = await fetchPartContentByUri(account, client, link.href)
+  return {
+    content: await toString(stream, 'utf8'), // TODO: check charset
+    mediaType: link.mediaType
+  }
 }
 
-export function activityContentSnippet (
+export async function activityContentSnippet (
+  account: Email,
+  client: Client,
   activity: DerivedActivity,
-  accountName: Email,
-  client: Client
-): kefir.Observable<?Content> {
-  return kefir.constantError(new Error('TODO: activityContentSnippet')) // TODO
+  length: number = 100
+): Promise<?string> {
+  try {
+    const result = await activityContent(activity, account, client, [
+      'text/plain',
+      'text/html'
+    ])
+    if (result) {
+      return result.content.slice(0, length)
+    }
+  } catch (err) {
+    console.error(`Failed to fetch content snippet for activity ${activity.id}`)
+  }
 }
 
 export function addAccount (account: ImapAccount, client: Client): kefir.Observable<void> {
@@ -107,6 +147,51 @@ export function query (opts: {
       account: opts.account,
       threadId
     }, client)))
+}
+
+export type ConversationListItem = {
+  id: URI,
+  lastActiveTime: Moment,
+  latestActivity: ActivityListItem,
+  participants: Actor[],
+  subject: ?string
+}
+
+export type ActivityListItem = {
+  actor: ?Actor,
+  contentSnippet: ?string
+}
+
+export function queryForListView (opts: {
+  account: Email,
+  query: string
+}, client: Client): kefir.Observable<ConversationListItem[], Error> {
+  return query(opts, client)
+    // A conversation with only non-visible activities (likes, edits, etc.) will
+    // effectively be empty, so let's not display it
+    .filter(conversation => !m.isEmpty(conversation.activities))
+    .flatMap(processConversation.bind(null, opts.account, client))
+    .scan((cs, conv) => cs.concat(conv), [])
+}
+
+function processConversation (
+  account: Email,
+  client: Client,
+  conv: Conversation
+): kefir.Observable<ConversationListItem, Error> {
+  const activity = conv.latestActivity
+  return kefir
+    .fromPromise(activityContentSnippet(account, client, activity))
+    .map(contentSnippet => ({
+      id: conv.id,
+      lastActiveTime: conv.lastActiveTime,
+      latestActivity: {
+        actor: activity.actor,
+        contentSnippet
+      },
+      participants: m.intoArray(conv.flatParticipants),
+      subject: conv.subject
+    }))
 }
 
 async function getConversationByThreadId (
@@ -140,6 +225,29 @@ function fetchPartContent (
     }), account)
     await request(action, client).toPromise()
     return fetchFromCache(msg, contentId)
+  }
+}
+
+async function fetchPartContentByUri (
+  account: Email,
+  client: Client,
+  uri: URI
+): Promise<Readable> {
+  try {
+    return cache.fetchContentByUri (client.db, uri)
+  } catch (err) {}
+  const parsed = parseMidUri(uri)
+  const messageId = parsed && parsed.messageId
+  const contentId = parsed && parsed.contentId
+  if (!messageId || !contentId) {
+    throw new Error(`Unable to parse messageID and contentID from URI: ${uri}`)
+  }
+  try {
+    const message = await cache.getMessage(messageId, client.db)
+    return fetchPartContent(account, client)(message, contentId)
+  } catch (err) {
+    // TODO: fall back to scanning mailboxes for the given message ID
+    throw new Error(`Tried to fetch content, but there is no local copy of the containing message, so we don't know which mailbox to look in.`)
   }
 }
 
