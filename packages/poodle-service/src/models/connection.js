@@ -108,15 +108,15 @@ function findBoxByPredicate (
   path?: string = ''
 ): ?{ box: imap.BoxListItem, name: string } {
   const pairs = Object.keys(boxes).map(k => ({ name: k, box: boxes[k] }))
-  const match = pairs.find(([n, b]) => p(b, n))
+  const match = pairs.find(({ box, name }) => p(box, name))
   if (match) {
     const { name, box } = match
     return { name: path + name, box }
   } else {
     return pairs
       .map(
-        ([n, b]) =>
-          b.children ? findBoxByPredicate(p, b.children, n + b.delimiter) : null
+        ({ box, name }) =>
+          box.children ? findBoxByPredicate(p, box.children, name + box.delimiter) : null
       )
       .filter(child => !!child)[0]
   }

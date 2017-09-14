@@ -55,9 +55,9 @@ export function queryConversations (
       uids => getThreadIds(uids, openBox)
     )
     return kefirUtil.takeAll(allThreadIds).flatMap(threadIds => {
-      const distinct = unique(threadIds)
+      const distinct: string[] = unique(threadIds)
       const threads = distinct
-        .flatMap(threadId =>
+        .map(threadId =>
           downloadThread(threadId, openBox, db)
           .ignoreValues()
           .beforeEnd(() => threadId)
