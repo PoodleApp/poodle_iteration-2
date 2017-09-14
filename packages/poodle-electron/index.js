@@ -5,6 +5,7 @@ const contextMenu = require('electron-context-menu')
 const path = require('path')
 const S = require('poodle-service/lib/ImapInterface/Server')
 const url = require('url')
+const db = require('./lib/db')
 
 if (process.env.NODE_ENV === 'development') {
   const {
@@ -48,7 +49,7 @@ function createWindow () {
 }
 
 app.on('ready', () => {
-  const server = new S.NewServer(ipcMain) // Listen for IMAP requests
+  const server = new S.NewServer(ipcMain, db) // Listen for IMAP requests
   createWindow()
 })
 
