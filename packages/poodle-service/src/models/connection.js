@@ -73,7 +73,14 @@ export function withBox<T, E, OT: kefir.Observable<T, E>> (
 ): OT {
   return (kefirUtil.ensure(
     kefir.fromPromise(openBox(boxName, readonly, connection)).flatMap(callback),
-    () => kefir.fromPromise(promises.lift0(cb => connection.closeBox(cb)))
+    () =>
+      kefir.fromPromise(
+        promises.lift0(cb => {
+          if (connection._box) {
+            connection.closeBox(cb)
+          }
+        })
+      )
   ): any) // TODO
 }
 
@@ -84,7 +91,14 @@ export function withAllMail<T, E, OT: kefir.Observable<T, E>> (
 ): OT {
   return (kefirUtil.ensure(
     kefir.fromPromise(openAllMail(readonly, connection)).flatMap(callback),
-    () => kefir.fromPromise(promises.lift0(cb => connection.closeBox(cb)))
+    () =>
+      kefir.fromPromise(
+        promises.lift0(cb => {
+          if (connection._box) {
+            connection.closeBox(cb)
+          }
+        })
+      )
   ): any) // TODO
 }
 
