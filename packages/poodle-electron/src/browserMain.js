@@ -37,11 +37,12 @@ const enhancer = redux.compose(
 const store = redux.createStore(buildRootReducer(r3.routerReducer), enhancer)
 
 // Run the IMAP service in the renderer process in development so that we can
-// use the Webkit debugger, and reload code changes easily.
+// use the Webkit debugger, and reload code changes easily. Eventually we will
+// run the service in the main process when running in production.
 let imapService
-if (process.env.NODE_ENV === 'development') {
+// if (process.env.NODE_ENV === 'development') {
   imapService = require('./imapService')
-}
+// }
 
 saga.run(sagas)
 
