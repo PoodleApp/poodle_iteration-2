@@ -52,24 +52,25 @@ export function queryConversations (
 ): kefir.Observable<ThreadId, Error> {
   return C.withAllMail(connection, true, openBox => {
     const allThreadIds = query(opts.query, openBox).flatMap(
-      uids => getThreadIds(uids, openBox)
+      uids => kefirUtil.batch(100, uids, uids => getThreadIds(uids, openBox))
     )
     return kefirUtil.takeAll(allThreadIds).flatMap(threadIds => {
       const distinct: string[] = unique(threadIds)
-      const threads = distinct
-        .map(threadId =>
-          downloadThread(threadId, openBox, db)
-          .ignoreValues()
-          .beforeEnd(() => threadId)
-        )
       // Run each fetch sequentially because we are using a single connection
-      return kefir.concat(threads)
+      return kefirUtil.sequence(distinct, threadId =>
+        downloadThread(threadId, openBox, db)
+        .ignoreValues()
+        .beforeEnd(() => threadId)
+      )
     })
   })
 }
 
 function getThreadIds (uids: imap.UID[], openBox: C.OpenBox): kefir.Observable<ThreadId, Error> {
-  const threadIds = basic.fetch(uids, { bodies: 'X-GM-THRID' }, openBox)
+  // The imap library will fetch 'x-gm-thrid' by default. We limit the bodies to
+  // one header to fetch as little data as possible, because 'x-gm-thrid' is the
+  // only thing we really want.
+  const threadIds = basic.fetch(uids, { bodies: 'HEADER.FIELDS (Message-ID)' }, openBox)
     .flatMap(basic.getAttributes)
     .map(attributes => attributes['x-gm-thrid'])
   return kefirUtil.catMaybes(threadIds)

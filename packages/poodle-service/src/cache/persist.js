@@ -2,6 +2,7 @@
 
 import Message, * as Msg from 'arfe/lib/models/Message'
 import { type URI, midUri } from 'arfe/lib/models/uri'
+import deepEqual from 'deep-equal'
 import PouchDB from 'pouchdb-node'
 import streamToPromise from 'stream-to-promise'
 
@@ -15,27 +16,22 @@ export async function persistMessage (
   message: Message,
   db: PouchDB
 ): Promise<void> {
-  const existing = await db.get(message.id).catch(err => {
-    if (err.status !== 404) {
-      return Promise.reject(err)
+  const requestedAt = toISOStringSecondPrecision(new Date())
+  const headers = Array.from(message.headers.entries())
+  await update(db, (existing: ?MessageRecord) => {
+    return {
+      _id: message.id,
+      conversationId: message.conversationId,
+      headers,
+      message: message.attributes,
+      perBoxMetadata: mergePerBoxMetadata(
+        existing && existing.perBoxMetadata,
+        message && message.perBoxMetadata
+      ),
+      requestedAt,
+      type: 'Message'
     }
   })
-  const record: MessageRecord = {
-    _id: message.id,
-    conversationId: message.conversationId,
-    headers: Array.from(message.headers.entries()),
-    message: message.attributes,
-    perBoxMetadata: mergePerBoxMetadata(
-      existing.perBoxMetadata,
-      message.perBoxMetadata
-    ),
-    requestedAt: new Date().toISOString(),
-    type: 'Message'
-  }
-  if (existing) {
-    record._rev = existing._rev
-  }
-  return db.put(record).then(_ => undefined)
 }
 
 /*
@@ -76,7 +72,13 @@ export async function persistPart (
     requestedAt: new Date().toISOString(),
     type: 'PartContent'
   }
-  await db.put(record)
+  try {
+    await db.put(record)
+  } catch (err) {
+    if (err.status !== 409) {
+      throw err
+    }
+  }
   return _id
 }
 
@@ -90,4 +92,62 @@ function mergePerBoxMetadata (
     ...existing,
     ...update
   }
+}
+
+async function update<T: { _id: string, _rev?: string }> (
+  db: PouchDB,
+  fn: (existing: ?T) => T,
+  retries: number = 3
+): Promise<T> {
+  const record = fn()
+  return updateHelper(db, record, fn, retries)
+}
+
+async function updateHelper<T: { _id: string, _rev?: string }> (
+  db: PouchDB,
+  record: T,
+  fn: (existing: ?T) => T,
+  retries,
+  retriesRemaining = retries
+): Promise<T> {
+  if (retries < 0) {
+    throw new Error('Retry count must be non-negative')
+  }
+  try {
+    await db.put(record)
+    return record
+  } catch (err) {
+    if (err.status === 409 && retries > 0) {
+      // conflict
+      const existing = await db.get(record._id).catch(err => {
+        if (err.status !== 404) {
+          // Just resolve to `undefined` if doc is missing
+          return Promise.reject(err)
+        }
+      })
+      const updatedRecord = fn(existing)
+      if (existing) {
+        updatedRecord._rev = existing._rev
+      }
+      if (deepEqual(existing, updatedRecord)) {
+        return existing
+      } else {
+        await randomDelay(100, retries - retriesRemaining)
+        return updateHelper(db, updatedRecord, fn, retries, retriesRemaining - 1)
+      }
+    } else {
+      throw err
+    }
+  }
+}
+
+function randomDelay (maxInMillis: number, multiplier: number): Promise<void> {
+  return new Promise((resolve) => {
+    const delay = Math.floor(Math.random() * maxInMillis) * multiplier
+    setTimeout(resolve, delay)
+  })
+}
+
+function toISOStringSecondPrecision (date: Date): string {
+  return date.toISOString().slice(0, 19) + 'Z'
 }

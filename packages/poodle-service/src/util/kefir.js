@@ -4,7 +4,21 @@ import * as kefir from 'kefir'
 
 import type { Observable } from 'kefir'
 
-export function catMaybes<T, E> (obs: Observable<T, E>): Observable<$NonMaybeType<T>, E> {
+export function batch<A, B, E> (
+  batchSize: number,
+  input: A[],
+  fn: (ts: A[]) => Observable<B, E>
+): Observable<B, E> {
+  const batches = []
+  for (let i = 0; i < input.length; i += batchSize) {
+    batches.push(input.slice(i, i + batchSize))
+  }
+  return sequence(batches, fn)
+}
+
+export function catMaybes<T, E> (
+  obs: Observable<T, E>
+): Observable<$NonMaybeType<T>, E> {
   return obs.filter(x => !!x)
 }
 
@@ -54,6 +68,27 @@ export function fromEventsWithEnd<T, S: events$EventEmitter> (
       emitter.end()
     })
   })
+}
+
+/*
+ * Wait until the given observable ends, then run the callback to produce
+ * a second observable. Returns an observable that emits all values from both.
+ */
+function andThen <A, E>(obs: Observable<A, E>, fn: () => Observable<A, E>): Observable<A, E> {
+  const next = obs.ignoreValues().beforeEnd(() => 1).flatMap(fn)
+  return obs.concat(next)
+}
+
+export function sequence<A, B, E> (
+  input: A[],
+  fn: (a: A) => Observable<B, E>
+): Observable<B, E> {
+  if (input.length < 1) {
+    return kefir.never()
+  }
+  const item = input[0]
+  const rest = input.slice(1)
+  return andThen(fn(item), () => sequence(rest, fn))
 }
 
 export function takeAll<T, E> (obs: Observable<T, E>): Observable<T[], E> {
