@@ -13,6 +13,9 @@ import type { URI } from './uri'
 export type Thread = Seqable<[Activity, Thread]>
 
 export function buildThread (messages: Seqable<Activity>): Thread {
+  if (m.isEmpty(messages)) {
+    throw new Error('Cannot build thread from empty messages list')
+  }
   return m.reduce(insertMessage, singleton(m.first(messages)), m.rest(messages))
 }
 

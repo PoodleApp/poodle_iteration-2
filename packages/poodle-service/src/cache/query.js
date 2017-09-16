@@ -29,7 +29,7 @@ export async function createIndexes (db: PouchDB): Promise<void> {
     }),
     db.createIndex({
       index: {
-        fields: ['message.attributes.x-gm-thrid']
+        fields: ['message.x-gm-thrid']
       },
       ddoc: 'messagesByGoogleThreadId',
       name: 'messagesByGoogleThreadId'
@@ -131,7 +131,7 @@ export async function getMessagesByThreadId (
   }
   const result = await db.find({
     selector: {
-      'message.attributes.x-gm-thrid': threadId
+      'message.x-gm-thrid': threadId
     }
   })
   const messageRecords = result.docs
