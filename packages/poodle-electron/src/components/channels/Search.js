@@ -25,6 +25,7 @@ const WithData = slurp(
               Imap.queryForListView,
             {
               account: email,
+              limit: 30,
               query: chrome.searchQuery
             },
               imapClient

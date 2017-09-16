@@ -139,9 +139,13 @@ export function addAccount (account: ImapAccount, client: Client): kefir.Observa
 
 export function query (opts: {
   account: Email,
+  limit?: number,
   query: string
 }, client: Client): kefir.Observable<Conversation, Error> {
-  const action = imapAction(imapActions.queryConversations({ query: opts.query }), opts.account)
+  const action = imapAction(imapActions.queryConversations({
+    limit: opts.limit,
+    query: opts.query
+  }), opts.account)
   return request(action, client)
     .flatMap(threadId => kefir.fromPromise(getConversationByThreadId({
       account: opts.account,
@@ -164,6 +168,7 @@ export type ActivityListItem = {
 
 export function queryForListView (opts: {
   account: Email,
+  limit?: number,
   query: string
 }, client: Client): kefir.Observable<ConversationListItem[], Error> {
   return query(opts, client)

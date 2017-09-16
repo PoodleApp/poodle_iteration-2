@@ -33,7 +33,7 @@ export type Action =
   //   }
   | {
       type: typeof QUERY_CONVERSATIONS,
-      box: ?string,
+      limit: ?number,
       query: string
     }
 
@@ -74,12 +74,12 @@ export function getCapabilities (): Action {
 // }
 
 export function queryConversations (opts: {
-  box?: string,
+  limit: ?number,
   query: string
 }): Action {
   return {
     type: QUERY_CONVERSATIONS,
-    box: opts.box,
+    limit: opts.limit,
     query: opts.query
   }
 }

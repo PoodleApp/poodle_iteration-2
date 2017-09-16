@@ -44,7 +44,7 @@ export function query (
  */
 export function queryConversations (
   opts: {
-    box?: ?string,
+    limit?: ?number,
     query: string
   },
   connection: C.Connection,
@@ -56,8 +56,9 @@ export function queryConversations (
     )
     return kefirUtil.takeAll(allThreadIds).flatMap(threadIds => {
       const distinct: string[] = unique(threadIds)
+      const threadsToFetch = opts.limit ? distinct.slice(0, opts.limit) : distinct
       // Run each fetch sequentially because we are using a single connection
-      return kefirUtil.sequence(distinct, threadId =>
+      return kefirUtil.sequence(threadsToFetch, threadId =>
         downloadThread(threadId, openBox, db)
         .ignoreValues()
         .beforeEnd(() => threadId)
