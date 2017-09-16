@@ -15,7 +15,8 @@ import type {
   Flag,
   MessageAttributes,
   MessagePart,
-  MessageStruct
+  MessageStruct,
+  UID
 } from 'imap'
 import type { Seq, Vector } from 'mori'
 import type { URI } from './uri'
@@ -33,9 +34,10 @@ type HeaderValue =
     }
 
 export type PerBoxMetadata = {
+  boxName: string,
   flags: Flag[],
-  uid: number,
-  uidvalidity: number
+  uid: UID,
+  uidvalidity: UID
 }
 
 export default class Message {
@@ -49,12 +51,12 @@ export default class Message {
   receivedDate: Moment
   subject: ?AS.models.LanguageValue
   to: ?(Address[])
-  perBoxMetadata: ?{ [key: string]: PerBoxMetadata }
+  perBoxMetadata: ?(PerBoxMetadata[])
 
   constructor (
     msg: MessageAttributes,
     headers: Headers,
-    perBoxMetadata?: { [key: string]: PerBoxMetadata }
+    perBoxMetadata?: PerBoxMetadata[]
   ) {
     this.attributes = msg
     this.headers = headers

@@ -21,7 +21,7 @@ export type MessageRecord = {
   conversationId: string,
   headers: Array<[string, any]>,
   message: MessageAttributes,
-  perBoxMetadata: { [key: string]: PerBoxMetadata },
+  perBoxMetadata: PerBoxMetadata[],
   requestedAt: string, // ISO-8601, used for cache invalidation
   type: 'Message'
 }

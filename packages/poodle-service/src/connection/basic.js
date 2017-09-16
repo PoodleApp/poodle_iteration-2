@@ -7,9 +7,10 @@ import * as kefir from 'kefir'
 import { simpleParser } from 'mailparser'
 import type PouchDB from 'pouchdb-node'
 import * as cache from '../cache/persist'
+import * as query from '../cache/query'
 import { decode } from '../encoding'
 import { type Connection, type OpenBox } from '../models/connection'
-import * as kefirutil from '../util/kefir'
+import * as kefirUtil from '../util/kefir'
 import * as promises from '../util/promises'
 
 import type {
@@ -29,16 +30,34 @@ type ID = string
 const headersSelection = 'HEADER'
 
 /*
- * Downloads and saves messages; emits IDs of the messages in PouchDB
+ * Downloads and saves messages if they do not already exist in the cache; emits
+ * IDs of the messages in PouchDB
  */
 export function downloadMessages (
-  source: MessageSource,
+  uids: UID[],
   openBox: OpenBox,
   db: PouchDB
 ): Observable<URI> {
-  return fetchMessages(source, openBox).flatMap(message =>
-    kefir.fromPromise(cache.persistMessage(message, db)).map(() => message.id)
-  )
+  const boxName = openBox.box.name
+  const uidvalidity = String(openBox.box.uidvalidity)
+  const uidsToFetch = kefir
+    .sequentially(0, uids)
+    .flatMap(uid =>
+      kefir
+        .fromPromise(query.getMessagesByUid({ boxName, uidvalidity, uid }))
+        .map(messages => [uid, messages])
+    )
+    .filter(([_, messages]) => messages.length < 1)
+    .map(([uid, _]) => uid)
+  return kefirUtil
+    .takeAll(uidsToFetch)
+    .flatMap(uids =>
+      fetchMessages(uids, openBox).flatMap(message =>
+        kefir
+          .fromPromise(cache.persistMessage(message, db))
+          .map(() => message.id)
+      )
+    )
 }
 
 export async function downloadPartContent (
@@ -73,7 +92,7 @@ export function fetch (
   opts: FetchOptions,
   openBox: OpenBox
 ): Observable<ImapMessage, Error> {
-  return kefirutil.fromEventsWithEnd(
+  return kefirUtil.fromEventsWithEnd(
     openBox.connection.fetch(source, opts),
     'message',
     (msg, seqno) => msg
@@ -99,23 +118,24 @@ export function fetchMessages (
   return respStream.flatMap(imapMsg => {
     const attrStream = getAttributes(imapMsg)
     const headersStream = getHeaders(imapMsg)
-    const perBoxMetadata = { [openBox.box.name]: openBox.box }
-    return kefir.zip(
-      [attrStream, headersStream],
-      (imapMsg, headers) => new Message(imapMsg, headers, perBoxMetadata)
-    )
+    const { name: boxName, uidvalidity } = openBox.box
+    return kefir.zip([attrStream, headersStream], (imapMsg, headers) => {
+      const { flags, uid } = imapMsg
+      const perBoxMetadata = [{ boxName, flags, uid, uidvalidity }]
+      return new Message(imapMsg, headers, perBoxMetadata)
+    })
   })
 }
 
 // TODO: this might come in multiple chunks
 function messageBodyStream (msg: ImapMessage): Observable<Readable, mixed> {
-  return kefirutil.fromEventsWithEnd(msg, 'body', (stream, info) => stream)
+  return kefirUtil.fromEventsWithEnd(msg, 'body', (stream, info) => stream)
 }
 
 export function getAttributes (
   message: ImapMessage
 ): Observable<MessageAttributes, Error> {
-  return kefirutil.fromEventsWithEnd(message, 'attributes')
+  return kefirUtil.fromEventsWithEnd(message, 'attributes')
 }
 
 // native Javascript Map
@@ -129,7 +149,7 @@ type HeaderValue =
     }
 
 function getHeaders (message: ImapMessage): Observable<Headers, Error> {
-  const bodies = kefirutil.fromEventsWithEnd(
+  const bodies = kefirUtil.fromEventsWithEnd(
     message,
     'body',
     (stream, info) => [stream, info]
@@ -138,7 +158,7 @@ function getHeaders (message: ImapMessage): Observable<Headers, Error> {
     if (info.which !== headersSelection) {
       return kefir.never()
     }
-    return kefirutil.collectData(stream).flatMap(data => {
+    return kefirUtil.collectData(stream).flatMap(data => {
       const headers = simpleParser(data).then(mail => mail.headers)
       return kefir.fromPromise(headers)
     })

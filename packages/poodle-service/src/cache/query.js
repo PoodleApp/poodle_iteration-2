@@ -7,6 +7,7 @@ import * as kefir from 'kefir'
 import PouchDB from 'pouchdb-node'
 import stream from 'stream'
 
+import type { UID } from 'imap'
 import type { Observable } from 'kefir'
 import type { Readable } from 'stream'
 import type { MessageRecord, QueryParams } from './types'
@@ -33,8 +34,18 @@ export async function createIndexes (db: PouchDB): Promise<void> {
       },
       ddoc: 'messagesByGoogleThreadId',
       name: 'messagesByGoogleThreadId'
+    }),
+    db.createIndex({
+      index: {
+        fields: [
+          'perBoxMetadata[].boxName',
+          'perBoxMetadata[].uidvalidity',
+          'perBoxMetadata[].uid'
+        ]
+      },
+      ddoc: 'messagesByUid',
+      name: 'messagesByUid'
     })
-
   ]
   await Promise.all(indexes)
 }
@@ -129,11 +140,29 @@ export async function getMessagesByThreadId (
   if (!threadId) {
     throw new Error('Cannot fetch thread without a thread ID')
   }
-  const result = await db.find({
+  return getMessages({
     selector: {
       'message.x-gm-thrid': threadId
     }
   })
+}
+
+export function getMessagesByUid (
+  opts: { boxName: string, uidvalidity: UID, uid: UID },
+  db: PouchDB
+): Promise<Message[]> {
+  const { boxName, uidvalidity, uid } = opts
+  return getMessages({
+    selector: {
+      perBoxMetadata: {
+        $elemMatch: { boxName, uidvalidity, uid }
+      }
+    }
+  })
+}
+
+async function getMessages(query: Object, db: PouchDB): Promise<Message[]> {
+  const result = await db.find(query)
   const messageRecords = result.docs
   return messageRecords.map(asMessage)
 }

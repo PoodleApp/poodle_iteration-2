@@ -2,6 +2,7 @@
 
 import Message, * as Msg from 'arfe/lib/models/Message'
 import { type URI, midUri } from 'arfe/lib/models/uri'
+import { immutable as unique } from 'array-unique'
 import deepEqual from 'deep-equal'
 import PouchDB from 'pouchdb-node'
 import streamToPromise from 'stream-to-promise'
@@ -82,16 +83,23 @@ export async function persistPart (
   return _id
 }
 
-type PerBoxMap = { [key: string]: Msg.PerBoxMetadata }
-
 function mergePerBoxMetadata (
-  existing: ?PerBoxMap,
-  update: ?PerBoxMap
-): PerBoxMap {
-  return {
-    ...existing,
-    ...update
-  }
+  existing: ?(Msg.PerBoxMetadata[]),
+  update: ?(Msg.PerBoxMetadata[])
+): Msg.PerBoxMetadata[] {
+  const allBoxes = unique(boxes(existing).concat(boxes(update)))
+  return allBoxes.reduce((result, box) => {
+    const meta = getMeta(box, update) || getMeta(box, existing)
+    return result.concat(meta)
+  }, [])
+}
+
+function boxes (perBoxMetadata: ?(Msg.PerBoxMetadata[])): string[] {
+  return (perBoxMetadata || []).map(({ boxName }) => boxName)
+}
+
+function getMeta (box: string, perBoxMetadata: ?(Msg.PerBoxMetadata[])): ?Msg.PerBoxMetadata {
+  return (perBoxMetadata || []).find(({ boxName }) => boxName === box)
 }
 
 async function update<T: { _id: string, _rev?: string }> (
