@@ -24,7 +24,7 @@ export default class AccountManager {
     const cm = new ConnectionManager(cf, this._db)
     this._accounts = m.assoc(this._accounts, account.email, cm)
     const capabilities = await cm
-      .handle(imapActions.getCapabilities())
+      .request(imapActions.getCapabilities())
       .toPromise()
     const metadata = {
       email: account.email,

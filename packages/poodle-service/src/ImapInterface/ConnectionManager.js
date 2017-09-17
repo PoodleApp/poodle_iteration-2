@@ -43,7 +43,7 @@ export default class ConnectionManager {
     this._queue = new JobQueue(this._process.bind(this))
   }
 
-  handle (action: actions.Action): kefir.Observable<Result> {
+  request (action: actions.Action): kefir.Observable<Result> {
     return this._queue.process(action)
   }
 

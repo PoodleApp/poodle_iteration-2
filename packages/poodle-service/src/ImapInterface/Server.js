@@ -82,6 +82,6 @@ function handleImapAction (
   server: Server
 ): kefir.Observable<Result> {
   return server.accountManager.withAccount(accountName, cm =>
-    cm.handle(action)
+    cm.request(action)
   )
 }

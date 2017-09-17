@@ -44,7 +44,9 @@ export default class JobQueue<A, B> {
           nextTick(() => this._run())
         }
       })
-    } finally {
+    } catch (err) {
+      job.emitter.error(err)
+      job.emitter.end()
       this._busy = false
     }
   }
