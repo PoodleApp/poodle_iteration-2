@@ -157,8 +157,8 @@ export function getMessagesByUid (
       perBoxMetadata: {
         $elemMatch: {
           boxName: { $eq: boxName },
-          uidvalidity: { $eq: uidvalidity },
-          uid: { $eq: uid }
+          uidvalidity: { $eq: String(uidvalidity) },
+          uid: { $eq: String(uid) }
         }
       }
     }
