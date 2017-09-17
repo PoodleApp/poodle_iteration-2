@@ -217,8 +217,9 @@ function fetchPartContent (
       return await fetchFromCache(msg, contentId)
     } catch (_) {}
     // TODO: check uid validity
-    const box = Object.keys(msg.perBoxMetadata || {})[0]
-    const uid = box && msg.perBoxMetadata[box].uid
+    const meta = msg.perBoxMetadata && msg.perBoxMetadata[0]
+    const box = meta && meta.boxName
+    const uid = meta && meta.uid
     if (!box || !uid) {
       throw new Error(`Cannot fetch part content for message with no UID, ${msg.id}`)
     }
