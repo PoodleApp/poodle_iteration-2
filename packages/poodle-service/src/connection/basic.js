@@ -51,6 +51,7 @@ export function downloadMessages (
     .map(([uid, _]) => uid)
   return kefirUtil
     .takeAll(uidsToFetch)
+    .filter(uids => uids.length > 0)
     .flatMap(uids =>
       fetchMessages(uids, openBox).flatMap(message =>
         kefir
