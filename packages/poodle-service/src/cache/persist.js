@@ -87,19 +87,19 @@ function mergePerBoxMetadata (
   existing: ?(Msg.PerBoxMetadata[]),
   update: ?(Msg.PerBoxMetadata[])
 ): Msg.PerBoxMetadata[] {
-  const allBoxes = unique(boxes(existing).concat(boxes(update)))
-  return allBoxes.reduce((result, box) => {
-    const meta = getMeta(box, update) || getMeta(box, existing)
-    return result.concat(meta)
-  }, [])
-}
-
-function boxes (perBoxMetadata: ?(Msg.PerBoxMetadata[])): string[] {
-  return (perBoxMetadata || []).map(({ boxName }) => boxName)
-}
-
-function getMeta (box: string, perBoxMetadata: ?(Msg.PerBoxMetadata[])): ?Msg.PerBoxMetadata {
-  return (perBoxMetadata || []).find(({ boxName }) => boxName === box)
+  existing = existing || []
+  update = update || []
+  const firstUpdate = update[0]
+  const uidvalidity = firstUpdate && firstUpdate.uidvalidity
+  const merged = []
+  for (const meta of update.concat(existing)) {
+    if (meta.uidvalidity === uidvalidity && !merged.some(({ boxName, uid }) => (
+      boxName === meta.boxName && uid === meta.uid
+    ))) {
+      merged.push(meta)
+    }
+  }
+  return merged
 }
 
 async function update<T: { _id: string, _rev?: string }> (
