@@ -144,7 +144,7 @@ export async function getMessagesByThreadId (
     selector: {
       'message.x-gm-thrid': threadId
     }
-  })
+  }, db)
 }
 
 export function getMessagesByUid (
@@ -155,10 +155,14 @@ export function getMessagesByUid (
   return getMessages({
     selector: {
       perBoxMetadata: {
-        $elemMatch: { boxName, uidvalidity, uid }
+        $elemMatch: {
+          boxName: { $eq: boxName },
+          uidvalidity: { $eq: uidvalidity },
+          uid: { $eq: uid }
+        }
       }
     }
-  })
+  }, db)
 }
 
 async function getMessages(query: Object, db: PouchDB): Promise<Message[]> {

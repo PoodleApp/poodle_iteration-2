@@ -44,7 +44,7 @@ export function downloadMessages (
     .sequentially(0, uids)
     .flatMap(uid =>
       kefir
-        .fromPromise(query.getMessagesByUid({ boxName, uidvalidity, uid }))
+        .fromPromise(query.getMessagesByUid({ boxName, uidvalidity, uid }, db))
         .map(messages => [uid, messages])
     )
     .filter(([_, messages]) => messages.length < 1)
@@ -118,9 +118,11 @@ export function fetchMessages (
   return respStream.flatMap(imapMsg => {
     const attrStream = getAttributes(imapMsg)
     const headersStream = getHeaders(imapMsg)
-    const { name: boxName, uidvalidity } = openBox.box
+    const boxName = openBox.box.name
+    const uidvalidity = String(openBox.box.uidvalidity)
     return kefir.zip([attrStream, headersStream], (imapMsg, headers) => {
-      const { flags, uid } = imapMsg
+      const flags = imapMsg.flags
+      const uid = String(imapMsg.uid)
       const perBoxMetadata = [{ boxName, flags, uid, uidvalidity }]
       return new Message(imapMsg, headers, perBoxMetadata)
     })
