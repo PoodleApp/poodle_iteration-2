@@ -3,9 +3,9 @@
 import Message, * as Msg from 'arfe/lib/models/Message'
 import { type URI, midUri } from 'arfe/lib/models/uri'
 import { immutable as unique } from 'array-unique'
-import deepEqual from 'deep-equal'
 import PouchDB from 'pouchdb-node'
 import streamToPromise from 'stream-to-promise'
+import * as pouchdbUtil from '../util/pouchdb'
 
 import type { Box, MessagePart } from 'imap'
 import type { Readable } from 'stream'
@@ -19,7 +19,7 @@ export async function persistMessage (
 ): Promise<void> {
   const requestedAt = toISOStringSecondPrecision(new Date())
   const headers = Array.from(message.headers.entries())
-  await update(db, (existing: ?MessageRecord) => {
+  await pouchdbUtil.update(db, (existing: ?MessageRecord) => {
     return {
       _id: message.id,
       conversationId: message.conversationId,
@@ -45,11 +45,7 @@ export async function persistPart (
   db: PouchDB
 ): Promise<ID> {
   const _id = midUri(messageId, part.id || part.partID) // prefer content ID over part ID
-  const existing = await db.get(_id).catch(err => {
-    if (err.status !== 404) {
-      return Promise.reject(err)
-    }
-  })
+  const existing = pouchdbUtil.maybeGet(db, _id)
   if (existing) {
     return _id
   }
@@ -100,60 +96,6 @@ function mergePerBoxMetadata (
     }
   }
   return merged
-}
-
-async function update<T: { _id: string, _rev?: string }> (
-  db: PouchDB,
-  fn: (existing: ?T) => T,
-  retries: number = 3
-): Promise<T> {
-  const record = fn()
-  return updateHelper(db, record, fn, retries)
-}
-
-async function updateHelper<T: { _id: string, _rev?: string }> (
-  db: PouchDB,
-  record: T,
-  fn: (existing: ?T) => T,
-  retries,
-  retriesRemaining = retries
-): Promise<T> {
-  if (retries < 0) {
-    throw new Error('Retry count must be non-negative')
-  }
-  try {
-    await db.put(record)
-    return record
-  } catch (err) {
-    if (err.status === 409 && retries > 0) {
-      // conflict
-      const existing = await db.get(record._id).catch(err => {
-        if (err.status !== 404) {
-          // Just resolve to `undefined` if doc is missing
-          return Promise.reject(err)
-        }
-      })
-      const updatedRecord = fn(existing)
-      if (existing) {
-        updatedRecord._rev = existing._rev
-      }
-      if (deepEqual(existing, updatedRecord)) {
-        return existing
-      } else {
-        await randomDelay(100, retries - retriesRemaining)
-        return updateHelper(db, updatedRecord, fn, retries, retriesRemaining - 1)
-      }
-    } else {
-      throw err
-    }
-  }
-}
-
-function randomDelay (maxInMillis: number, multiplier: number): Promise<void> {
-  return new Promise((resolve) => {
-    const delay = Math.floor(Math.random() * maxInMillis) * multiplier
-    setTimeout(resolve, delay)
-  })
 }
 
 function toISOStringSecondPrecision (date: Date): string {

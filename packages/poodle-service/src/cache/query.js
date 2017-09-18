@@ -6,6 +6,7 @@ import unique from 'array-unique'
 import * as kefir from 'kefir'
 import PouchDB from 'pouchdb-node'
 import stream from 'stream'
+import * as pouchdbUtil from '../util/pouchdb'
 
 import type { UID } from 'imap'
 import type { Observable } from 'kefir'
@@ -35,16 +36,19 @@ export async function createIndexes (db: PouchDB): Promise<void> {
       ddoc: 'messagesByGoogleThreadId',
       name: 'messagesByGoogleThreadId'
     }),
-    db.createIndex({
-      index: {
-        fields: [
-          'perBoxMetadata[].boxName',
-          'perBoxMetadata[].uidvalidity',
-          'perBoxMetadata[].uid'
-        ]
-      },
-      ddoc: 'messagesByUid',
-      name: 'messagesByUid'
+    pouchdbUtil.createDesignDocument(db, {
+      _id: '_design/messages',
+      views: {
+        byUid: {
+          map: `function (doc) {
+            if ('perBoxMetadata' in doc) {
+              doc.perBoxMetadata.forEach(function(meta) {
+                emit([meta.boxName, meta.uidvalidity, meta.uid], 1);
+              });
+            }
+          }`
+        }
+      }
     })
   ]
   await Promise.all(indexes)
@@ -140,32 +144,30 @@ export async function getMessagesByThreadId (
   if (!threadId) {
     throw new Error('Cannot fetch thread without a thread ID')
   }
-  return getMessages({
-    selector: {
-      'message.x-gm-thrid': threadId
-    }
-  }, db)
-}
-
-export function getMessagesByUid (
-  opts: { boxName: string, uidvalidity: UID, uid: UID },
-  db: PouchDB
-): Promise<Message[]> {
-  const { boxName, uidvalidity, uid } = opts
-  return getMessages({
-    selector: {
-      perBoxMetadata: {
-        $elemMatch: {
-          boxName: { $eq: boxName },
-          uidvalidity: { $eq: String(uidvalidity) },
-          uid: { $eq: String(uid) }
-        }
+  return getMessages(
+    {
+      selector: {
+        'message.x-gm-thrid': threadId
       }
-    }
-  }, db)
+    },
+    db
+  )
 }
 
-async function getMessages(query: Object, db: PouchDB): Promise<Message[]> {
+export async function verifyExistenceUids (
+  query: { boxName: string, uidvalidity: UID, uid: UID }[],
+  db: PouchDB
+): Promise<{ boxName: string, uidvalidity: UID, uid: UID }[]> {
+  const result = await db.query('messages/byUid', {
+    include_docs: false,
+    keys: query.map(({ boxName, uidvalidity, uid }) => [
+      boxName, uidvalidity, uid
+    ])
+  })
+  return result.rows.map(row => row.key)
+}
+
+async function getMessages (query: Object, db: PouchDB): Promise<Message[]> {
   const result = await db.find(query)
   const messageRecords = result.docs
   return messageRecords.map(asMessage)
@@ -199,13 +201,11 @@ export function fetchPartContent (
       new Error(`No part with ID ${contentId} for message ${msg.id}`)
     )
   }
-  return db
-    .getAttachment(msg.uriForPart(part), 'content')
-    .then(buffer => {
-      const rs = new stream.PassThrough()
-      rs.end(buffer)
-      return rs
-    })
+  return db.getAttachment(msg.uriForPart(part), 'content').then(buffer => {
+    const rs = new stream.PassThrough()
+    rs.end(buffer)
+    return rs
+  })
 }
 
 // TODO: in case URI was constructed using a partID instead of a contentID, fall
@@ -244,6 +244,10 @@ function buildSelector (params: QueryParams): Object {
   }
 }
 
-function asMessage ({ message, headers, perBoxMetadata }: MessageRecord): Message {
+function asMessage ({
+  message,
+  headers,
+  perBoxMetadata
+}: MessageRecord): Message {
   return new Message(message, new Map(headers), perBoxMetadata)
 }

@@ -38,20 +38,18 @@ export function downloadMessages (
   openBox: OpenBox,
   db: PouchDB
 ): Observable<URI> {
+  uids = uids.map(String) // We will get cache misses if uids are not correct type
   const boxName = openBox.box.name
   const uidvalidity = String(openBox.box.uidvalidity)
-  const uidsToFetch = kefir
-    .sequentially(0, uids)
-    .flatMap(uid =>
-      kefir
-        .fromPromise(query.getMessagesByUid({ boxName, uidvalidity, uid }, db))
-        .map(messages => [uid, messages])
-    )
-    .filter(([_, messages]) => messages.length < 1)
-    .map(([uid, _]) => uid)
-  return kefirUtil
-    .takeAll(uidsToFetch)
-    .filter(uids => uids.length > 0)
+  const uidsInCache = kefir.fromPromise(
+    query
+      .verifyExistenceUids(uids.map(uid => ({ boxName, uidvalidity, uid })), db)
+      .then(keys => keys.map(({ uid }) => uid))
+  )
+  const uidsToFetch = uidsInCache.map(inCache =>
+    uids.filter(uid => !inCache.includes(uid))
+  )
+  return uidsToFetch
     .flatMap(uids =>
       fetchMessages(uids, openBox).flatMap(message =>
         kefir
