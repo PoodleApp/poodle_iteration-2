@@ -1,5 +1,6 @@
 /* @flow */
 
+import * as kefir from 'kefir'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chrome from 'poodle-core/lib/actions/chrome'
 import * as q from 'poodle-core/lib/queries/conversations'
@@ -15,10 +16,24 @@ type OwnProps = {
 }
 
 const Inbox = slurp(
-  ({ auth, chrome }: State, { }: OwnProps) => ({
-    conversations: subscribe(Imap.search, 'in:inbox', auth.account, imapClient),
-    errors: chrome.errors
-  }),
+  ({ auth, chrome }: State, { account }: OwnProps) => {
+    const email = auth.account && auth.account.email
+    return {
+      conversations:
+        email
+          ? subscribe(
+              Imap.queryForListView,
+            {
+              account: email,
+              limit: 30,
+              query: 'in:inbox'
+            },
+              imapClient
+            )
+          : subscribe(kefir.constant, []),
+      errors: chrome.errors
+    }
+  },
   (dispatch: Dispatch<*>) => ({
     onDismissError (...args) {
       dispatch(chrome.dismissError(...args))

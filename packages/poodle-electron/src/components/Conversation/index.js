@@ -2,6 +2,7 @@
 
 import ArfeConversation from 'arfe/lib/models/Conversation'
 import * as LV from 'arfe/lib/models/LanguageValue'
+import * as kefir from 'kefir'
 import AppBar from 'material-ui/AppBar'
 import Divider from 'material-ui/Divider'
 import IconButton from 'material-ui/IconButton'
@@ -73,10 +74,7 @@ export function Conversation (props: Props) {
         <p>
           {String(error)}
         </p>
-        <RaisedButton
-          label='Retry'
-          onClick={props.conversation.reload}
-        />
+        <RaisedButton label='Retry' onClick={props.conversation.reload} />
       </div>
     )
   } else if (conversation) {
@@ -98,10 +96,7 @@ export function Conversation (props: Props) {
     content = (
       <div>
         {activities}
-        <ComposeReply
-          account={props.account}
-          conversation={conversation}
-        />
+        <ComposeReply account={props.account} conversation={conversation} />
       </div>
     )
   } else {
@@ -137,9 +132,17 @@ export function Conversation (props: Props) {
 }
 
 export default slurp(
-  ({ auth, chrome, queue }: State, { conversationId }: OwnProps) => ({
-    conversation: subscribe(Imap.fetchConversation, conversationId, auth.account, imapClient),
-    editing: chrome.editing,
-    pendingLikes: queue.pendingLikes || []
-  })
+  ({ auth, chrome, queue }: State, { conversationId }: OwnProps) => {
+    const email = auth.account && auth.account.email
+    return {
+      conversation: email ? subscribe(
+        Imap.getConversation,
+        conversationId,
+        email,
+        imapClient
+      ) : subscribe(kefir.constantError, new Error('not logged in')),
+      editing: chrome.editing,
+      pendingLikes: queue.pendingLikes || []
+    }
+  }
 )(Conversation)

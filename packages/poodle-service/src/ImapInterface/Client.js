@@ -194,6 +194,15 @@ function processConversation (
     }))
 }
 
+// TODO: download conversation if it is not in cache
+export async function getConversation(
+  conversationId: URI,
+  account: Email,
+  client: Client
+): Promise<Conversation> {
+  return cache.getConversation(conversationId, client.db)
+}
+
 async function getConversationByThreadId (
   opts: { accountName: Email, threadId: ThreadId },
   client: Client
