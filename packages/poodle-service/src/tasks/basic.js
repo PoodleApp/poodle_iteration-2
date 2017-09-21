@@ -85,7 +85,7 @@ export function downloadMessages (uids: UID[]): Task<URI> {
   })
 }
 
-export async function downloadPartContent (
+export function downloadPartContent (
   messageId: string,
   uid: UID,
   part: MessagePart
