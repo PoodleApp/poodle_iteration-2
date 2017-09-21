@@ -217,5 +217,5 @@ function connectionTask<T> (action: actions.Action<T>): Task<T> {
 }
 
 function dbTask<T> (fn: (db: PouchDB) => Observable<T, Error>): Task<T> {
-  return Task.getContext().flatMap(db => Task.lift(fn(db)))
+  return Task.getContext().flatMap(({ db }) => Task.lift(fn(db)))
 }
