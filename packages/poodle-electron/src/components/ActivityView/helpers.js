@@ -24,5 +24,5 @@ export function myContent (activity: DerivedActivity, email: string): boolean {
 }
 
 export function pendingLike(activity: DerivedActivity, pendingLikes: URI.URI[]): boolean {
-  return m.some(objectUri => pendingLikes.includes(objectUri), activity.objectUris)
+  return !!m.some(objectUri => pendingLikes.includes(objectUri), activity.objectUris)
 }
