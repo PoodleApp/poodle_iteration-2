@@ -14,6 +14,7 @@ import * as request from '../request'
 import * as actions from '../request/actions'
 import * as kefirUtil from '../util/kefir'
 import * as promises from '../util/promises'
+import { openBox } from './stateChanges'
 import Task from './Task'
 
 import type {
@@ -83,6 +84,17 @@ export function downloadMessages (uids: UID[]): Task<URI> {
       )
     )
   })
+}
+
+export function downloadPart (opts: {
+  messageId: string,
+  box: request.BoxSpecifier,
+  part: MessagePart,
+  uid: UID
+}): Task<ID> {
+  return openBox(opts.box).flatMap(() =>
+    downloadPartContent(opts.messageId, opts.uid, opts.part)
+  )
 }
 
 export function downloadPartContent (

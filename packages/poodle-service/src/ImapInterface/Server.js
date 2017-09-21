@@ -41,16 +41,12 @@ function _handle (action: actions.Action<any>, server: Server): kefir.Observable
   switch (action.type) {
     case actions.ADD_ACCOUNT:
       return kefir.fromPromise(addAccount(action.account, server))
+    case actions.DOWNLOAD_PART:
+      return performTask(tasks.downloadPart(action), action.accountName, server)
     case actions.LIST_ACCOUNTS:
       return kefir.constant(server.accountManager.listAccounts())
     case actions.QUERY_CONVERSATIONS:
-      const opts = action
-      return server.accountManager.withAccount(action.accountName, cm =>
-        tasks.queryConversations(opts).perform({
-          performRequest: <T>(action: RequestAction<T>, state): kefir.Observable<T> => cm.request(action, state),
-          db: server.db
-        })
-      )
+      return performTask(tasks.queryConversations(action), action.accountName, server)
     case actions.REMOVE_ACCOUNT:
       return kefir.fromPromise(removeAccount(action.accountName, server))
     default:
@@ -73,4 +69,13 @@ async function removeAccount (accountName: Email, server: Server): Promise<void>
 async function broadcastAccountsList (server: Server) {
   const accounts = server.accountManager.listAccounts()
   server.channel.emit(constants.ACCOUNT_LIST, accounts)
+}
+
+function performTask<T> (task: tasks.Task<T>, accountName: string, server: Server): kefir.Observable<T> {
+  return server.accountManager.withAccount(accountName, cm =>
+    task.perform({
+      performRequest: <T>(action: RequestAction<T>, state): kefir.Observable<T> => cm.request(action, state),
+      db: server.db
+    })
+  )
 }

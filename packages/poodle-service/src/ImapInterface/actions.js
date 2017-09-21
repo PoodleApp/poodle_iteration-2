@@ -38,16 +38,23 @@ export function addAccount (account: ImapAccount): Action<void> {
 // Resolves to database key for the downloaded part
 export function downloadPart (opts: {
   accountName: string,
+  box: BoxSpecifier,
   messageId: string,
   part: imap.MessagePart,
   uid: imap.UID
 }): Action<string> {
+  const accountName: string = opts.accountName
+  const box: BoxSpecifier = opts.box
+  const messageId: string = opts.messageId
+  const part: imap.MessagePart = opts.part
+  const uid: imap.UID = opts.uid
   return {
     type: DOWNLOAD_PART,
-    accountName: opts.accountName,
-    messageId: opts.messageId,
-    part: opts.part,
-    uid: opts.uid
+    accountName,
+    box,
+    messageId,
+    part,
+    uid
   }
 }
 
