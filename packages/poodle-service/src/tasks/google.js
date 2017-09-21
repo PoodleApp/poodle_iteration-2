@@ -7,13 +7,12 @@
 import { type URI } from 'arfe/lib/models/uri'
 import { immutable as unique } from 'array-unique'
 import * as imap from 'imap'
+import { type ThreadId } from '../types'
 import * as capabilities from '../capabilities'
 import * as kefirUtil from '../util/kefir'
 import * as basic from './basic'
 import { openAllMail } from './stateChanges'
 import Task from './Task'
-
-opaque type ThreadId = string
 
 // TODO: do some caching to avoid a request to fetch boxes every time we open
 // `\All`

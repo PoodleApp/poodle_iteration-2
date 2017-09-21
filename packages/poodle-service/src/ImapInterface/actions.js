@@ -1,9 +1,10 @@
 /* @flow */
 
+import type Conversation from 'arfe/lib/models/Conversation'
 import * as imap from 'imap'
 import { type ImapAccount } from '../models/ImapAccount'
 import { type BoxSpecifier } from '../request'
-import { type Email } from '../types'
+import { type AccountMetadata, type Email, type ThreadId } from '../types'
 
 export const ADD_ACCOUNT = 'imapInterface/addAccount'
 export const DOWNLOAD_PART = 'imapInterface/downloadPart'
@@ -11,7 +12,7 @@ export const LIST_ACCOUNTS = 'imapInterface/listAccounts'
 export const QUERY_CONVERSATIONS = 'imapInterface/queryConversations'
 export const REMOVE_ACCOUNT = 'imapInterface/removeAccount'
 
-export type Action =
+export type Action<T> =
   | { type: typeof ADD_ACCOUNT, account: ImapAccount }
   | {
       type: typeof DOWNLOAD_PART,
@@ -30,16 +31,17 @@ export type Action =
     }
   | { type: typeof REMOVE_ACCOUNT, accountName: Email }
 
-export function addAccount (account: ImapAccount): Action {
+export function addAccount (account: ImapAccount): Action<void> {
   return { type: ADD_ACCOUNT, account }
 }
 
+// Resolves to database key for the downloaded part
 export function downloadPart (opts: {
   accountName: string,
   messageId: string,
   part: imap.MessagePart,
   uid: imap.UID
-}): Action {
+}): Action<string> {
   return {
     type: DOWNLOAD_PART,
     accountName: opts.accountName,
@@ -49,7 +51,7 @@ export function downloadPart (opts: {
   }
 }
 
-export function listAccounts (): Action {
+export function listAccounts (): Action<AccountMetadata[]> {
   return { type: LIST_ACCOUNTS }
 }
 
@@ -57,7 +59,7 @@ export function queryConversations (opts: {
   accountName: string,
   limit?: number,
   query: string
-}): Action {
+}): Action<ThreadId> {
   return {
     type: QUERY_CONVERSATIONS,
     accountName: opts.accountName,
@@ -66,6 +68,6 @@ export function queryConversations (opts: {
   }
 }
 
-export function removeAccount (accountName: Email): Action {
+export function removeAccount (accountName: Email): Action<void> {
   return { type: REMOVE_ACCOUNT, accountName }
 }

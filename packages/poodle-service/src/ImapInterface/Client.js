@@ -21,7 +21,7 @@ import * as cache from '../cache/query'
 import * as capabilities from '../capabilities'
 import { type ImapAccount } from '../models/ImapAccount'
 import { type Thread } from '../models/Thread'
-import { type AccountMetadata, type Email } from '../types'
+import { type AccountMetadata, type Email, type ThreadId } from '../types'
 import * as C from './channel'
 import * as actions from './actions'
 import * as constants from './constants'
@@ -195,7 +195,7 @@ function processConversation (
 }
 
 async function getConversationByThreadId (
-  opts: { accountName: Email, threadId: string },
+  opts: { accountName: Email, threadId: ThreadId },
   client: Client
 ): Promise<Conversation> {
   const messages = await cache.getMessagesByThreadId(opts.threadId, client.db)
@@ -325,6 +325,6 @@ function hasCapability(opts: { account: Email, capability: string }, client: Cli
   }
 }
 
-function request<T> (action: actions.Action, client: Client): kefir.Observable<T> {
+function request<T> (action: actions.Action<T>, client: Client): kefir.Observable<T> {
   return C.request(action, client.channel)
 }

@@ -6,3 +6,5 @@ export type AccountMetadata = {
 }
 
 export type Email = string
+
+export type ThreadId = string

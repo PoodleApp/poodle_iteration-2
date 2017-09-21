@@ -32,7 +32,12 @@ export function NewServer (channel: EventEmitter, db: PouchDB): Server {
   return server
 }
 
-export function handle (action: actions.Action, server: Server): kefir.Observable<Result> {
+export function handle<T> (action: actions.Action<T>, server: Server): kefir.Observable<T> {
+  // Delgate to a private function to fix up the polymorphic return type
+  return _handle(action, server)
+}
+
+function _handle (action: actions.Action<any>, server: Server): kefir.Observable<any> {
   switch (action.type) {
     case actions.ADD_ACCOUNT:
       return kefir.fromPromise(addAccount(action.account, server))
