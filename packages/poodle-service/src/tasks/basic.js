@@ -19,6 +19,7 @@ import Task from './Task'
 
 import type {
   Box,
+  BoxList,
   FetchOptions,
   ImapMessage,
   MessageAttributes,
@@ -164,6 +165,10 @@ export function getAttributes (
   message: ImapMessage
 ): Observable<MessageAttributes, Error> {
   return kefirUtil.fromEventsWithEnd(message, 'attributes')
+}
+
+export function getBoxes (): Task<BoxList> {
+  return connectionTask(actions.getBoxes())
 }
 
 export function getBox (): Task<Box> {

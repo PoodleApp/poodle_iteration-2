@@ -8,6 +8,7 @@
 
 import * as imap from 'imap'
 import type Connection from 'imap'
+import * as B from '../models/BoxList'
 import * as promises from '../util/promises'
 import * as S from './state'
 import { type BoxSpecifier } from './types'
@@ -74,7 +75,7 @@ async function getBoxName (
     return name
   } else if (attribute) {
     try {
-      const { name } = await findBox(byAttribute(attribute), connection)
+      const { name } = await findBox(B.byAttribute(attribute), connection)
       return name
     } catch (err) {
       throw new Error(`cannot find box with attribute, ${attribute}`)
@@ -89,42 +90,10 @@ async function findBox (
   connection: Connection
 ): Promise<{ name: string, box: imap.BoxListItem }> {
   const boxes = await promises.lift1(cb => connection.getBoxes(cb))
-  const result = findBoxHelper(p, boxes)
+  const result = B.findBox(p, boxes)
   if (result) {
     return result
   } else {
     throw new Error('Box not found')
   }
 }
-
-function findBoxHelper (
-  p: (box: imap.BoxListItem, boxName: string) => boolean,
-  boxes: imap.BoxList,
-  path?: string = ''
-): ?{ box: imap.BoxListItem, name: string } {
-  const pairs = Object.keys(boxes).map(k => ({ name: k, box: boxes[k] }))
-  const match = pairs.find(({ box, name }) => p(box, name))
-  if (match) {
-    const { name, box } = match
-    return { name: path + name, box }
-  } else {
-    return pairs
-      .map(
-        ({ box, name }) =>
-          box.children
-            ? findBoxHelper(p, box.children, name + box.delimiter)
-            : null
-      )
-      .filter(child => !!child)[0]
-  }
-}
-
-function byAttribute (attribute: string): (box: imap.BoxListItem) => boolean {
-  return box => box.attribs.some(a => a === attribute)
-}
-
-// function boxByName (
-//   name: string
-// ): (_: imap.BoxListItem, boxName: string) => boolean {
-//   return (_, boxName) => boxName === name
-// }

@@ -44,6 +44,12 @@ function _perform (
       )
     case actions.GET_BOX:
       return kefir.constant((connection: any)._box)
+    case actions.GET_BOXES:
+      const nsPrefix = action.nsPrefix
+      return kefir.fromNodeCallback(
+        cb =>
+          nsPrefix ? connection.getBoxes(nsPrefix, cb) : connection.getBoxes(cb)
+      )
     case actions.GET_CAPABILITIES:
       return kefir.constant(connection._caps || [])
     case actions.SEARCH:

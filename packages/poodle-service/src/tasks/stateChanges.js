@@ -10,10 +10,6 @@ export function closeBox (
   return Task.putState(S.authenticated)
 }
 
-export function openAllMail (readonly: boolean = true): Task<void> {
-  return openBox({ attribute: '\\All' }, readonly)
-}
-
 export function openBox (
   boxSpec: BoxSpecifier,
   readonly: boolean = true
