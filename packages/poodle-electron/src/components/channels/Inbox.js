@@ -24,7 +24,7 @@ const Inbox = slurp(
           ? subscribe(
               Imap.queryForListView,
             {
-              account: email,
+              accountName: email,
               limit: 30,
               query: 'in:inbox'
             },
