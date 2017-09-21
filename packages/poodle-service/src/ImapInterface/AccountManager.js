@@ -1,31 +1,25 @@
 /* @flow */
 
+import type Connection from 'imap'
 import * as kefir from 'kefir'
 import * as m from 'mori'
-import type PouchDB from 'pouchdb-node'
 import { type ImapAccount, getConnectionFactory } from '../models/ImapAccount'
 import { type AccountMetadata, type Email } from '../types'
-import * as imapActions from './actions/imap'
-import ConnectionManager from './ConnectionManager'
 
 export default class AccountManager {
-  _accounts: m.Map<Email, ConnectionManager>
-  _db: PouchDB
+  _accounts: m.Map<Email, Connection>
   _metadata: m.Map<Email, AccountMetadata>
 
-  constructor (db: PouchDB) {
+  constructor () {
     this._accounts = m.hashMap()
-    this._db = db
     this._metadata = m.hashMap()
   }
 
   async add (account: ImapAccount): Promise<void> {
     const cf = await getConnectionFactory(account)
-    const cm = new ConnectionManager(cf, this._db)
-    this._accounts = m.assoc(this._accounts, account.email, cm)
-    const capabilities = await cm
-      .request(imapActions.getCapabilities())
-      .toPromise()
+    const connection: Connection = await cf()
+    this._accounts = m.assoc(this._accounts, account.email, connection)
+    const capabilities: string[] = (connection: any)._caps || []
     const metadata = {
       email: account.email,
       capabilities
@@ -34,24 +28,25 @@ export default class AccountManager {
   }
 
   async remove (accountName: Email): Promise<void> {
+    this.withAccount(accountName, connection => connection.end())
     this._accounts = m.dissoc(this._accounts, accountName)
     this._metadata = m.dissoc(this._metadata, accountName)
   }
 
-  listAccounts(): AccountMetadata[] {
+  listAccounts (): AccountMetadata[] {
     return m.intoArray(m.vals(this._metadata))
   }
 
   withAccount<T> (
     accountName: Email,
-    fn: (cf: ConnectionManager) => kefir.Observable<T>
+    fn: (c: Connection) => ?kefir.Observable<T>
   ): kefir.Observable<T> {
-    const cf = m.get(this._accounts, accountName)
-    if (!cf) {
+    const connection = m.get(this._accounts, accountName)
+    if (!connection) {
       return kefir.constantError(
         new Error(`Not logged into account ${accountName}`)
       )
     }
-    return fn(cf)
+    return fn(connection) || kefir.never()
   }
 }

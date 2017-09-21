@@ -74,7 +74,7 @@ export function fromEventsWithEnd<T, S: events$EventEmitter> (
  * Wait until the given observable ends, then run the callback to produce
  * a second observable. Returns an observable that emits all values from both.
  */
-function andThen <A, E>(obs: Observable<A, E>, fn: () => Observable<A, E>): Observable<A, E> {
+export function andThen <A, E>(obs: Observable<A, E>, fn: () => Observable<A, E>): Observable<A, E> {
   const next = obs.ignoreValues().beforeEnd(() => 1).flatMap(fn)
   return obs.concat(next)
 }
