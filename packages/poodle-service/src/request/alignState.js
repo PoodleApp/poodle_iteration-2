@@ -49,7 +49,7 @@ async function openBox (
   const boxName = await getBoxName(boxSpec, connection)
   const _box = (connection: any)._box
   if (_box && _box.name === boxName && _box.readOnly == readonly) {
-
+    // No change necessary
   } else {
     await closeBox
     await promises.lift1(cb => connection.openBox(boxName, readonly, cb))
@@ -74,7 +74,8 @@ async function getBoxName (
     return name
   } else if (attribute) {
     try {
-      return await findBox(byAttribute(attribute), connection)
+      const { name } = await findBox(byAttribute(attribute), connection)
+      return name
     } catch (err) {
       throw new Error(`cannot find box with attribute, ${attribute}`)
     }
