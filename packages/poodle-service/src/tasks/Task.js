@@ -3,7 +3,7 @@
 import * as kefir from 'kefir'
 import type PouchDB from 'pouchdb-node'
 import { type Action } from '../request/actions'
-import { type ConnectionState, authenticated } from '../request/state'
+import { type ConnectionState, any } from '../request/state'
 
 type Context = {
   performRequest: <A>(action: Action<A>, state: ConnectionState) => Obs<A>,
@@ -76,10 +76,7 @@ export default class Task<A> {
     this.run = run
   }
 
-  perform (
-    context: Context,
-    initialState: ConnectionState = authenticated
-  ): Obs<A> {
+  perform (context: Context, initialState: ConnectionState = any): Obs<A> {
     return this.run(context, initialState).map(({ value }) => value)
   }
 

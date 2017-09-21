@@ -3,9 +3,10 @@
 import type EventEmitter from 'events'
 import * as kefir from 'kefir'
 import type PouchDB from 'pouchdb-node'
-import * as C from '../connection'
-import * as request from '../request'
 import { type ImapAccount } from '../models/ImapAccount'
+import * as request from '../request'
+import { type Action as RequestAction } from '../request/actions'
+import * as tasks from '../tasks'
 import { type AccountMetadata, type Email } from '../types'
 import AccountManager from './AccountManager'
 import * as actions from './actions'
@@ -39,8 +40,11 @@ export function handle (action: actions.Action, server: Server): kefir.Observabl
       return kefir.constant(server.accountManager.listAccounts())
     case actions.QUERY_CONVERSATIONS:
       const opts = action
-      return server.accountManager.withAccount(action.accountName, connection =>
-        request.perform(C.queryConversations(opts, server.db), connection)
+      return server.accountManager.withAccount(action.accountName, cm =>
+        tasks.queryConversations(opts).perform({
+          performRequest: <T>(action: RequestAction<T>, state): kefir.Observable<T> => cm.request(action, state),
+          db: server.db
+        })
       )
     case actions.REMOVE_ACCOUNT:
       return kefir.fromPromise(removeAccount(action.accountName, server))

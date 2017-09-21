@@ -15,16 +15,12 @@ export * from './types'
 
 export function perform<T> (
   action: actions.Action<T>,
-  expectedState: ?state.ConnectionState,
+  expectedState: state.ConnectionState,
   connection: Connection
 ): kefir.Observable<T, Error> {
-  if (expectedState) {
-    return kefir
-      .fromPromise(alignState(expectedState, connection))
-      .flatMap(() => _perform(action, connection))
-  } else {
-    return _perform(action, connection)
-  }
+  return kefir
+    .fromPromise(alignState(expectedState, connection))
+    .flatMap(() => _perform(action, connection))
 }
 
 // TODO:
@@ -37,6 +33,9 @@ function _perform (
   connection: Connection
 ): kefir.Observable<any, Error> {
   switch (action.type) {
+    case actions.END:
+      connection.end()
+      return kefir.constant(undefined)
     case actions.FETCH:
       return kefirUtil.fromEventsWithEnd(
         connection.fetch(action.source, action.options),

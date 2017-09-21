@@ -18,6 +18,8 @@ export default async function alignState (
 ): Promise<void> {
   await connect(connection)
   switch (expectedState.type) {
+    case S.any:
+      return
     case S.AUTHENTICATED:
       return closeBox(true, connection)
     case S.OPEN_BOX:

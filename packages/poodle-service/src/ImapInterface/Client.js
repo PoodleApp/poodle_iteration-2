@@ -23,9 +23,7 @@ import { type ImapAccount } from '../models/ImapAccount'
 import { type Thread } from '../models/Thread'
 import { type AccountMetadata, type Email } from '../types'
 import * as C from './channel'
-import { type Action, accountAction, imapAction } from './actions'
-import * as accountActions from './actions/account'
-import * as imapActions from './actions/imap'
+import * as actions from './actions'
 import * as constants from './constants'
 
 type Actor = AS.models.Object
@@ -65,7 +63,7 @@ export function NewClient (channel: EventEmitter, db: PouchDB): Client {
     channel.addListener(constants.ACCOUNT_LIST, listener)
 
     // Request up-to-date list from Server
-    C.request(accountAction(accountActions.list()), channel)
+    C.request((actions.listAccounts()), channel)
 
     return function unsubscribe () {
       channel.removeListener(constants.ACCOUNT_LIST, listener)
@@ -134,21 +132,18 @@ export async function activityContentSnippet (
 }
 
 export function addAccount (account: ImapAccount, client: Client): kefir.Observable<void> {
-  return request(accountAction(accountActions.add(account)), client)
+  return request(actions.addAccount(account), client)
 }
 
 export function query (opts: {
-  account: Email,
+  accountName: Email,
   limit?: number,
   query: string
 }, client: Client): kefir.Observable<Conversation, Error> {
-  const action = imapAction(imapActions.queryConversations({
-    limit: opts.limit,
-    query: opts.query
-  }), opts.account)
+  const action = actions.queryConversations(opts)
   return request(action, client)
     .flatMap(threadId => kefir.fromPromise(getConversationByThreadId({
-      account: opts.account,
+      accountName: opts.accountName,
       threadId
     }, client)))
 }
@@ -167,7 +162,7 @@ export type ActivityListItem = {
 }
 
 export function queryForListView (opts: {
-  account: Email,
+  accountName: Email,
   limit?: number,
   query: string
 }, client: Client): kefir.Observable<ConversationListItem[], Error> {
@@ -175,7 +170,7 @@ export function queryForListView (opts: {
     // A conversation with only non-visible activities (likes, edits, etc.) will
     // effectively be empty, so let's not display it
     .filter(conversation => !m.isEmpty(conversation.activities))
-    .flatMapConcat(processConversation.bind(null, opts.account, client))
+    .flatMapConcat(processConversation.bind(null, opts.accountName, client))
     .scan((cs, conv) => cs.concat(conv), [])
 }
 
@@ -200,15 +195,15 @@ function processConversation (
 }
 
 async function getConversationByThreadId (
-  opts: { account: Email, threadId: string },
+  opts: { accountName: Email, threadId: string },
   client: Client
 ): Promise<Conversation> {
   const messages = await cache.getMessagesByThreadId(opts.threadId, client.db)
-  return Conv.messagesToConversation(fetchPartContent(opts.account, client), messages)
+  return Conv.messagesToConversation(fetchPartContent(opts.accountName, client), messages)
 }
 
 function fetchPartContent (
-  account: Email,
+  accountName: Email,
   client: Client
 ): (msg: Message, contentId: string) => Promise<Readable> {
   const fetchFromCache = cache.fetchPartContent.bind(null, client.db)
@@ -223,12 +218,13 @@ function fetchPartContent (
     if (!box || !uid) {
       throw new Error(`Cannot fetch part content for message with no UID, ${msg.id}`)
     }
-    const action = imapAction(imapActions.fetchPart({
-      box,
+    const action = actions.downloadPart({
+      accountName,
+      box: { name: box },
       messageId: msg.id,
       part: msg.getPart({ contentId }),
       uid
-    }), account)
+    })
     await request(action, client).toPromise()
     return fetchFromCache(msg, contentId)
   }
@@ -329,6 +325,6 @@ function hasCapability(opts: { account: Email, capability: string }, client: Cli
   }
 }
 
-function request<T> (action: Action, client: Client): kefir.Observable<T> {
+function request<T> (action: actions.Action, client: Client): kefir.Observable<T> {
   return C.request(action, client.channel)
 }
