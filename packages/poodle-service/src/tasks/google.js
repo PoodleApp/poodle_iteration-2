@@ -32,8 +32,11 @@ export function queryConversations (opts: {
   limit?: ?number,
   query: string
 }): Task<ThreadId> {
-  return openAllMail().flatMap(() =>
-    query(opts.query).flatMap(threadIds => {
+  return openAllMail()
+    .flatMap(() => query(opts.query))
+    .flatMap(uids => getThreadIds(uids))
+    .modifyObservable(kefirUtil.takeAll)
+    .flatMap(threadIds => {
       const distinct: string[] = unique(threadIds)
       const threadsToFetch = opts.limit
         ? distinct.slice(0, opts.limit)
@@ -46,7 +49,6 @@ export function queryConversations (opts: {
         )
       )
     })
-  )
 }
 
 function getThreadIds (uids: imap.UID[]): Task<ThreadId> {
