@@ -80,6 +80,10 @@ export default class Task<A> {
     return this.run(context, initialState).map(({ value }) => value)
   }
 
+  filter (fn: (a: A) => boolean): Task<A> {
+    return this.modifyObservable(obs => obs.filter(fn))
+  }
+
   flatMap<B> (fn: (a: A) => Task<B>): Task<B> {
     return new Task((context, s0) =>
       this.run(context, s0).flatMap(({ value, state: s1 }) =>

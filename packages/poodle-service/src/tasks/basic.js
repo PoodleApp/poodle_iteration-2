@@ -56,7 +56,7 @@ export function requireCapability (capability: string): Task<void> {
  * Downloads and saves messages if they do not already exist in the cache; emits
  * IDs of the messages in PouchDB
  */
-export function downloadMessages (uids: UID[]): Task<URI> {
+export function downloadMessages (uids: UID[]): Task<void> {
   uids = uids.map(String) // We will get cache misses if uids are not correct type
   return getBox().flatMap(box => {
     const boxName = box.name
@@ -77,11 +77,9 @@ export function downloadMessages (uids: UID[]): Task<URI> {
       uids.filter(uid => !inCache.includes(uid))
     )
 
-    return uidsToFetch.flatMap(uids =>
+    return uidsToFetch.filter(uids => uids.length > 0).flatMap(uids =>
       fetchMessages(uids).flatMap(message =>
-        dbTask(db => kefir.fromPromise(cache.persistMessage(message, db))).map(
-          () => message.id
-        )
+        dbTask(db => kefir.fromPromise(cache.persistMessage(message, db)))
       )
     )
   })

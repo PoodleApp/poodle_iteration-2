@@ -65,7 +65,7 @@ function getThreadIds (uids: imap.UID[]): Task<ThreadId> {
  * Downloads a conversation thread using Google's proprietary thread ID IMAP
  * extension; emits IDs of PouchDB records for downloaded messages
  */
-function downloadThread (threadId: ThreadId): Task<URI> {
+function downloadThread (threadId: ThreadId): Task<void> {
   return basic
     .search([['X-GM-THRID', threadId]])
     .flatMap(uids => basic.downloadMessages(uids))
