@@ -365,7 +365,7 @@ export function processConversationForListView (
   const activity = conv.latestActivity
   return getActivityContentSnippet(activity).map(contentSnippet => ({
     id: conv.id,
-    lastActiveTime: conv.lastActiveTime,
+    lastActiveTime: conv.lastActiveTime.toDate(),
     latestActivity: {
       actor: activity.actor,
       contentSnippet
