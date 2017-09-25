@@ -4,15 +4,15 @@ import * as kefir from 'kefir'
 
 export const SUBSCRIBE: 'slurp/subscribe' = 'slurp/subscribe'
 
-export type Effect<T, E> = {
+export type Effect<T, E, Args = *> = {
   type: typeof SUBSCRIBE,
-  observableFn: (...args: any[]) => kefir.Observable<T, E> | Promise<T>,
-  args: any[]
+  observableFn: (...args: Args) => kefir.Observable<T, E> | Promise<T>,
+  args: Args
 }
 
-export function subscribe<T, E> (
-  observableFn: (...args: any[]) => kefir.Observable<T, E> | Promise<T>,
-  ...args: any[]
+export function subscribe<T, E, Args: *> (
+  observableFn: (...args: Args) => kefir.Observable<T, E> | Promise<T>,
+  ...args: Args
 ): Effect<T, E> {
   return {
     type: SUBSCRIBE,

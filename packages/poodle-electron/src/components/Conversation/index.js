@@ -12,12 +12,12 @@ import spacing from 'material-ui/styles/spacing'
 import * as m from 'mori'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as q from 'poodle-core/lib/queries/conversation'
-import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
-import * as Imap from 'poodle-service/lib/ImapInterface/Client'
+import { type Slurp, slurp } from 'poodle-core/lib/slurp'
+import * as tasks from 'poodle-service/lib/tasks'
 import React from 'react'
 import * as redux from 'react-redux'
 import * as router from 'react-router-redux'
-import imapClient from '../../imapClient'
+import { perform } from '../../imapClient'
 
 import ActivityView from '../ActivityView'
 import ComposeReply from '../ComposeReply'
@@ -134,13 +134,13 @@ export function Conversation (props: Props) {
 export default slurp(
   ({ auth, chrome, queue }: State, { conversationId }: OwnProps) => {
     const email = auth.account && auth.account.email
+    const conversation = email ? perform(
+      tasks.getConversation,
+      [conversationId],
+      { accountName: email }
+    ) : perform(tasks.Task.error, [new Error('not logged in')])
     return {
-      conversation: email ? subscribe(
-        Imap.getConversation,
-        conversationId,
-        email,
-        imapClient
-      ) : subscribe(kefir.constantError, new Error('not logged in')),
+      conversation,
       editing: chrome.editing,
       pendingLikes: queue.pendingLikes || []
     }

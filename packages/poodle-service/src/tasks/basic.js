@@ -346,6 +346,23 @@ function getHeaders (message: ImapMessage): Observable<Headers, Error> {
   })
 }
 
+// TODO: fall back to searching server if conversation is not in cache
+export function getConversation (uri: URI): Task<Conversation> {
+  return Task.promisify(fetchPartContent).flatMap(fetchPartContent => {
+    return dbTask(db =>
+        kefir.fromPromise(cache.getConversation(uri, db))
+      )
+      .flatMap(messages => {
+        if (messages.length < 1) {
+          return Task.error(new Error(`No messages in cache for conversation, ${uri}`))
+        }
+        return Task.liftPromise(
+          Conv.messagesToConversation(fetchPartContent, messages)
+        )
+      })
+  })
+}
+
 export type ConversationListItem = {
   id: URI,
   lastActiveTime: Date,

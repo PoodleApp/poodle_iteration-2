@@ -2,6 +2,7 @@
 
 import * as C from 'poodle-service/lib/ImapInterface/Client'
 import * as ImapAccount from 'poodle-service/lib/models/ImapAccount'
+import * as tasks from 'poodle-service/lib/tasks'
 import { all, call, cancelled, fork, put, takeLatest } from 'redux-saga/effects'
 import * as auth from '../actions/auth'
 import * as chrome from '../actions/chrome'
@@ -58,15 +59,16 @@ function * initAccount (
     yield call(deps.storeAccessToken, token, account)
 
     // TODO: check account type
-    yield C.addAccount(
-      {
+    yield C.perform(
+      deps.imapClient,
+      tasks.addAccount,
+      [{
         type: ImapAccount.GOOGLE,
         email: account.email,
         client_id,
         client_secret,
         credentials: token
-      },
-      deps.imapClient
+      }]
     ).toPromise()
 
     const smtpConfig = {

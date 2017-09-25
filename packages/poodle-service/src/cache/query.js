@@ -1,6 +1,6 @@
 /* @flow */
 
-import Conversation, * as Conv from 'arfe/lib/models/Conversation'
+import type Conversation from 'arfe/lib/models/Conversation'
 import Message, * as Msg from 'arfe/lib/models/Message'
 import unique from 'array-unique'
 import * as kefir from 'kefir'
@@ -57,7 +57,7 @@ export async function createIndexes (db: PouchDB): Promise<void> {
 export function queryConversations (
   params: QueryParams,
   db: PouchDB
-): Observable<Conversation, mixed> {
+): Observable<Message[], mixed> {
   const selector = buildSelector(params)
   const query: { [key: string]: any } = {
     fields: ['conversationId'],
@@ -108,7 +108,7 @@ async function fetchConversationIds (
 export async function getConversation (
   uri: string,
   db: PouchDB
-): Promise<Conversation> {
+): Promise<Message[]> {
   const parsed = Msg.parseMidUri(uri)
   if (!parsed) {
     throw new Error(
@@ -123,13 +123,12 @@ export async function getConversation (
 async function getConversationById (
   conversationId: string,
   db: PouchDB
-): Promise<Conversation> {
+): Promise<Message[]> {
   if (!conversationId) {
     throw new Error('Cannot fetch thread without a conversation ID')
   }
   const messageRecords = await getThread(conversationId, db)
-  const messages = messageRecords.map(asMessage)
-  return Conv.messagesToConversation(fetchPartContent.bind(null, db), messages)
+  return messageRecords.map(asMessage)
 }
 
 export async function getMessage (id: string, db: PouchDB): Promise<Message> {

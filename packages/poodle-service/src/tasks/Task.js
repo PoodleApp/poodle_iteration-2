@@ -140,8 +140,9 @@ export default class Task<A> {
     this.run = run
   }
 
-  perform (context: Context, initialState: State = initialState): Obs<A> {
-    return this.run(context, initialState).map(({ value }) => value)
+  perform<S: $Shape<State>> (context: Context, state?: ?S): Obs<A> {
+    const s = state ? { ...initialState, ...state } : initialState
+    return this.run(context, s).map(({ value }) => value)
   }
 
   catMaybes (): Task<$NonMaybeType<A>> {

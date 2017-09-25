@@ -2,7 +2,6 @@
 
 import { type AccountMetadata } from 'poodle-service'
 import * as C from 'poodle-service/lib/ImapInterface/Client'
-import * as actions from 'poodle-service/lib/ImapInterface/actions'
 import * as redux from 'redux'
 
 export const ACCOUNT_LIST = 'ImapInterface/accountList'

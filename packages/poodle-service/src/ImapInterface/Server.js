@@ -43,12 +43,13 @@ export function activeAccounts (server: Server) {
   return server.activeAccounts
 }
 
-export function handle<T> (
+export function perform<T, Args: *> (
   server: Server,
-  task: tasks.Task<T>,
-  initialState?: tasks.State
+  taskFn: (...args: Args) => tasks.Task<T>,
+  args: Args,
+  initialState?: ?tasks.State
 ): kefir.Observable<T> {
-  return task.perform({
+  return taskFn(...args).perform({
     runAccountAction: runAccountAction(server.accountManager),
     runImapAction: runImapAction(server.accountManager),
     db: server.db

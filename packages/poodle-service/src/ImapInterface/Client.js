@@ -26,6 +26,11 @@ export function accounts (client: Client): kefir.Observable<AccountMetadata[]> {
   return server.activeAccounts(client.server)
 }
 
-export function perform<A> (client: Client, task: tasks.Task<A>, initialState?: tasks.State): kefir.Observable<A> {
-  return server.handle(client.server, task, initialState)
+export function perform<A, Args: *> (
+  client: Client,
+  taskFn: (...args: Args) => tasks.Task<A>,
+  args: Args,
+  initialState?: ?tasks.State
+): kefir.Observable<A> {
+  return server.perform(client.server, taskFn, args, initialState)
 }
