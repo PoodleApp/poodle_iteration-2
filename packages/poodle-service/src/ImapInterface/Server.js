@@ -53,7 +53,7 @@ export function perform<T, Args: *> (
     runAccountAction: runAccountAction(server),
     runImapAction: runImapAction(server.accountManager),
     db: server.db
-  })
+  }, initialState)
 }
 
 function runAccountAction (
