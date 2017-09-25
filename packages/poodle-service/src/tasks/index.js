@@ -1,5 +1,6 @@
 /* @flow */
 
+export * from './account'
 export * from './basic'
-export { queryConversations } from './google'
-export { default as Task } from './Task'
+export { queryConversations, queryConversationsForListView } from './google'
+export { default as Task, Context, State } from './Task'

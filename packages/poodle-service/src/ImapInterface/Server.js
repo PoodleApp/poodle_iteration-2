@@ -3,79 +3,76 @@
 import type EventEmitter from 'events'
 import * as kefir from 'kefir'
 import type PouchDB from 'pouchdb-node'
+import * as accounts from '../accounts'
+import { type Action as AccountAction } from '../accounts/actions'
 import { type ImapAccount } from '../models/ImapAccount'
 import * as request from '../request'
-import { type Action as RequestAction } from '../request/actions'
+import { type Action as ImapAction } from '../request/actions'
 import * as tasks from '../tasks'
 import { type AccountMetadata, type Email } from '../types'
-import AccountManager from './AccountManager'
-import * as actions from './actions'
-import * as Channel from './channel'
-import * as constants from './constants'
 
-// TODO
-type Result = any
+// TODO: in the future a `Server` will receive and respond to requests via IPC
 
 export opaque type Server = {
-  accountManager: AccountManager,
-  channel: EventEmitter,
-  db: PouchDB
+  accountManager: accounts.AccountManager,
+  activeAccounts: kefir.Observable<AccountMetadata[]>,
+  db: PouchDB,
+  onAccountsChange: (as: AccountMetadata[]) => any
 }
 
-export function NewServer (channel: EventEmitter, db: PouchDB): Server {
-  const server = {
-    accountManager: new AccountManager(),
+export function NewServer (db: PouchDB): Server {
+  let emitter
+  const onAccountsChange = (as: AccountMetadata[]) => {
+    if (emitter) {
+      emitter.value(as)
+    }
+  }
+  const activeAccounts = kefir.stream(e => {
+    emitter = e
+  })
+
+  return {
+    accountManager: new accounts.AccountManager(),
+    activeAccounts,
     db,
-    channel
+    onAccountsChange
   }
-  Channel.serve(action => handle(action, server), channel)
-  return server
 }
 
-export function handle<T> (action: actions.Action<T>, server: Server): kefir.Observable<T> {
-  // Delgate to a private function to fix up the polymorphic return type
-  return _handle(action, server)
+export function activeAccounts (server: Server) {
+  return server.activeAccounts
 }
 
-function _handle (action: actions.Action<any>, server: Server): kefir.Observable<any> {
-  switch (action.type) {
-    case actions.ADD_ACCOUNT:
-      return kefir.fromPromise(addAccount(action.account, server))
-    case actions.DOWNLOAD_PART:
-      return performTask(tasks.downloadPart(action), action.accountName, server)
-    case actions.LIST_ACCOUNTS:
-      return kefir.constant(server.accountManager.listAccounts())
-    case actions.QUERY_CONVERSATIONS:
-      return performTask(tasks.queryConversations(action), action.accountName, server)
-    case actions.REMOVE_ACCOUNT:
-      return kefir.fromPromise(removeAccount(action.accountName, server))
-    default:
+export function handle<T> (
+  server: Server,
+  task: tasks.Task<T>,
+  initialState?: tasks.State
+): kefir.Observable<T> {
+  return task.perform({
+    runAccountAction: runAccountAction(server.accountManager),
+    runImapAction: runImapAction(server.accountManager),
+    db: server.db
+  })
+}
+
+function runAccountAction (
+  accountManager: accounts.AccountManager
+): (action: AccountAction<any>) => kefir.Observable<any> {
+  return action => accounts.perform(action, accountManager)
+}
+
+function runImapAction (
+  accountManager: accounts.AccountManager
+): (action: ImapAction<any>, state: tasks.State) => kefir.Observable<any> {
+  return (action, state) => {
+    const accountName = state.accountName
+    if (!accountName) {
       return kefir.constantError(
-        new Error(`Unknown action type: ${action.type}`)
+        new Error('Task must select an account before running IMAP actions')
       )
+    }
+    return accountManager.withAccount(accountName, cm =>
+      cm.request(action, state.connectionState)
+    )
   }
-}
-
-async function addAccount (account: ImapAccount, server: Server): Promise<void> {
-  await server.accountManager.add(account)
-  broadcastAccountsList(server)
-}
-
-async function removeAccount (accountName: Email, server: Server): Promise<void> {
-  await server.accountManager.remove(accountName)
-  broadcastAccountsList(server)
-}
-
-async function broadcastAccountsList (server: Server) {
-  const accounts = server.accountManager.listAccounts()
-  server.channel.emit(constants.ACCOUNT_LIST, accounts)
-}
-
-function performTask<T> (task: tasks.Task<T>, accountName: string, server: Server): kefir.Observable<T> {
-  return server.accountManager.withAccount(accountName, cm =>
-    task.perform({
-      performRequest: <T>(action: RequestAction<T>, state): kefir.Observable<T> => cm.request(action, state),
-      db: server.db
-    })
-  )
 }

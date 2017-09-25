@@ -1,13 +1,18 @@
 /* @flow */
 
+import * as AS from 'activitystrea.ms'
+import Conversation, * as Conv from 'arfe/lib/models/Conversation'
 import Message from 'arfe/lib/models/Message'
-import { type URI } from 'arfe/lib/models/uri'
+import DerivedActivity from 'arfe/lib/models/DerivedActivity'
+import { type URI, parseMidUri } from 'arfe/lib/models/uri'
 import dateformat from 'dateformat'
 import * as kefir from 'kefir'
 import { simpleParser } from 'mailparser'
+import * as m from 'mori'
 import type PouchDB from 'pouchdb-node'
-import * as cache from '../cache/persist'
-import * as query from '../cache/query'
+import { type Readable } from 'stream'
+import toString from 'stream-to-string'
+import * as cache from '../cache'
 import { decode } from '../encoding'
 import { type Connection, type OpenBox } from '../models/connection'
 import * as request from '../request'
@@ -27,9 +32,9 @@ import type {
   MessageSource,
   UID
 } from 'imap'
-import type { Readable } from 'stream'
 import type { Observable } from 'kefir'
 
+type Actor = AS.models.Object
 type ID = string
 
 const headersSelection = 'HEADER'
@@ -64,7 +69,7 @@ export function downloadMessages (uids: UID[]): Task<void> {
 
     const uidsInCache = dbTask(db =>
       kefir.fromPromise(
-        query
+        cache
           .verifyExistenceUids(
             uids.map(uid => ({ boxName, uidvalidity, uid })),
             db
@@ -77,11 +82,13 @@ export function downloadMessages (uids: UID[]): Task<void> {
       uids.filter(uid => !inCache.includes(uid))
     )
 
-    return uidsToFetch.filter(uids => uids.length > 0).flatMap(uids =>
-      fetchMessages(uids).flatMap(message =>
-        dbTask(db => kefir.fromPromise(cache.persistMessage(message, db)))
+    return uidsToFetch
+      .filter(uids => uids.length > 0)
+      .flatMap(uids =>
+        fetchMessages(uids).flatMap(message =>
+          dbTask(db => kefir.fromPromise(cache.persistMessage(message, db)))
+        )
       )
-    )
   })
 }
 
@@ -108,13 +115,6 @@ export function downloadPartContent (
   )
 }
 
-export function fetchMessagePart (uid: UID, part: MessagePart): Task<Readable> {
-  const encoding = part.encoding
-  return fetch(([uid]: string[]), { bodies: part.partID })
-    .flatMap(msg => Task.lift(messageBodyStream(msg)))
-    .map(body => (encoding ? decode(encoding, body) : body))
-}
-
 export function search (criteria: mixed[]): Task<UID[]> {
   return connectionTask(actions.search(criteria))
 }
@@ -124,6 +124,13 @@ export function fetch (
   opts: FetchOptions
 ): Task<ImapMessage> {
   return connectionTask(actions.fetch(source, opts))
+}
+
+export function fetchMessagePart (uid: UID, part: MessagePart): Task<Readable> {
+  const encoding = part.encoding
+  return fetch(([uid]: string[]), { bodies: part.partID })
+    .flatMap(msg => Task.lift(messageBodyStream(msg)))
+    .map(body => (encoding ? decode(encoding, body) : body))
 }
 
 /*
@@ -154,9 +161,140 @@ export function fetchMessages (source: MessageSource): Task<Message> {
   })
 }
 
+function fetchPartContentByUri (uri: URI): Task<?Readable> {
+  return dbTask(db =>
+    kefir.fromPromise(cache.fetchContentByUri(db, uri).catch(() => {}))
+  ).flatMap(data => {
+    if (data) {
+      return Task.result(data)
+    }
+    const parsed = parseMidUri(uri)
+    const messageId = parsed && parsed.messageId
+    const contentId = parsed && parsed.contentId
+    if (!messageId || !contentId) {
+      throw new Error(
+        `Unable to parse messageID and contentID from URI: ${uri}`
+      )
+    }
+    return dbTask(db =>
+      kefir.fromPromise(
+        cache.getMessage(messageId, db).catch(err => {
+          // TODO: fall back to scanning mailboxes for the given message ID
+          throw new Error(
+            `Tried to fetch content, but there is no local copy of the containing message, so we don't know which mailbox to look in.`
+          )
+        })
+      )
+    )
+      .flatMap(message => fetchPartContent(message, contentId))
+      .modifyObservable(obs =>
+        // Insert `undefined` so that we get a value emitted in case an error
+        // occurred
+        obs.beforeEnd(() => undefined).take(1)
+      )
+  })
+}
+
+/*
+ * Designed to be consumable by `Conv.messagesToConversation`. Use
+ * `Task.promisify(fetchPartContent)` to produce a version of this function that
+ * produces a `Promise`.
+ */
+export function fetchPartContent (
+  msg: Message,
+  contentId: string
+): Task<Readable> {
+  return fetchPartContentFromCache(msg, contentId).flatMap(data => {
+    if (data) {
+      return Task.result(data)
+    }
+    // TODO: check uid validity
+    const part = msg.getPart({ contentId })
+    if (!part) {
+      return Task.error(
+        new Error(`Cannot find part with ID ${contentId} in message, ${msg.id}`)
+      )
+    }
+    const meta = msg.perBoxMetadata && msg.perBoxMetadata[0]
+    if (!meta) {
+      return Task.error(
+        new Error(
+          `Cannot fetch part content for message with no UID, ${msg.id}`
+        )
+      )
+    }
+    const { boxName, uid, uidvalidity } = meta
+    return Task.isolate(
+      openBox({ name: boxName }, true).flatMap(getBox).flatMap(box => {
+        // TODO: make changes to be more consistent about string-vs-number
+        if (String(box.uidvalidity) !== uidvalidity) {
+          // TODO: check other stored UIDs; download content from server
+          return Task.error(new Error(`Stored uidvalidity does not match!`))
+        }
+        return downloadPartContent(msg.id, uid, part)
+      })
+    ).flatMap(cacheId =>
+      dbTask(db => kefir.fromPromise(cache.fetchContentByUri(db, cacheId)))
+    )
+  })
+}
+
+function fetchPartContentFromCache (
+  msg: Message,
+  contentId: string
+): Task<?Readable> {
+  return dbTask(db =>
+    kefir.fromPromise(
+      cache.fetchPartContent(db, msg, contentId).catch(() => undefined) // Resolve to `undefined` if content is not in cache
+    )
+  )
+}
+
 // TODO: this might come in multiple chunks
 function messageBodyStream (msg: ImapMessage): Observable<Readable, Error> {
   return kefirUtil.fromEventsWithEnd(msg, 'body', (stream, info) => stream)
+}
+
+export type Content = {
+  content: string,
+  mediaType: string
+}
+
+export function getActivityContent (
+  activity: DerivedActivity,
+  preferences: string[] = ['text/html', 'text/plain']
+): Task<?Content> {
+  const links = m.mapcat(
+    pref => m.filter(l => l.mediaType === pref, activity.objectLinks),
+    preferences
+  )
+  const link = m.first(links)
+
+  if (!link) {
+    return Task.result(undefined) // no content
+  }
+
+  const href = link.href
+  if (!href) {
+    return Task.error(
+      new Error(
+        `object link does not have an \`href\` property in activity ${activity.id}`
+      )
+    )
+  }
+
+  return fetchPartContentByUri(link.href)
+    .flatMap(stream => Task.liftPromise(toString(stream, 'utf8'))) // TODO: check charset
+    .map(content => ({ content, mediaType: link.mediaType }))
+}
+
+export function getActivityContentSnippet (
+  activity: DerivedActivity,
+  length: number = 100,
+  preferences: string[] = ['text/plain', 'text/html']
+): Task<?string> {
+  return getActivityContent(activity, preferences)
+    .map(result => result && result.content.slice(0, length))
 }
 
 export function getAttributes (
@@ -208,12 +346,41 @@ function getHeaders (message: ImapMessage): Observable<Headers, Error> {
   })
 }
 
+export type ConversationListItem = {
+  id: URI,
+  lastActiveTime: Date,
+  latestActivity: ActivityListItem,
+  participants: Actor[],
+  subject: ?string
+}
+
+export type ActivityListItem = {
+  actor: ?Actor,
+  contentSnippet: ?string
+}
+
+export function processConversationForListView (
+  conv: Conversation
+): Task<ConversationListItem> {
+  const activity = conv.latestActivity
+  return getActivityContentSnippet(activity).map(contentSnippet => ({
+    id: conv.id,
+    lastActiveTime: conv.lastActiveTime,
+    latestActivity: {
+      actor: activity.actor,
+      contentSnippet
+    },
+    participants: m.intoArray(conv.flatParticipants),
+    subject: conv.subject
+  }))
+}
+
 function connectionTask<T> (action: actions.Action<T>): Task<T> {
   return new Task((context, state) =>
-    context.performRequest(action, state).map(value => ({ value, state }))
+    context.runImapAction(action, state).map(value => ({ value, state }))
   )
 }
 
-function dbTask<T> (fn: (db: PouchDB) => Observable<T, Error>): Task<T> {
+export function dbTask<T> (fn: (db: PouchDB) => Observable<T, Error>): Task<T> {
   return Task.getContext().flatMap(({ db }) => Task.lift(fn(db)))
 }

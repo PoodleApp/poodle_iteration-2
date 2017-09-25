@@ -7,12 +7,18 @@ import * as S from '../request/state'
 export function closeBox (
   autoExpunge: boolean = true
 ): Task<void> {
-  return Task.putState(S.authenticated)
+  return Task.modifyState(state => ({
+    ...state,
+    connectionState: S.authenticated
+  }))
 }
 
 export function openBox (
   boxSpec: BoxSpecifier,
   readonly: boolean = true
 ): Task<void> {
-  return Task.putState(S.openBox(boxSpec, readonly))
+  return Task.modifyState(state => ({
+    ...state,
+    connectionState: S.openBox(boxSpec, readonly)
+  }))
 }
