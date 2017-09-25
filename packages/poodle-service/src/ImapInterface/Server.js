@@ -50,16 +50,20 @@ export function perform<T, Args: *> (
   initialState?: ?tasks.State
 ): kefir.Observable<T> {
   return taskFn(...args).perform({
-    runAccountAction: runAccountAction(server.accountManager),
+    runAccountAction: runAccountAction(server),
     runImapAction: runImapAction(server.accountManager),
     db: server.db
   })
 }
 
 function runAccountAction (
-  accountManager: accounts.AccountManager
+  { accountManager, onAccountsChange }: Server
 ): (action: AccountAction<any>) => kefir.Observable<any> {
-  return action => accounts.perform(action, accountManager)
+  return action => {
+    const result = accounts.perform(action, accountManager)
+    result.onEnd(() => onAccountsChange(accountManager.listAccounts()))
+    return result
+  }
 }
 
 function runImapAction (
