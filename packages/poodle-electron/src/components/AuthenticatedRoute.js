@@ -3,7 +3,7 @@
 import { sameEmail } from 'arfe/lib/models/uri'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as selectors from 'poodle-core/lib/selectors'
-import { type AccountMetadata } from 'poodle-service'
+import { type AccountMetadata } from 'poodle-service/lib/types'
 import * as queryString from 'query-string'
 import * as React from 'react'
 import * as redux from 'react-redux'

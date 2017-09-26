@@ -65,14 +65,12 @@ type LoginProps = {
   oauthLoadingMessages: string[],
   onDismissError: typeof chromeActions.dismissError,
   onLogin: typeof authActions.setAccount,
-  location: Object,
-  loggedIn: boolean
+  location: Object
 }
 
 export function Login ({
   account,
   location,
-  loggedIn,
   oauthLoadingMessages,
   ...props
 }: LoginProps) {
@@ -82,7 +80,7 @@ export function Login ({
     </p>
   )
 
-  if (account && loggedIn) {
+  if (account) {
     const referrer = queryString.parse(location.search).referrer
     return (
       <Redirect to={referrer || '/activity'} />
@@ -167,8 +165,7 @@ function mapStateToProps (state: State): $Shape<LoginProps> {
     oauthLoadingMessages: chromeState.loadingMessagesFor(
       'authentication-flow',
       chrome
-    ),
-    loggedIn: selectors.loggedIn(state)
+    )
   }
 }
 
