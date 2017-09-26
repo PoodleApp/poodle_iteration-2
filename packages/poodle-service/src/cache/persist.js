@@ -45,7 +45,7 @@ export async function persistPart (
   db: PouchDB
 ): Promise<ID> {
   const _id = midUri(messageId, part.id || part.partID) // prefer content ID over part ID
-  const existing = pouchdbUtil.maybeGet(db, _id)
+  const existing = await pouchdbUtil.maybeGet(db, _id)
   if (existing) {
     return _id
   }
