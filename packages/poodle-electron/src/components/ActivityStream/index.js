@@ -77,9 +77,7 @@ export default function ActivityStream (props: Props) {
         <RaisedButton label='Retry' onClick={props.conversations.reload} />
       </div>
     )
-  } else if (!conversations) {
-    content = <div>Loading...</div>
-  } else {
+  } else if (conversations && conversations.length > 1) {
     const convs = conversations.map((conv, i) =>
       <div key={conv.id}>
         <ConversationRow conversation={conv} />
@@ -93,6 +91,10 @@ export default function ActivityStream (props: Props) {
         </List>
       </Paper>
     )
+  } else if (!complete) {
+    content = <div>Loading...</div>
+  } else {
+    content = <div>No results</div>
   }
 
   return (
