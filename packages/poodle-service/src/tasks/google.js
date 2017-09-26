@@ -86,14 +86,14 @@ function queryConversationsAsStream (opts: {
  * task.
  */
 function accumulateById<T: { id: string }> (task: Task<T>): Task<T[]> {
-  return task.modifyObservable(conversations =>
-    conversations.scan(
-      (cs, c) =>
-        // Remove any stale versions of `c` from the list, then add `c`
-        cs.filter(c_ => c_.id !== c.id).concat(c),
+  return task.modifyObservable(conversations => {
+    return kefirUtil.scan(
+      conversations,
+      // Remove any stale versions of `c` from the list, then add `c`
+      (cs, c) => cs.filter(c_ => c_.id !== c.id).concat(c),
       []
     )
-  )
+  })
 }
 
 // May resolve multiple times with the same conversation! This task attempts to
@@ -104,10 +104,12 @@ function getConversationByThreadId (threadId: ThreadId): Task<Conversation> {
   const fromCache = getConversationByThreadIdFromCache(threadId).map(
     conv => (alreadyGotResultFromServer ? undefined : conv)
   )
-  const fromServer = downloadThread.flatMap(() => fromCache).map(conv => {
-    alreadyGotResultFromServer = true
-    return conv
-  })
+  const fromServer = downloadThread(threadId)
+    .flatMap(() => fromCache)
+    .map(conv => {
+      alreadyGotResultFromServer = true
+      return conv
+    })
   return Task.par([fromCache, fromServer]).catMaybes()
 }
 

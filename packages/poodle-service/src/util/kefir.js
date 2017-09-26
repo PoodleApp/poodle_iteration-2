@@ -79,6 +79,21 @@ export function andThen <A, E>(obs: Observable<A, E>, fn: () => Observable<A, E>
   return obs.concat(next)
 }
 
+/*
+ * Kefir's built-in `scan` method resets its accumulator on encountering an
+ * error. This version emits errors like the built-in method, but does not reset
+ * the accumulator.
+ */
+export function scan<T, R, E> (
+  input: Observable<T, E>,
+  fn: (accum: R, value: T) => R,
+  seed: R
+): Observable<R, E> {
+  const errors = input.ignoreValues()
+  const values = input.ignoreErrors().scan(fn, seed)
+  return values.merge(errors)
+}
+
 export function sequence<A, B, E> (
   input: A[],
   fn: (a: A) => Observable<B, E>

@@ -284,8 +284,14 @@ export function getActivityContent (
   }
 
   return fetchPartContentByUri(link.href)
-    .flatMap(stream => Task.liftPromise(toString(stream, 'utf8'))) // TODO: check charset
-    .map(content => ({ content, mediaType: link.mediaType }))
+    .flatMap(stream => {
+      if (stream) {
+        return Task.liftPromise(toString(stream, 'utf8')) // TODO: check charset
+          .map(content => ({ content, mediaType: link.mediaType }))
+      } else {
+        return Task.result(undefined)
+      }
+    })
 }
 
 export function getActivityContentSnippet (
