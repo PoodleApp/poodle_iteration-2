@@ -54,6 +54,9 @@ export default class SearchBar extends React.Component<Props, State> {
     const interceptChange = (value: string) => {
       onChange(value)
       this.setState({ value })
+      if (!value) {
+        onSearch(value) // clear search results when input is cleared
+      }
     }
 
     return (
