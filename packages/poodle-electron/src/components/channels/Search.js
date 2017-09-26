@@ -33,7 +33,8 @@ const WithData = slurp(
         : subscribe(kefir.constant, [])
     return {
       conversations,
-      errors: chrome.errors
+      errors: chrome.errors,
+      searchQuery: chrome.searchQuery
     }
   },
   (dispatch: Dispatch<*>) => ({

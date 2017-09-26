@@ -30,7 +30,8 @@ type Props = {
   conversations: Slurp<ConversationListItem[], Error>,
   errors: ?(Error[]),
   onDismissError: typeof chrome.dismissError,
-  onSearch: typeof chrome.search
+  onSearch: typeof chrome.search,
+  searchQuery: ?string
 }
 
 const styles = {
@@ -111,7 +112,7 @@ export default function ActivityStream (props: Props) {
       </header>
       <div style={styles.body}>
         <main style={styles.content}>
-          <SearchBar onSearch={props.onSearch} />
+          <SearchBar onSearch={props.onSearch} value={props.searchQuery || ''} />
           {content}
         </main>
         <nav style={styles.leftNav}>
