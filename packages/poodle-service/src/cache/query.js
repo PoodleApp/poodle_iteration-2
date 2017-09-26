@@ -133,7 +133,7 @@ async function getConversationById (
 
 export async function getMessage (id: string, db: PouchDB): Promise<Message> {
   const record = await db.get(id)
-  return asMessage(record.doc)
+  return asMessage(record)
 }
 
 export async function getMessagesByThreadId (
