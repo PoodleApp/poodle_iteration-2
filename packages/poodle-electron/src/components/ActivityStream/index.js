@@ -14,9 +14,8 @@ import spacing from 'material-ui/styles/spacing'
 import Moment from 'moment'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chrome from 'poodle-core/lib/actions/chrome'
-import * as q from 'poodle-core/lib/queries/conversations'
-import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
-import Sync from 'poodle-service/lib/sync'
+import { type Slurp } from 'poodle-core/lib/slurp'
+import { type ConversationListItem } from 'poodle-service/lib/tasks'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { type Dispatch } from 'redux'
@@ -24,17 +23,15 @@ import { type Dispatch } from 'redux'
 import Avatar from '../Avatar'
 import ChannelListSidebar from './ChannelListSidebar'
 import Errors from '../Errors'
+import SearchBar from '../SearchBar'
 
-import type { State } from '../../reducers'
-
-type OwnProps = {
-  account: authActions.Account
-}
-
-type Props = OwnProps & {
-  conversations: Slurp<q.ConversationListItem[], Error>,
+type Props = {
+  account: authActions.Account,
+  conversations: Slurp<ConversationListItem[], Error>,
   errors: ?(Error[]),
-  onDismissError: typeof chrome.dismissError
+  onDismissError: typeof chrome.dismissError,
+  onSearch: typeof chrome.search,
+  searchQuery: ?string
 }
 
 const styles = {
@@ -63,7 +60,7 @@ const styles = {
   }
 }
 
-export function ActivityStream (props: Props) {
+export default function ActivityStream (props: Props) {
   const { value: conversations, error, latest, complete } = props.conversations
 
   const errorDisplay = error
@@ -80,9 +77,7 @@ export function ActivityStream (props: Props) {
         <RaisedButton label='Retry' onClick={props.conversations.reload} />
       </div>
     )
-  } else if (!conversations) {
-    content = <div>Loading...</div>
-  } else {
+  } else if (conversations && conversations.length > 1) {
     const convs = conversations.map((conv, i) =>
       <div key={conv.id}>
         <ConversationRow conversation={conv} />
@@ -96,6 +91,10 @@ export function ActivityStream (props: Props) {
         </List>
       </Paper>
     )
+  } else if (!complete) {
+    content = <div>Loading...</div>
+  } else {
+    content = <div>No results</div>
   }
 
   return (
@@ -115,6 +114,7 @@ export function ActivityStream (props: Props) {
       </header>
       <div style={styles.body}>
         <main style={styles.content}>
+          <SearchBar onSearch={props.onSearch} value={props.searchQuery || ''} />
           {content}
         </main>
         <nav style={styles.leftNav}>
@@ -127,7 +127,7 @@ export function ActivityStream (props: Props) {
 }
 
 type ConversationRowProps = {
-  conversation: q.ConversationListItem
+  conversation: ConversationListItem
 }
 
 function ConversationRow ({ conversation }: ConversationRowProps) {
@@ -157,20 +157,3 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
     />
   )
 }
-
-const ActivityStreamWithData = slurp(
-  ({ auth, chrome }: State, { }: OwnProps) => ({
-    conversations: subscribe(q.fetchConversations, auth.sync, {
-      labels: ['\\Inbox'],
-      limit: 30
-    }),
-    errors: chrome.errors
-  }),
-  (dispatch: Dispatch<*>) => ({
-    onDismissError (...args) {
-      dispatch(chrome.dismissError(...args))
-    }
-  })
-)(ActivityStream)
-
-export default ActivityStreamWithData

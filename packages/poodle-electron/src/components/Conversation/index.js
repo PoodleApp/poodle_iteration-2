@@ -2,6 +2,7 @@
 
 import ArfeConversation from 'arfe/lib/models/Conversation'
 import * as LV from 'arfe/lib/models/LanguageValue'
+import * as kefir from 'kefir'
 import AppBar from 'material-ui/AppBar'
 import Divider from 'material-ui/Divider'
 import IconButton from 'material-ui/IconButton'
@@ -11,11 +12,12 @@ import spacing from 'material-ui/styles/spacing'
 import * as m from 'mori'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as q from 'poodle-core/lib/queries/conversation'
-import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
-import Sync from 'poodle-service/lib/sync'
+import { type Slurp, slurp } from 'poodle-core/lib/slurp'
+import * as tasks from 'poodle-service/lib/tasks'
 import React from 'react'
 import * as redux from 'react-redux'
 import * as router from 'react-router-redux'
+import { perform } from '../../imapClient'
 
 import ActivityView from '../ActivityView'
 import ComposeReply from '../ComposeReply'
@@ -72,10 +74,7 @@ export function Conversation (props: Props) {
         <p>
           {String(error)}
         </p>
-        <RaisedButton
-          label='Retry'
-          onClick={props.conversation.reload}
-        />
+        <RaisedButton label='Retry' onClick={props.conversation.reload} />
       </div>
     )
   } else if (conversation) {
@@ -97,10 +96,7 @@ export function Conversation (props: Props) {
     content = (
       <div>
         {activities}
-        <ComposeReply
-          account={props.account}
-          conversation={conversation}
-        />
+        <ComposeReply account={props.account} conversation={conversation} />
       </div>
     )
   } else {
@@ -136,9 +132,17 @@ export function Conversation (props: Props) {
 }
 
 export default slurp(
-  ({ auth, chrome, queue }: State, { conversationId }: OwnProps) => ({
-    conversation: subscribe(q.fetchConversation, auth.sync, conversationId),
-    editing: chrome.editing,
-    pendingLikes: queue.pendingLikes || []
-  })
+  ({ auth, chrome, queue }: State, { conversationId }: OwnProps) => {
+    const email = auth.account && auth.account.email
+    const conversation = email ? perform(
+      tasks.getConversation,
+      [conversationId],
+      { accountName: email }
+    ) : perform(tasks.Task.error, [new Error('not logged in')])
+    return {
+      conversation,
+      editing: chrome.editing,
+      pendingLikes: queue.pendingLikes || []
+    }
+  }
 )(Conversation)

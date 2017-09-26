@@ -1,7 +1,9 @@
 /* @flow */
 
+import { sameEmail } from 'arfe/lib/models/uri'
 import * as authActions from 'poodle-core/lib/actions/auth'
-import Sync from 'poodle-service/lib/sync'
+import * as selectors from 'poodle-core/lib/selectors'
+import { type AccountMetadata } from 'poodle-service/lib/types'
 import * as queryString from 'query-string'
 import * as React from 'react'
 import * as redux from 'react-redux'
@@ -13,19 +15,15 @@ import type { State } from '../reducers'
 type Props = {
   account: ?authActions.Account,
   component?: React.ComponentType<*>,
+  connected?: boolean,
   render?: (router: ContextRouter) => React.Element<any>,
-  sync: ?Sync,
   path?: string,
   exact?: boolean,
   strict?: boolean
 }
 
-export function AuthenticatedRoute ({
-  component,
-  render,
-  ...rest
-}: Props) {
-  const { account, sync } = rest
+export function AuthenticatedRoute ({ component, render, ...rest }: Props) {
+  const { account, connected } = rest
 
   return (
     <Route
@@ -43,7 +41,7 @@ export function AuthenticatedRoute ({
           )
         }
 
-        if (!sync) {
+        if (!connected) {
           return (
             <div>
               <p>Logging in...</p>
@@ -67,10 +65,10 @@ export function AuthenticatedRoute ({
   )
 }
 
-function mapStateToProps ({ auth }: State): $Shape<Props> {
+function mapStateToProps (state: State): $Shape<Props> {
   return {
-    account: auth.account,
-    sync: auth.sync
+    account: state.auth.account,
+    connected: selectors.loggedIn(state)
   }
 }
 

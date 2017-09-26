@@ -21,7 +21,7 @@ declare module "react-redux" {
 
   declare type MapDispatchToProps<A, OP: Object, DP: Object> =
     | ((dispatch: Dispatch<A>, ownProps: OP) => DP)
-    | DP;
+    | $NonMaybeType<DP>;
 
   declare type MergeProps<SP, DP: Object, OP: Object, P: Object> = (
     stateProps: SP,

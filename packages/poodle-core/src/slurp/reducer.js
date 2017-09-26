@@ -8,11 +8,13 @@ export default function reducer (state: State = {}, action: actions.Action): Sta
   switch (action.type) {
     case actions.ON_VALUE:
       return updateSingle(action, state, {
+        complete: false,
         value: action.value,
         latest: action.value
       })
     case actions.ON_ERROR:
       return updateSingle(action, state, {
+        complete: false,
         error: action.error,
         latest: action.error
       })

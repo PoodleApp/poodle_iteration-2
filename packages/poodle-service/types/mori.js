@@ -20,55 +20,55 @@ declare module mori {
    * They are a convenience that allows us to describe the capabilities of each
    * collection type.
    */
-  declare type Collection<A>    = { @@ICollection: A }
-  declare type Associative<K,V> = { @@IAssociative: [K,V] }
-  declare type Keyed<K,V>       = { @@keyed: [K,V] }
-  declare type Sequential<A>    = { @@ISequential: A }
-  declare type Stack<A>         = { @@IStack: A }
+  declare type Collection<A>    = { $$ICollection: A }
+  declare type Associative<K,V> = { $$IAssociative: [K,V] }
+  declare type Keyed<K,V>       = { $$keyed: [K,V] }
+  declare type Sequential<A>    = { $$ISequential: A }
+  declare type Stack<A>         = { $$IStack: A }
 
   declare type Indexed<A> = Iterable<A>
   declare type Seqable<A> = Iterable<A>
 
   declare type Seq<A> = {
     @@iterator(): Iterator<A>,
-    @@ICollection: A,
-    @@ISeq: A,
+    $$ICollection: A,
+    $$ISeq: A,
   }
 
   declare type List<A> = {
     @@iterator(): Iterator<A>,
-    @@ICollection: A,
-    @@ISeq: A,
-    @@ISequential: A,
-    @@IStack: A,
+    $$ICollection: A,
+    $$ISeq: A,
+    $$ISequential: A,
+    $$IStack: A,
   }
 
   declare type Map<K,V> = {
     @@iterator(): Iterator<Pair<K,V>>,
-    @@ICollection: Pair<K,V>,
-    @@IAssociative: [K,V],
-    @@keyed: [K,V],
+    $$ICollection: Pair<K,V>,
+    $$IAssociative: [K,V],
+    $$keyed: [K,V],
   }
 
   declare type Queue<A> = {
     @@iterator(): Iterator<A>,
-    @@ICollection: A,
-    @@ISequential: A,
-    @@IStack: A,
+    $$ICollection: A,
+    $$ISequential: A,
+    $$IStack: A,
   }
 
   declare type Set<A> = {
     @@iterator(): Iterator<A>,
-    @@ICollection: A,
-    @@keyed: [A,A],
+    $$ICollection: A,
+    $$keyed: [A,A],
   }
 
   declare type Vector<A> = {
     @@iterator(): Iterator<A>,
-    @@ICollection: A,
-    @@IAssociative: [number,A],
-    @@keyed: [number,A],
-    @@ISequential: A,
+    $$ICollection: A,
+    $$IAssociative: [number,A],
+    $$keyed: [number,A],
+    $$ISequential: A,
   }
 
   /* Other Types */
@@ -91,10 +91,10 @@ declare module mori {
    */
   declare type Pair<K,V> = {
     @@iterator(): Iterator<K|V>,
-    @@ICollection: K|V,
-    @@IAssociative: [number,K|V],
-    @@keyed: [number,K|V],
-    @@ISequential: K|V,
+    $$ICollection: K|V,
+    $$IAssociative: [number,K|V],
+    $$keyed: [number,K|V],
+    $$ISequential: K|V,
   }
 
   declare class Keyword {}

@@ -1,6 +1,7 @@
 /* @flow */
 
 import * as Actor from 'arfe/lib/models/Actor'
+import * as Conv from 'arfe/lib/models/Conversation'
 import * as Drv from 'arfe/lib/models/DerivedActivity'
 import * as LV from 'arfe/lib/models/LanguageValue'
 import * as URI from 'arfe/lib/models/uri'
@@ -227,19 +228,19 @@ function AsideView (props: ActivityViewProps) {
   const nestLevel = props.nestLevel || 1
   const { activity, conversation } = props
 
-  const aside = activity.aside
+  const aside = Conv.asideToConversation(activity)
   if (!aside) {
     return <p>[private aside not found]</p>
   }
 
-  const ppl = aside.participants.map(p => p.displayName).join(', ')
+  const ppl = m.intoArray(m.map(p => p.displayName, aside.flatParticipants)).join(', ')
 
   // TODO: This is a bit of a hack
   // const showReplyForm = m.equals(activity, m.last(m.filter(act => (
   //   Act.hasType(Act.syntheticTypes.Aside, act) && m.equals(act.aside, activity.aside)
   // ), conversation.activities)))
 
-  const activities = aside.activities.map(act =>
+  const activities = m.intoArray(aside.activities).map(act =>
     <ActivityView
       {...props}
       activity={act}

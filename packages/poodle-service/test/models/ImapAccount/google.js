@@ -1,8 +1,9 @@
 /* @flow */
 
 import * as fs         from 'fs'
-import * as google     from '../../src/oauth/google'
-import IndirectBrowser from '../IndirectBrowser'
+import { type OauthCredentials } from '../../../src/models/ImapAccount'
+import * as google     from '../../../src/models/ImapAccount/google'
+import IndirectBrowser from '../../IndirectBrowser'
 
 function getClientIdAndSecret(): { client_id: string, client_secret: string } {
   const client_id = process.env.CLIENT_ID
@@ -27,7 +28,7 @@ const scopes = [
   'https://www.googleapis.com/auth/contacts.readonly',  // contacts, read-only
 ]
 
-function getOrLookupAccessToken(): Promise<google.OauthCredentials> {
+function getOrLookupAccessToken(): Promise<OauthCredentials> {
   return new Promise((resolve, reject) => {
     fs.readFile('accessToken.json', { encoding: 'utf8' }, (err, data: string) => {
       if (err) { reject(err) } else { resolve(JSON.parse(data)) }
@@ -45,7 +46,7 @@ function getOrLookupAccessToken(): Promise<google.OauthCredentials> {
   })
 }
 
-function getAccessToken(): Promise<google.OauthCredentials> {
+function getAccessToken(): Promise<OauthCredentials> {
   return google.getAccessToken(() => new IndirectBrowser, {
     scopes,
     ...getClientIdAndSecret(),

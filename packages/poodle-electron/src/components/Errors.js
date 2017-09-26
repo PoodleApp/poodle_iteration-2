@@ -16,6 +16,7 @@ export default function Errors({ errors, onDismiss }: Props) {
       action="dismiss"
       onTouchTap={() => onDismiss(index)}
       onRequestClose={() => onDismiss(index)}
+      key={index}
     />
   )
   return <div>{bars}</div>

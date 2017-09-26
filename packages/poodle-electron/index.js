@@ -1,9 +1,11 @@
 /* @flow */
 
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const contextMenu = require('electron-context-menu')
 const path = require('path')
+const S = require('poodle-service/lib/ImapInterface/Server')
 const url = require('url')
+// const db = require('./lib/db')
 
 if (process.env.NODE_ENV === 'development') {
   const {
@@ -44,11 +46,16 @@ function createWindow () {
     // Dereference the window to allow GC
     mainWindow = null
   })
-
-  // ipc.respond('google-account', account.setupGoogle)
 }
 
-app.on('ready', createWindow)
+// let server
+app.on('ready', () => {
+  // Eventually we will run the IMAP interface in the main process in production
+  // if (process.env.NODE_ENV !== 'development') {
+  //   server = new S.NewServer(ipcMain, db) // Listen for IMAP requests
+  // }
+  createWindow()
+})
 
 // Quit when all windows have been closed - except in OS X
 app.on('window-all-closed', function () {

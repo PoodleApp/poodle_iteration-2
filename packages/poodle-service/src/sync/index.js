@@ -14,7 +14,8 @@ import { startBackgroundSync } from './sync'
 
 import type { Observable } from 'kefir'
 import type { Readable } from 'stream'
-import type { QueryParams, ConnectionFactory } from './types'
+import type { ConnectionFactory } from '../models/ImapAccount'
+import type { QueryParams } from './types'
 
 PouchDB.plugin(findPlugin)
 

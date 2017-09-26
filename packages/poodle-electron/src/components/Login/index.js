@@ -6,6 +6,7 @@ import TextField from 'material-ui/TextField'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chromeActions from 'poodle-core/lib/actions/chrome'
 import * as chromeState from 'poodle-core/lib/reducers/chrome'
+import * as selectors from 'poodle-core/lib/selectors'
 import PropTypes from 'prop-types'
 import * as queryString from 'query-string'
 import React from 'react'
@@ -64,14 +65,12 @@ type LoginProps = {
   oauthLoadingMessages: string[],
   onDismissError: typeof chromeActions.dismissError,
   onLogin: typeof authActions.setAccount,
-  location: Object,
-  loggedIn: boolean
+  location: Object
 }
 
 export function Login ({
   account,
   location,
-  loggedIn,
   oauthLoadingMessages,
   ...props
 }: LoginProps) {
@@ -81,7 +80,7 @@ export function Login ({
     </p>
   )
 
-  if (account && loggedIn) {
+  if (account) {
     const referrer = queryString.parse(location.search).referrer
     return (
       <Redirect to={referrer || '/activity'} />
@@ -158,15 +157,15 @@ function onLogin (
   }
 }
 
-function mapStateToProps ({ auth, chrome }: State): $Shape<LoginProps> {
+function mapStateToProps (state: State): $Shape<LoginProps> {
+  const { auth, chrome } = state
   return {
     account: auth.account,
     errors: chrome.errors,
     oauthLoadingMessages: chromeState.loadingMessagesFor(
       'authentication-flow',
       chrome
-    ),
-    loggedIn: !!auth.authenticatedAs
+    )
   }
 }
 

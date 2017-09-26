@@ -144,7 +144,7 @@ export async function threadToConversation (
 }
 
 export async function messagesToConversation (
-  fetchPartContent: (msg: Message, partId: string) => Promise<Readable>,
+  fetchPartContent: (msg: Message, contentId: string) => Promise<Readable>,
   messages: Seqable<Message>
 ): Promise<Conversation> {
   const activitiesByMessage = await Promise.all(

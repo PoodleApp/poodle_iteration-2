@@ -3,7 +3,7 @@
 .*/kefir/test/flow/.*
 .*/mailcomposer/.*
 .*/node_modules/react-event-listener/.*
-.*/poodle-electron/lib/.*
+.*/poodle-electron/lib/[^d][^b].*
 
 [include]
 

@@ -1,7 +1,9 @@
 /* @flow */
 
+// TODO: these sagas should probably be moved to `imap-redux`, or to top-level
+// sagas
+
 import * as compose from 'arfe/lib/compose'
-import Sync from 'poodle-service/lib/sync'
 import {
   type Effect,
   all,
@@ -17,7 +19,6 @@ import * as composeActions from './actions'
 // Generator type parameters are of the form: `Generator<+Yield,+Return,-Next>`
 
 function * sendEdit (
-  sync: Sync,
   action: composeActions.Action
 ): Generator<Effect, void, any> {
   if (action.type !== composeActions.EDIT) {
@@ -33,11 +34,10 @@ function * sendEdit (
     conversation,
     activity
   })
-  yield * transmit(sync, message)
+  yield * transmit(message)
 }
 
 function * sendReply (
-  sync: Sync,
   action: composeActions.Action
 ): Generator<Effect, void, any> {
   if (action.type !== composeActions.SEND) {
@@ -52,27 +52,28 @@ function * sendReply (
     },
     conversation
   })
-  yield * transmit(sync, message)
+  yield * transmit(message)
 }
 
+// TODO: update this to send transmit action through IMAP `Client`
 function * transmit (
-  sync: Sync,
   message: compose.MessageConfiguration
 ): Generator<Effect, void, any> {
-  try {
-    yield put(composeActions.sending())
-    const result = yield call([sync, 'send'], message)
-    console.log('DeliveryResult')
-    console.dir(result)
-    yield put(composeActions.sent())
-  } catch (err) {
-    yield put(chrome.showError(err))
-  }
+  yield put(chrome.showError(new Error('Sending messages is not implemented at the moment')))
+  // try {
+  //   yield put(composeActions.sending())
+  //   const result = yield call([sync, 'send'], message)
+  //   console.log('DeliveryResult')
+  //   console.dir(result)
+  //   yield put(composeActions.sent())
+  // } catch (err) {
+  //   yield put(chrome.showError(err))
+  // }
 }
 
-export default function * root (sync: Sync): Generator<Effect, void, any> {
+export default function * root (): Generator<Effect, void, any> {
   yield all([
-    fork(takeEvery, composeActions.EDIT, sendEdit, sync),
-    fork(takeEvery, composeActions.SEND, sendReply, sync)
+    fork(takeEvery, composeActions.EDIT, sendEdit),
+    fork(takeEvery, composeActions.SEND, sendReply)
   ])
 }

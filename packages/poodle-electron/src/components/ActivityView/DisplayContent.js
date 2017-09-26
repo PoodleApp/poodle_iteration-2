@@ -24,7 +24,7 @@ type OwnProps = {
 type Props = OwnProps & ContentProps
 
 export function DisplayContent ({ activity, content, style }: Props) {
-  const { value, error, latest } = content
+  const { complete, value, error, latest } = content
 
   if (error && error === latest) {
     return (
@@ -32,6 +32,12 @@ export function DisplayContent ({ activity, content, style }: Props) {
         <p>
           {String(error)}
         </p>
+      </div>
+    )
+  } else if (!complete) {
+    return (
+      <div>
+        <p>...</p>
       </div>
     )
   }

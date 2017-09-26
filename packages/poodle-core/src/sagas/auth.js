@@ -1,26 +1,30 @@
 /* @flow */
 
-import * as oauth from 'poodle-service/lib/oauth/google'
-import { newSync } from 'poodle-service/lib/sync'
+import * as C from 'poodle-service/lib/ImapInterface/Client'
+import * as ImapAccount from 'poodle-service/lib/models/ImapAccount'
+import * as tasks from 'poodle-service/lib/tasks'
 import { all, call, cancelled, fork, put, takeLatest } from 'redux-saga/effects'
 import * as auth from '../actions/auth'
 import * as chrome from '../actions/chrome'
 import { client_id, client_secret } from '../constants'
 
-import type { IMAPConnection } from 'poodle-service'
 import type { Effect } from 'redux-saga'
 
 export interface Dependencies {
+  imapClient: C.Client,
+
   // Should initiate OAuth flow to get a new access token if no valid token is
   // available in the keychain
-  getAccessToken(email: string): Promise<oauth.OauthCredentials>,
+  getAccessToken(email: string): Promise<ImapAccount.OauthCredentials>,
 
   // Should fetch access token from system keychain, if available
-  loadAccessToken(account: auth.Account): Promise<?oauth.OauthCredentials>,
+  loadAccessToken(
+    account: auth.Account
+  ): Promise<?ImapAccount.OauthCredentials>,
 
   // Should store access token in system keychain
   storeAccessToken(
-    token: oauth.OauthCredentials,
+    token: ImapAccount.OauthCredentials,
     account: auth.Account
   ): Promise<void>,
 
@@ -42,6 +46,7 @@ function * lookupAccount (deps: Dependencies): Generator<Effect, void, any> {
   }
 }
 
+// TODO: Move check for saved account to main process
 function * initAccount (
   deps: Dependencies,
   { account }: Object
@@ -52,9 +57,20 @@ function * initAccount (
   }
   if (token) {
     yield call(deps.storeAccessToken, token, account)
-    yield put(auth.accessToken(account.email, token))
 
-    const connectionFactory = yield getConnectionFactory(account.email, token)
+    // TODO: check account type
+    yield C.perform(
+      deps.imapClient,
+      tasks.addAccount,
+      [{
+        type: ImapAccount.GOOGLE,
+        email: account.email,
+        client_id,
+        client_secret,
+        credentials: token
+      }]
+    ).toPromise()
+
     const smtpConfig = {
       service: 'Gmail',
       auth: {
@@ -70,14 +86,6 @@ function * initAccount (
       }
     }
 
-    const sync = yield call(newSync, {
-      boxes: ['INBOX', '\\Sent'],
-      connectionFactory,
-      dbname: `poodle-${account.email}`,
-      smtpConfig
-    })
-    yield put(auth.setSync(sync))
-
     // persist account info on successful login
     deps.saveAccount(account)
   }
@@ -86,7 +94,7 @@ function * initAccount (
 function * fetchNewAccessToken (
   account: auth.Account,
   deps: Dependencies
-): Generator<Effect, ?oauth.OauthCredentials, any> {
+): Generator<Effect, ?ImapAccount.OauthCredentials, any> {
   try {
     yield put(
       chrome.indicateLoading('authentication-flow', 'Authorizing with Google')
@@ -97,31 +105,6 @@ function * fetchNewAccessToken (
   } finally {
     yield put(chrome.doneLoading('authentication-flow'))
   }
-}
-
-async function getConnectionFactory (
-  email: string,
-  token: oauth.OauthCredentials
-): Promise<() => Promise<IMAPConnection>> {
-  const tokGen = await getTokenGenerator(email, token)
-  return () => oauth.getConnection(tokGen)
-}
-
-async function getTokenGenerator (
-  email: string,
-  token: oauth.OauthCredentials
-): Promise<oauth.XOAuth2Generator> {
-  if (!token || !email) {
-    return Promise.reject(
-      new Error('cannot instantiate token generator without access token')
-    )
-  }
-  return oauth.getTokenGenerator({
-    email,
-    credentials: token,
-    client_id,
-    client_secret
-  })
 }
 
 export default function * root (

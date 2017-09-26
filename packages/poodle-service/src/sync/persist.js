@@ -4,13 +4,17 @@ import Message from 'arfe/lib/models/Message'
 import PouchDB from 'pouchdb-node'
 import streamToPromise from 'stream-to-promise'
 
-import type { MessagePart } from 'imap'
+import type { Box, MessagePart } from 'imap'
 import type { Readable } from 'stream'
 import type { MessageRecord, PartRecord } from './types'
 
+export async function persistBoxMetadata (box: Box, db: PouchDB): Promise<void> {
+  // TODO
+}
+
 export async function persistMessage (
-  db: PouchDB,
-  message: Message
+  message: Message,
+  db: PouchDB
 ): Promise<void> {
   const existing = await db.get(message.id).catch(err => {
     if (err.status !== 404) {
@@ -19,10 +23,11 @@ export async function persistMessage (
   })
   const record: MessageRecord = {
     _id: message.id,
-    type: 'Message',
     conversationId: message.conversationId,
+    headers: Array.from(message.headers.entries()),
     message: message.attributes,
-    headers: Array.from(message.headers.entries())
+    requestedAt: new Date().toISOString(),
+    type: 'Message'
   }
   if (existing) {
     record._rev = existing._rev
@@ -62,6 +67,7 @@ export async function persistPart (
       }
     },
     part,
+    requestedAt: new Date().toISOString(),
     type: 'PartContent'
   }
   return db.put(record)

@@ -12,9 +12,11 @@ export { parseMidUri } from './uri'
 
 import type {
   Address as ImapAddress,
+  Flag,
   MessageAttributes,
   MessagePart,
-  MessageStruct
+  MessageStruct,
+  UID
 } from 'imap'
 import type { Seq, Vector } from 'mori'
 import type { URI } from './uri'
@@ -31,6 +33,13 @@ type HeaderValue =
       params: { charset: string }
     }
 
+export type PerBoxMetadata = {
+  boxName: string,
+  flags: Flag[],
+  uid: UID,
+  uidvalidity: UID
+}
+
 export default class Message {
   attributes: MessageAttributes
   headers: Headers
@@ -42,8 +51,13 @@ export default class Message {
   receivedDate: Moment
   subject: ?AS.models.LanguageValue
   to: ?(Address[])
+  perBoxMetadata: ?(PerBoxMetadata[])
 
-  constructor (msg: MessageAttributes, headers: Headers) {
+  constructor (
+    msg: MessageAttributes,
+    headers: Headers,
+    perBoxMetadata?: PerBoxMetadata[]
+  ) {
     this.attributes = msg
     this.headers = headers
     // TODO: not every message has a messageId header
@@ -57,6 +71,7 @@ export default class Message {
     this.subject =
       msg.envelope.subject && asutil.newString(msg.envelope.subject)
     this.to = addressList(msg.envelope.to)
+    this.perBoxMetadata = perBoxMetadata
   }
 
   // Request metadata for a message part by `partId` or `contentId`. Content ID

@@ -9,8 +9,8 @@
  */
 
 import google from 'googleapis'
-
-import type { OauthClient, OauthCredentials } from '../google'
+import { type OauthCredentials } from '../types'
+import { type OauthClient } from './index'
 
 export type Profile = {
   kind: 'plus#person',

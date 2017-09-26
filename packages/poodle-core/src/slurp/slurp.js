@@ -2,6 +2,7 @@
 
 import deepEqual from 'deep-equal'
 import * as kefir from 'kefir'
+import nextTick from 'process-nextick-args'
 import { connect } from 'react-redux'
 import * as chrome from '../actions/chrome'
 import * as actions from './actions'
@@ -44,7 +45,7 @@ type MapSubscriptionsToProps<S, OP: Object, SP: Object> = (
   ownProps: OP
 ) => SP
 
-declare function slurp<S, A, OP, SP>(
+declare function slurp<S: { slurp: SlurpState }, A, OP, SP>(
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: Null,
   mergeProps: Null,
@@ -54,28 +55,28 @@ declare function slurp<S, A, OP, SP>(
   $Supertype<$ObjMap<SP, FromEffect> & { dispatch: Dispatch<A> } & OP>
 >
 
-declare function slurp<S, A, OP, SP, DP>(
+declare function slurp<S: { slurp: SlurpState }, A, OP, SP, DP>(
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: MapDispatchToProps<A, OP, DP>,
   mergeProps: Null,
   options?: ConnectOptions
 ): Connector<OP, $Supertype<$ObjMap<SP, FromEffect> & DP & OP>>
 
-declare function slurp<S, A, OP, SP, DP, P>(
+declare function slurp<S: { slurp: SlurpState }, A, OP, SP, DP, P>(
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: Null,
   mergeProps: MergeProps<$ObjMap<SP, FromEffect>, DP, OP, P>,
   options?: ConnectOptions
 ): Connector<OP, P>
 
-declare function slurp<S, A, OP, SP, DP, P>(
+declare function slurp<S: { slurp: SlurpState }, A, OP, SP, DP, P>(
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: MapDispatchToProps<A, OP, DP>,
   mergeProps: MergeProps<$ObjMap<SP, FromEffect>, DP, OP, P>,
   options?: ConnectOptions
 ): Connector<OP, P>
 
-export function slurp<S, OP: Object, SP: Object> (
+export function slurp<S: { slurp: SlurpState }, OP: Object, SP: Object> (
   mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
   mapDispatchToProps: *,
   mergeProps: *,
@@ -99,6 +100,7 @@ function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
   options: *
 ) {
   const componentKey = getKey()
+  const delayedDispatch = delayed(dispatch)
   let sources: {
     [key: string]: {
       source: effects.Effect<any, any>,
@@ -134,7 +136,9 @@ function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
         if (existing) {
           existing.unsubscribe()
         }
-        const unsubscribe = subscribe(dispatch, componentKey, key, newSource)
+        // Dispatch on next tick to avoid a tight loop in cases where, e.g.,
+        // a subscription ends synchronously.
+        const unsubscribe = subscribe(delayedDispatch, componentKey, key, newSource)
         sources[key] = { source: newSource, unsubscribe }
       }
     }
@@ -236,6 +240,12 @@ function unsubscribe (sources: {
 }) {
   for (const key of Object.keys(sources)) {
     sources[key].unsubscribe()
+  }
+}
+
+function delayed (fn: Function): Function {
+  return (...args) => {
+    nextTick(() => fn(...args))
   }
 }
 

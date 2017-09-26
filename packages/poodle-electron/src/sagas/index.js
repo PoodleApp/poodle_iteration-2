@@ -2,9 +2,11 @@
 
 import keytar from 'keytar'
 import * as auth from 'poodle-core/lib/actions/auth'
-import authSaga from 'poodle-core/lib/sagas/auth'
+import authSaga, { type Dependencies } from 'poodle-core/lib/sagas/auth'
 import queueSaga from 'poodle-core/lib/queue/saga'
+import { type OauthCredentials } from 'poodle-service/lib/models/ImapAccount'
 import { all, fork } from 'redux-saga/effects'
+import imapClient from '../imapClient'
 import * as oauth from '../oauth'
 
 import type { Effect } from 'redux-saga'
@@ -14,7 +16,7 @@ import type { Effect } from 'redux-saga'
 // Attempt to load access token from OS keychain
 async function loadAccessToken (
   account: auth.Account
-): Promise<?oauth.OauthCredentials> {
+): Promise<?OauthCredentials> {
   let creds = keytar.getPassword('Poodle', account.email)
   creds = creds && JSON.parse(creds)
   if (creds && creds.refresh_token) {
@@ -23,7 +25,7 @@ async function loadAccessToken (
 }
 
 async function storeAccessToken (
-  token: oauth.OauthCredentials,
+  token: OauthCredentials,
   account: auth.Account
 ) {
   keytar.replacePassword('Poodle', account.email, JSON.stringify(token))
@@ -40,7 +42,8 @@ async function saveAccount (account: auth.Account) {
   localStorage.setItem('account', JSON.stringify(account))
 }
 
-const authDeps = {
+const authDeps: Dependencies = {
+  imapClient,
   getAccessToken: oauth.getAccessToken,
   loadAccessToken,
   storeAccessToken,
