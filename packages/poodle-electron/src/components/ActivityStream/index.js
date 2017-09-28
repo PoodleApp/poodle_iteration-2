@@ -36,7 +36,7 @@ type Props = {
 
 const styles = {
   authorName: {
-    color: colors.darkBlack
+    // color: colors.darkBlack
   },
   body: {
     display: 'flex',
@@ -45,6 +45,9 @@ const styles = {
   content: {
     flex: 1,
     padding: spacing.desktopGutter + 'px'
+  },
+  date: {
+    color: colors.darkBlack
   },
   leftNav: {
     flex: `0 0 ${spacing.desktopKeylineIncrement * 3}px`,
@@ -114,7 +117,10 @@ export default function ActivityStream (props: Props) {
       </header>
       <div style={styles.body}>
         <main style={styles.content}>
-          <SearchBar onSearch={props.onSearch} value={props.searchQuery || ''} />
+          <SearchBar
+            onSearch={props.onSearch}
+            value={props.searchQuery || ''}
+          />
           {content}
         </main>
         <nav style={styles.leftNav}>
@@ -143,6 +149,10 @@ function ConversationRow ({ conversation }: ConversationRowProps) {
       primaryText={LV.getString(conversation.subject, '[no subject]')}
       secondaryText={
         <p>
+          <span style={styles.date}>
+            {Moment(conversation.lastActiveTime).calendar()}
+          </span>
+          {'\u00A0\u00A0'}
           <span style={styles.authorName}>{actorDisplayName}</span> — {snippet}
         </p>
       }
