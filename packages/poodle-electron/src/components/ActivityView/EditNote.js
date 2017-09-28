@@ -12,6 +12,7 @@ import { type ComposeProps, ComposeHOC } from 'poodle-core/lib/compose'
 import PropTypes from 'prop-types'
 import provideContent, { type ContentProps } from './provideContent'
 import * as React from 'react'
+import imapClient from '../../imapClient'
 
 type OwnProps = {
   account: auth.Account,
@@ -133,7 +134,7 @@ function onMenuAction (
 
 export const EditNoteWithState: React.ComponentType<
   OwnProps & { initialContent: string }
-> = ComposeHOC(EditNote)
+> = ComposeHOC({ imapClient }, EditNote)
 
 const EditNoteWithStaetAndInitialContent: React.ComponentType<
   OwnProps

@@ -2,13 +2,7 @@
 
 import Conversation, { type Participants } from 'arfe/lib/models/Conversation'
 import marked from 'marked'
-import {
-  FlatButton,
-  IconButton,
-  IconMenu,
-  Paper,
-  TextField
-} from 'material-ui'
+import { FlatButton, IconButton, IconMenu, Paper, TextField } from 'material-ui'
 import MenuItem from 'material-ui/MenuItem'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import spacing from 'material-ui/styles/spacing'
@@ -17,6 +11,7 @@ import PropTypes from 'prop-types'
 import * as React from 'react'
 import * as auth from 'poodle-core/lib/actions/auth'
 import { type ComposeProps, ComposeHOC } from 'poodle-core/lib/compose'
+import imapClient from '../imapClient'
 import { type State } from '../reducers'
 
 type OwnProps = {
@@ -123,4 +118,6 @@ function onMenuAction (
   }
 }
 
-export default (ComposeHOC(ComposeReply): React.ComponentType<OwnProps>)
+export default (ComposeHOC({ imapClient }, ComposeReply): React.ComponentType<
+  OwnProps
+>)
