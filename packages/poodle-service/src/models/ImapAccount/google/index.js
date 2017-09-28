@@ -5,11 +5,12 @@ import Connection from 'imap'
 import { stringify } from 'querystring'
 import fetch from 'node-fetch'
 import xoauth2 from 'xoauth2'
+import { type SmtpConfig } from '../../../smtp'
 import { lift1 } from '../../../util/promises'
 import {
   type ConnectionFactory,
   type GoogleAccount,
-  type OauthCredentials
+  type OauthCredentials,
 } from '../types'
 
 import type { ImapOpts } from 'imap'
@@ -105,6 +106,26 @@ export async function getConnectionFactory (
 ): Promise<ConnectionFactory> {
   const tokGen = await getTokenGenerator(account)
   return () => getConnection(tokGen)
+}
+
+export async function getSmtpConfig (
+  account: GoogleAccount
+): Promise<SmtpConfig> {
+  const { client_id, client_secret, credentials } = account
+  return {
+    service: 'Gmail',
+    auth: {
+      type: 'OAuth2',
+      accessToken: credentials.access_token,
+      // accessUrl: 'https://accounts.google.com/o/oauth2/token',
+      clientId: client_id,
+      clientSecret: client_secret,
+      expires: credentials.expires_in,
+      refreshToken: credentials.refresh_token,
+      service: 'Gmail',
+      user: account.email
+    }
+  }
 }
 
 export function initImap (

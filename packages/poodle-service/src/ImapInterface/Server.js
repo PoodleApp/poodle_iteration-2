@@ -8,6 +8,7 @@ import { type Action as AccountAction } from '../accounts/actions'
 import { type ImapAccount } from '../models/ImapAccount'
 import * as request from '../request'
 import { type Action as ImapAction } from '../request/actions'
+import * as smtp from '../smtp'
 import * as tasks from '../tasks'
 import { type AccountMetadata, type Email } from '../types'
 
@@ -52,6 +53,7 @@ export function perform<T, Args: *> (
   return taskFn(...args).perform({
     runAccountAction: runAccountAction(server),
     runImapAction: runImapAction(server.accountManager),
+    runSmtpAction: runSmtpAction(server.accountManager),
     db: server.db
   }, initialState)
 }
@@ -78,6 +80,22 @@ function runImapAction (
     }
     return accountManager.withAccount(accountName, cm =>
       cm.request(action, state.connectionState)
+    )
+  }
+}
+
+function runSmtpAction (
+  accountManager: accounts.AccountManager
+): (action: smtp.Action<any>, state: tasks.State) => kefir.Observable<any> {
+  return (action, state) => {
+    const accountName = state.accountName
+    if (!accountName) {
+      return kefir.constantError(
+        new Error('Task must select an account before running SMTP actions')
+      )
+    }
+    return accountManager.withSmtpAccount(accountName, smtpTransport =>
+      smtp.perform(action, smtpTransport)
     )
   }
 }

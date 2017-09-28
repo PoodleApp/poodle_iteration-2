@@ -5,6 +5,7 @@ import type PouchDB from 'pouchdb-node'
 import { type Action as AccountAction } from '../accounts/actions'
 import { type Action as RequestAction } from '../request/actions'
 import { type ConnectionState, any } from '../request/state'
+import { type Action as SmtpAction } from '../smtp/actions'
 import { type Email } from '../types'
 import * as kefirUtil from '../util/kefir'
 
@@ -16,6 +17,7 @@ export type State = {
 export type Context = {
   runAccountAction: <A>(action: AccountAction<A>) => Obs<A>,
   runImapAction: <A>(action: RequestAction<A>, state: State) => Obs<A>,
+  runSmtpAction: <A>(action: SmtpAction<A>, state: State) => Obs<A>,
   db: PouchDB
 }
 
