@@ -71,21 +71,6 @@ function * initAccount (
       }]
     ).toPromise()
 
-    const smtpConfig = {
-      service: 'Gmail',
-      auth: {
-        type: 'OAuth2',
-        accessToken: token.access_token,
-        // accessUrl: 'https://accounts.google.com/o/oauth2/token',
-        clientId: client_id,
-        clientSecret: client_secret,
-        expires: token.expires_in,
-        refreshToken: token.refresh_token,
-        service: 'Gmail',
-        user: account.email
-      }
-    }
-
     // persist account info on successful login
     deps.saveAccount(account)
   }

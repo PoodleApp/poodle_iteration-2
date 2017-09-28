@@ -8,7 +8,7 @@ import { local } from 'redux-fractal'
 import createSagaMiddleware from 'redux-saga'
 import * as compose from './actions'
 import reducer, { type State } from './reducer'
-import rootSaga from './sagas'
+import rootSaga, { type Dependencies } from './sagas'
 
 type ExpectedProps = {
   activity?: DerivedActivity,
@@ -23,6 +23,7 @@ export type ComposeProps = State & {
 }
 
 export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
+  deps: Dependencies,
   component: *
 ) {
   return local({
@@ -33,7 +34,7 @@ export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
     createStore: (props: OwnProps) => {
       const sagaMiddleware = createSagaMiddleware()
       const store = createStore(reducer, applyMiddleware(sagaMiddleware))
-      sagaMiddleware.run(rootSaga)
+      sagaMiddleware.run(rootSaga, deps)
       // TODO
       // return { store, cleanup: () => sagaMiddleware.cancel() }
       return store

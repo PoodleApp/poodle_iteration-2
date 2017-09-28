@@ -4,6 +4,8 @@
 // sagas
 
 import * as compose from 'arfe/lib/compose'
+import * as C from 'poodle-service/lib/ImapInterface/Client'
+import * as tasks from 'poodle-service/lib/tasks'
 import {
   type Effect,
   all,
@@ -16,9 +18,14 @@ import stringToStream from 'string-to-stream'
 import * as chrome from '../actions/chrome'
 import * as composeActions from './actions'
 
+export interface Dependencies {
+  imapClient: C.Client
+}
+
 // Generator type parameters are of the form: `Generator<+Yield,+Return,-Next>`
 
 function * sendEdit (
+  deps: Dependencies,
   action: composeActions.Action
 ): Generator<Effect, void, any> {
   if (action.type !== composeActions.EDIT) {
@@ -34,10 +41,11 @@ function * sendEdit (
     conversation,
     activity
   })
-  yield * transmit(message)
+  yield * transmit(deps, message)
 }
 
 function * sendReply (
+  deps: Dependencies,
   action: composeActions.Action
 ): Generator<Effect, void, any> {
   if (action.type !== composeActions.SEND) {
@@ -52,28 +60,29 @@ function * sendReply (
     },
     conversation
   })
-  yield * transmit(message)
+  yield * transmit(deps, message)
 }
 
-// TODO: update this to send transmit action through IMAP `Client`
 function * transmit (
+  deps: Dependencies,
   message: compose.MessageConfiguration
 ): Generator<Effect, void, any> {
-  yield put(chrome.showError(new Error('Sending messages is not implemented at the moment')))
-  // try {
-  //   yield put(composeActions.sending())
-  //   const result = yield call([sync, 'send'], message)
-  //   console.log('DeliveryResult')
-  //   console.dir(result)
-  //   yield put(composeActions.sent())
-  // } catch (err) {
-  //   yield put(chrome.showError(err))
-  // }
+  try {
+    yield put(composeActions.sending())
+    const result = yield C.perform(deps.imapClient, tasks.sendMail, [message])
+    console.log('DeliveryResult') // TODO: debugging output
+    console.dir(result)
+    yield put(composeActions.sent())
+  } catch (err) {
+    yield put(chrome.showError(err))
+  }
 }
 
-export default function * root (): Generator<Effect, void, any> {
+export default function * root (
+  deps: Dependencies
+): Generator<Effect, void, any> {
   yield all([
-    fork(takeEvery, composeActions.EDIT, sendEdit),
-    fork(takeEvery, composeActions.SEND, sendReply)
+    fork(takeEvery, composeActions.EDIT, sendEdit, deps),
+    fork(takeEvery, composeActions.SEND, sendReply, deps)
   ])
 }
