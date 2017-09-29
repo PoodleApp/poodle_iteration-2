@@ -19,7 +19,8 @@ export type State = {
 type Indicator = { key: string, message: string }
 
 const inititialState: State = {
-  leftNavOpen: false
+  leftNavOpen: false,
+  searchQuery: 'in:inbox' // TODO: workaround until Inbox channel is ready to go
 }
 
 export default function reducer (
