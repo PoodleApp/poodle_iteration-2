@@ -203,7 +203,10 @@ function getPartByContentId (
   contentId: string,
   msg: MessageAttributes
 ): ?MessagePart {
-  const matches = m.filter(part => part.id === contentId, flatParts(msg))
+  const matches = m.filter(
+    part => part.id && (idFromHeaderValue(part.id) === contentId),
+    flatParts(msg)
+  )
   return m.first(matches)
 }
 
