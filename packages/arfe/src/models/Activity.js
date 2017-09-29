@@ -6,7 +6,7 @@ import toString from 'stream-to-string'
 import traverse from 'traverse'
 import * as Vocab from 'vocabs-as'
 import Address from './Address'
-import Message from './Message'
+import Message, * as Msg from './Message'
 import * as Part from './MessagePart'
 import * as U from './uri'
 import * as asutil from '../util/activity'
@@ -167,7 +167,7 @@ async function getActivity (
   msg: Message,
   part: MessagePart
 ): Promise<Activity> {
-  const contentId = part.id
+  const contentId = part.id && Msg.idFromHeaderValue(part.id)
   if (!contentId) {
     throw new Error('cannot fetch content for message part with no ID')
   }

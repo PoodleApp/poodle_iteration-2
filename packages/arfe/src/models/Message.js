@@ -376,7 +376,7 @@ const messageIdPattern = /<(.*)>/
 
 // `
 
-function idFromHeaderValue (id: MessageId): MessageId {
+export function idFromHeaderValue (id: MessageId): MessageId {
   return id.replace(messageIdPattern, (_, id) => id)
 }
 
