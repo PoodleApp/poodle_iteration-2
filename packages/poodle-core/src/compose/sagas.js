@@ -15,6 +15,7 @@ import {
   takeEvery
 } from 'redux-saga/effects'
 import stringToStream from 'string-to-stream'
+import { type Account } from '../actions/auth'
 import * as chrome from '../actions/chrome'
 import * as composeActions from './actions'
 
@@ -41,7 +42,7 @@ function * sendEdit (
     conversation,
     activity
   })
-  yield * transmit(deps, message)
+  yield * transmit(deps, account, message)
 }
 
 function * sendReply (
@@ -60,18 +61,21 @@ function * sendReply (
     },
     conversation
   })
-  yield * transmit(deps, message)
+  yield * transmit(deps, account, message)
 }
 
 function * transmit (
   deps: Dependencies,
+  account: Account,
   message: compose.MessageConfiguration
 ): Generator<Effect, void, any> {
   try {
     yield put(composeActions.sending())
     const result = yield C.perform(deps.imapClient, tasks.sendMail, [
       message
-    ]).toPromise()
+    ], {
+      accountName: account.email
+    }).toPromise()
     console.log('DeliveryResult') // TODO: debugging output
     console.dir(result)
     yield put(composeActions.sent())

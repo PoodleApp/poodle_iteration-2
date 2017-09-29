@@ -30,7 +30,7 @@ export function perform<A, Args: *> (
   client: Client,
   taskFn: (...args: Args) => tasks.Task<A>,
   args: Args,
-  initialState?: ?tasks.State
+  initialState?: $Shape<tasks.State>
 ): kefir.Observable<A> {
   return server.perform(client.server, taskFn, args, initialState)
 }
