@@ -69,7 +69,9 @@ function * transmit (
 ): Generator<Effect, void, any> {
   try {
     yield put(composeActions.sending())
-    const result = yield C.perform(deps.imapClient, tasks.sendMail, [message])
+    const result = yield C.perform(deps.imapClient, tasks.sendMail, [
+      message
+    ]).toPromise()
     console.log('DeliveryResult') // TODO: debugging output
     console.dir(result)
     yield put(composeActions.sent())
