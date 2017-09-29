@@ -137,16 +137,16 @@ export function fetchMessagePart (uid: UID, part: MessagePart): Task<Readable> {
  * Downloads message structure and metadata, but not content parts
  */
 export function fetchMessages (source: MessageSource): Task<Message> {
-  const respStream = fetch(source, {
-    bodies: headersSelection,
-    envelope: true,
-    struct: true
-  })
-  return respStream.flatMap(imapMsg => {
-    const attrStream = getAttributes(imapMsg)
-    const headersStream = getHeaders(imapMsg)
-    return getBox().flatMap(box => {
-      const uidvalidity = String(box.uidvalidity)
+  return getBox().flatMap(box => {
+    const uidvalidity = String(box.uidvalidity)
+    const respStream = fetch(source, {
+      bodies: headersSelection,
+      envelope: true,
+      struct: true
+    })
+    return respStream.flatMap(imapMsg => {
+      const attrStream = getAttributes(imapMsg)
+      const headersStream = getHeaders(imapMsg)
       return Task.lift(
         kefir.zip([attrStream, headersStream], (imapMsg, headers) => {
           const flags = imapMsg.flags

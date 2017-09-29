@@ -105,7 +105,7 @@ function getConversationByThreadId (threadId: ThreadId): Task<Conversation> {
     conv => (alreadyGotResultFromServer ? undefined : conv)
   )
   const fromServer = downloadThread(threadId)
-    .flatMap(() => fromCache)
+    .flatMap(() => fromCache) // Fresh copy should be in cache at this point
     .map(conv => {
       alreadyGotResultFromServer = true
       return conv
