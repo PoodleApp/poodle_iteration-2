@@ -32,6 +32,7 @@ export default class AccountManager {
     this._accounts = m.assoc(this._accounts, account.email, cm)
     this._smtpAccounts = m.assoc(
       this._smtpAccounts,
+      account.email,
       nodemailer.createTransport(smtpConfig)
     )
     const capabilities = await cm
