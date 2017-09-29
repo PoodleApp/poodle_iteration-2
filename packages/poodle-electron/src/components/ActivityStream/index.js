@@ -12,6 +12,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import * as colors from 'material-ui/styles/colors'
 import spacing from 'material-ui/styles/spacing'
 import Moment from 'moment'
+import * as m from 'mori'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chrome from 'poodle-core/lib/actions/chrome'
 import { type Slurp } from 'poodle-core/lib/slurp'
@@ -81,7 +82,10 @@ export default function ActivityStream (props: Props) {
       </div>
     )
   } else if (conversations && conversations.length > 1) {
-    const convs = conversations.map((conv, i) =>
+    const sorted = m.intoArray(
+      m.sortBy(conv => 0 - conv.lastActiveTime, conversations)
+    )
+    const convs = sorted.map((conv, i) =>
       <div key={conv.id}>
         <ConversationRow conversation={conv} />
         {i == conversations.length - 1 ? '' : <Divider inset={true} />}
