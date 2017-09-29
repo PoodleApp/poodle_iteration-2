@@ -1,6 +1,9 @@
 /* @flow */
 
+import * as compose from 'arfe/lib/compose'
 import composeLike from 'arfe/lib/compose/like'
+import * as C from 'poodle-service/lib/ImapInterface/Client'
+import * as tasks from 'poodle-service/lib/tasks'
 import {
   type Effect,
   all,
@@ -11,17 +14,23 @@ import {
   takeEvery
 } from 'redux-saga/effects'
 import stringToStream from 'string-to-stream'
+import { type Account } from '../actions/auth'
 import * as chrome from '../actions/chrome'
 import * as queue from './actions'
 
+export interface Dependencies {
+  imapClient: C.Client
+}
+
 // Generator type parameters are of the form: `Generator<+Yield,+Return,-Next>`
 
-function * sendLike (action: queue.Action): Generator<Effect, void, any> {
+function * sendLike (
+  deps: Dependencies,
+  action: queue.Action
+): Generator<Effect, void, any> {
   if (action.type !== queue.SEND_LIKES) {
     return
   }
-
-  // TODO: which account to send `like` from?
 
   const { account, conversation, likedObjectUris, recipients } = action
   const message = composeLike({
@@ -34,18 +43,20 @@ function * sendLike (action: queue.Action): Generator<Effect, void, any> {
     },
     likedObjectUris
   })
-  // TOOD
-  yield put(chrome.showError(new Error('Likes are not supported at the moment')))
-  // try {
-  //   yield put(queue.sendingLikes(action.likedObjectUris))
-  //   const result = yield call([sync, 'send'], message)
-  //   yield put(queue.doneSendingLikes(action.likedObjectUris))
-  // } catch (err) {
-  //   yield put(chrome.showError(err))
-  //   yield put(queue.doneSendingLikes(action.likedObjectUris))
-  // }
+  try {
+    yield put(queue.sendingLikes(action.likedObjectUris))
+    const result = yield C.perform(deps.imapClient, tasks.sendMail, [message], {
+      accountName: account.email
+    }).toPromise()
+    yield put(queue.doneSendingLikes(action.likedObjectUris))
+  } catch (err) {
+    yield put(chrome.showError(err))
+    yield put(queue.doneSendingLikes(action.likedObjectUris))
+  }
 }
 
-export default function * root (): Generator<Effect, void, any> {
-  yield all([fork(takeEvery, queue.SEND_LIKES, sendLike)])
+export default function * root (
+  deps: Dependencies
+): Generator<Effect, void, any> {
+  yield all([fork(takeEvery, queue.SEND_LIKES, sendLike, deps)])
 }

@@ -52,5 +52,5 @@ const authDeps: Dependencies = {
 }
 
 export default function * root (): Generator<Effect, void, any> {
-  yield all([fork(authSaga, authDeps), fork(queueSaga)])
+  yield all([fork(authSaga, authDeps), fork(queueSaga, { imapClient })])
 }
