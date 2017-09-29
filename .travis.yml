@@ -42,7 +42,7 @@ before_install:
   - export PATH="$HOME/.yarn/bin:$PATH"
 
 install:
-  - yarn && (cd packages/poodle-core; yarn) && (cd packages/poodle-electron; yarn)
+  - yarn && (cd packages/poodle-service; yarn) && (cd packages/poodle-core; yarn) && (cd packages/poodle-electron; yarn)
 
 script:
   - make test
