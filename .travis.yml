@@ -47,7 +47,7 @@ install:
 script:
   - make test
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then (cd packages/poodle-electron; yarn dist); fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then (cd packages/poodle-electron; yarn dist -- --mac --win); fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then (cd packages/poodle-electron; yarn dist --mac --win); fi
 
 before_cache:
   - rm -rf $HOME/.cache/electron-builder/wine
