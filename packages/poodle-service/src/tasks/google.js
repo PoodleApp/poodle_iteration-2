@@ -152,6 +152,7 @@ function downloadThread (threadId: ThreadId): Task<void> {
   return basic
     .search([['X-GM-THRID', threadId]])
     .flatMap(uids => basic.downloadMessages(uids))
+    .emitWhenDone()
 }
 
 export function openAllMail (readonly: boolean = true): Task<void> {

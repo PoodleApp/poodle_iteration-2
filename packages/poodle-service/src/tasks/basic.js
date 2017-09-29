@@ -58,8 +58,7 @@ export function requireCapability (capability: string): Task<void> {
 }
 
 /*
- * Downloads and saves messages if they do not already exist in the cache; emits
- * IDs of the messages in PouchDB
+ * Downloads and saves messages if they do not already exist in the cache
  */
 export function downloadMessages (uids: UID[]): Task<void> {
   uids = uids.map(String) // We will get cache misses if uids are not correct type
@@ -90,6 +89,7 @@ export function downloadMessages (uids: UID[]): Task<void> {
         )
       )
   })
+  .emitWhenDone()
 }
 
 export function downloadPart (opts: {

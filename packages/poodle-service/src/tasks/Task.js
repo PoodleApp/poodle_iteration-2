@@ -151,6 +151,15 @@ export default class Task<A> {
     return this.filter(a => !!a)
   }
 
+  /*
+   * Produces a `Task` that emits exactly once when the input task completes
+   */
+  emitWhenDone (): Task<void> {
+    return this.modifyObservable(obs =>
+      obs.ignoreValues().beforeEnd(() => undefined)
+    )
+  }
+
   filter (fn: (a: A) => boolean): Task<A> {
     return this.modifyObservable(obs => obs.filter(fn))
   }
