@@ -24,7 +24,7 @@ const WithData = slurp(
             tasks.queryConversationsForListView,
           [
             {
-              limit: 30,
+              limit: 100,
               query: chrome.searchQuery
             }
           ],
