@@ -204,6 +204,9 @@ export function fetchPartContent (
   msg: Message,
   contentId: string
 ): Task<Readable> {
+  if (contentId.startsWith('<')) { // TODO
+    throw new Error('Remove angle brackets from contentId!')
+  }
   return fetchPartContentFromCache(msg, contentId).flatMap(data => {
     if (data) {
       return Task.result(data)
