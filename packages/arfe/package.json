@@ -30,6 +30,7 @@
     ]
   },
   "devDependencies": {
+    "ava": "^0.22.0",
     "babel-cli": "^6.22.2",
     "babel-preset-node7": "^1.4.0",
     "babel-preset-react": "^6.22.0",
@@ -45,6 +46,7 @@
     "activitystreams-context": "^1.0.0",
     "buildmail": "^4.0.1",
     "email-addresses": "^2.0.2",
+    "media-type": "^0.3.1",
     "moment": "^2.17.1",
     "mori": "^0.3.2",
     "node-uuid": "^1.4.8",
