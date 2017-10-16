@@ -4,7 +4,11 @@ import type { MessagePart as ImapMessagePart } from 'imap'
 
 export type MessagePart = ImapMessagePart
 
-export function contentType(part: MessagePart): string {
+export function charset (part: MessagePart): ?string {
+  return part.params && part.params.charset
+}
+
+export function contentType (part: MessagePart): string {
   if (!part.subtype) {
     // TODO: My observations so far indicate that if there is no value for
     // `subtype`, then the type is `multipart`, and the value given for `type`
@@ -12,5 +16,24 @@ export function contentType(part: MessagePart): string {
     return `multipart/${part.type}`
   }
 
-  return `${part.type}/${part.subtype}`
+  const baseType = `${part.type}/${part.subtype}`
+  const cs = charset(part)
+  return cs
+    ? `${baseType}; charset=${cs}`
+    : baseType
+}
+
+export function disposition (part: MessagePart): ?string {
+  return part.disposition && part.disposition.type
+}
+
+export function filename (part: MessagePart): ?string {
+  const params = part.disposition && part.disposition.params
+  if (params) {
+    return params.filename
+  }
+}
+
+export function isMultipart (part: MessagePart): boolean {
+  return !part.subtype
 }

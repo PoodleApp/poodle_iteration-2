@@ -1,54 +1,67 @@
 /* @flow */
 
 import * as AS from 'activitystrea.ms'
-import BuildMail from 'buildmail'
+import * as imap from 'imap'
 import * as m from 'mori'
 import Address from '../models/Address'
+import Message from '../models/Message'
 import Conversation from '../models/Conversation'
+import * as LV from '../models/LanguageValue'
+import { midUri } from '../models/uri'
+import * as asutil from '../util/activity'
+import { type Builder } from './builders'
+import * as builders from './builders'
 import * as compose from './helpers'
+import * as Struct from './struct'
+import { type Content, type MessageParams } from './types'
 
 import type { Seqable } from 'mori'
-import type { Content } from './helpers'
-import type { MessageConfiguration } from './types'
 
 // TODO: include markdown source with message
 
-type CommentOptions = {
-  from: Seqable<Address>,
-  to: Seqable<Address>,
-  cc: Seqable<Address>,
+type CommentOptions = MessageParams & {
   content: Content,
   conversation: Conversation,
-  fallbackContent?: Content // default value is value of `content`
+  fallbackContent?: Content, // default value is value of `content`
+  attachments?: Content[],
+  related?: Content[]
 }
 
-export default function comment (
-  options: CommentOptions
-): MessageConfiguration {
-  const activity = ({ activityUri, contentUri }) =>
-    AS.create()
-      .id(activityUri)
-      .object(
-        AS.note()
-          .url(
-            AS.link()
-              .mediaType(options.content.mediaType)
-              .href(contentUri)
+/*
+ * Reply to a conversation
+ */
+export default function comment ({
+  content,
+  fallbackContent,
+  related,
+  attachments,
+  ...options
+}: CommentOptions): Builder<Message> {
+  const addContent = fallbackContent
+    ? builders
+        .primaryContent(fallbackContent)
+        .then(() => builders.relatedContent(content))
+    : builders.primaryContent(content)
+
+  return addContent
+    .then(({ uri: contentUri }) =>
+      builders.primaryActivity(activityUri =>
+        AS.create()
+          .id(activityUri)
+          .object(
+            AS.note()
+              .url(
+                AS.link()
+                  .mediaType(content.mediaType)
+                  .href(contentUri)
+                  .get()
+              )
               .get()
           )
           .get()
       )
-      .get()
-
-  const root = compose.buildAlternative({
-    activity,
-    root: compose.newMessage.bind(null, options),
-    content: options.content,
-    fallbackContent: options.fallbackContent
-  })
-
-  return {
-    envelope: root.getEnvelope(),
-    raw: root.createReadStream()
-  }
+    )
+    .then(() => builders.relatedParts(related))
+    .then(() => builders.attachments(attachments))
+    .then(() => builders.message(options))
 }

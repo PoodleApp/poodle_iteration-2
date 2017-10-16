@@ -49,15 +49,20 @@ declare module "imap" {
 
   declare export type Boxes = { [key:string]: Box }
 
+  declare export type Disposition = {
+    params: ?{ [key: string]: string },
+    type: string
+  }
+
   declare export type MessagePart = {
     partID?:      string,
     type:         string,  // eg, 'text'
     subtype?:     string,  // eg, 'plain'
-    params:       { [key:string]: string },  // eg, charset
+    params:       { [key:string]: string },  // eg, boundary, charset
     encoding?:    string,
     id?:          ?string,
     description?: ?string,
-    disposition?: ?string,
+    disposition?: Disposition,
     language?:    ?string,
     location?:    ?string,
     md5?:         ?string,

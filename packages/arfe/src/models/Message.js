@@ -24,13 +24,12 @@ import type { URI } from './uri'
 export type MessageId = string
 
 // native Javascript Map; this type is produced by 'mailparser'
-type Headers = Map<string, HeaderValue>
-type HeaderValue =
-  | string
-  | string[]
+export type Headers = Map<string, HeaderValue>
+export type HeaderValue =
+  | any
   | {
-      value: string | string[],
-      params: { charset: string }
+      value: any,
+      params?: { charset?: string }
     }
 
 export type PerBoxMetadata = {
@@ -136,7 +135,7 @@ export default class Message {
 
   get references (): MessageId[] {
     const refs = getHeaderValue('references', this.headers)
-    return (refs || []).map(idFromHeaderValue).filter(id => !!id)
+    return refs.map(idFromHeaderValue).filter(id => !!id)
   }
 
   get uid (): number {
@@ -204,7 +203,7 @@ function getPartByContentId (
   msg: MessageAttributes
 ): ?MessagePart {
   const matches = m.filter(
-    part => part.id && (idFromHeaderValue(part.id) === contentId),
+    part => part.id && idFromHeaderValue(part.id) === contentId,
     flatParts(msg)
   )
   return m.first(matches)
@@ -386,19 +385,20 @@ function addressList (addrs: ?(ImapAddress[])): ?(Address[]) {
   }
 }
 
-function getHeaderValue (key: string, headers: Headers): ?(string[]) {
+function getHeaderValue (key: string, headers: Headers): string[] {
   return normalizeHeaderValue(headers.get(key))
 }
 
-function normalizeHeaderValue (v: ?HeaderValue): ?(string[]) {
+// TODO: fix up types here
+function normalizeHeaderValue (v: any): any {
   if (!v) {
-    return
+    return []
   }
   if (typeof v === 'string') {
     return [v]
   }
   if (v instanceof Array) {
-    return v
+    return v.filter(e => typeof e === 'string')
   }
   if (v.value) {
     return normalizeHeaderValue(v.value)
