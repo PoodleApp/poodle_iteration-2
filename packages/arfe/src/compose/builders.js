@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow strict */
 
 import * as AS from 'activitystrea.ms'
 import * as imap from 'imap'
@@ -12,13 +12,12 @@ import * as compose from './helpers'
 import * as Struct from './struct'
 import {
   type Content,
-  type ContentMap,
   type ID,
   type MessageParams
 } from './types'
 
 export type BuilderState = {
-  messageId: ID,
+  messageId?: ID,
   sender: Address,
   contentMap: m.Map<ID, Content>,
   partMap: m.Map<ID, imap.MessagePart>,
@@ -28,6 +27,23 @@ export type BuilderState = {
 }
 
 export type Builder<A> = State<A, BuilderState>
+
+// `contentMap` is a map from `Content-ID` to `Content` values
+export async function build (
+  builder: Builder<Message>,
+  sender: Address
+): Promise<{ message: Message, contentMap: m.Map<ID, Content> }> {
+  const initState = {
+    sender,
+    contentMap: m.hashMap(),
+    partMap: m.hashMap(),
+    primaryParts: m.vector(),
+    relatedParts: m.vector(),
+    attachments: m.vector()
+  }
+  const { value, state } = await builder.run(initState)
+  return { message: value, contentMap: state.contentMap }
+}
 
 export function getContentId (): Builder<ID> {
   return State.getState().map(state => compose.getUniqueId(state.sender))
@@ -180,7 +196,7 @@ export function message ({
   const subject =
     params.subject || (conversation ? LV.getString(conversation.subject) : '')
 
-  return messageId.then(id => {
+  return messageId().then(id => {
     const idHeader = compose.idToHeaderValue(id)
 
     const envelope = {
@@ -216,7 +232,7 @@ export function message ({
       }
     })
 
-    return struct.then(s => {
+    return struct().then(s => {
       const attributes = {
         uid: 0,
         flags: [],
@@ -260,5 +276,5 @@ export function struct (): Builder<imap.MessageStruct> {
 }
 
 export function uriForPart (id: ID): Builder<URI> {
-  return State.getState().map(state => midUri(state.messageId, id))
+  return messageId().map(msgId => midUri(msgId, id))
 }

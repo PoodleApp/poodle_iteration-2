@@ -16,14 +16,6 @@ export type Content = {
   stream: Readable
 }
 
-// Keys should be fully-qualified 'mid:' URIs
-export type ContentMap = { [key: URI]: Readable }
-
-export type MessageWithContent = {
-  message: Message,
-  contentMap: ContentMap
-}
-
 // Type that is passed to nodemailer
 export type MessageConfiguration = {
   alternatives?: ContentPart[],
@@ -37,15 +29,13 @@ export type MessageConfiguration = {
 
 // Type accepted by builders that build `Message` values
 export type MessageParams = {
-  id: ID,
   date?: ?Date,
   from: Seqable<Address>,
   to: Seqable<Address>,
   cc?: ?Seqable<Address>,
   bcc?: ?Seqable<Address>,
   subject?: ?string,
-  conversation?: ?Conversation,
-  struct: imap.MessageStruct
+  conversation?: ?Conversation
 }
 
 type ContentPart = {

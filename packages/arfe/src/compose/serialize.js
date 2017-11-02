@@ -1,14 +1,15 @@
-/* @flow */
+/* @flow strict */
 
 import BuildMail from 'buildmail'
 import * as imap from 'imap'
+import * as m from 'mori'
 import { type Readable } from 'stream'
 import type Address from '../models/Address'
 import Message, * as Msg from '../models/Message'
 import * as Part from '../models/MessagePart'
-import { type MessageConfiguration } from './types'
+import { type ID, type Content, type MessageConfiguration } from './types'
 
-export default async function serialize (
+export async function serialize (
   fetchPartContent: (msg: Message, partId: string) => Promise<Readable>,
   message: Message
 ): Promise<MessageConfiguration> {
@@ -29,6 +30,24 @@ export default async function serialize (
     envelope: root.getEnvelope(), // TODO: generate envelope from `message.attributes.envelope`
     raw: root.createReadStream()
   }
+}
+
+export async function serializeFromContentMap (
+  { message, contentMap }: { message: Message, contentMap: m.Map<ID, Content> }
+): Promise<MessageConfiguration> {
+  async function fetcher (msg: Message, partId: string): Promise<Readable> {
+    const part = msg.getPart({ partId })
+    if (!part) { throw new Error(`unable to find part ${partId}`) }
+
+    const contentId = part.id
+    if (!contentId) { throw new Error(`no content ID for part ${partId}`) }
+
+    const content = m.get(contentMap, contentId)
+    if (!content) { throw new Error(`no content found in content map for part ID ${partId}`) }
+
+    return content.stream
+  }
+  return serialize(fetcher, message)
 }
 
 async function nodesFromStruct (

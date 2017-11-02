@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow strict */
 
 import * as AS from 'activitystrea.ms'
 import * as imap from 'imap'

@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow strict */
 
 import type { MessageAttributes } from 'imap'
 
@@ -10,7 +10,6 @@ export const multipartAlternative: MessageAttributes =
       "params": {
         "boundary": "001a1149d07e3f8f41052a57e0ee"
       },
-      "disposition": null,
       "language": null
     },
     [
@@ -27,7 +26,6 @@ export const multipartAlternative: MessageAttributes =
         "size": 266,
         "lines": 6,
         "md5": null,
-        "disposition": null,
         "language": null
       }
     ],
@@ -45,7 +43,6 @@ export const multipartAlternative: MessageAttributes =
         "size": 403,
         "lines": 3,
         "md5": null,
-        "disposition": null,
         "language": null
       }
     ]

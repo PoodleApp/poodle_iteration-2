@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow strict */
 
 import * as AS  from 'activitystrea.ms'
 import * as m   from 'mori'
@@ -73,7 +73,7 @@ describe('compose/comment', ({ test }) => {
     const joseph  = MB.participants.Joseph
 
 
-    const reply = compose.comment({
+    const replyBuilder = compose.comment({
       ...conversation.replyRecipients({ email: loraine.email, name: loraine.displayName }),
       content: {
         mediaType: 'text/html',
@@ -81,6 +81,8 @@ describe('compose/comment', ({ test }) => {
       },
       conversation, 
     })
+    const { message, contentMap } = await compose.build(replyBuilder, loraine)
+    const reply = await compose.serializeFromContentMap({ message, contentMap })
 
     const { envelope } = reply
     if (!envelope) {
