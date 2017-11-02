@@ -4,6 +4,7 @@
 // sagas
 
 import * as compose from 'arfe/lib/compose'
+import * as Addr from 'arfe/lib/models/Address'
 import * as C from 'poodle-service/lib/ImapInterface/Client'
 import * as tasks from 'poodle-service/lib/tasks'
 import {
@@ -53,7 +54,8 @@ function * sendReply (
     return
   }
   const { account, conversation, recipients, content } = action
-  const message = compose.comment({
+  const sender = Addr.build(account)
+  const messageBuilder = compose.comment({
     ...recipients,
     content: {
       mediaType: content.mediaType,
@@ -61,7 +63,9 @@ function * sendReply (
     },
     conversation
   })
-  yield * transmit(deps, account, message)
+  const { message, contentMap } = yield compose.build(messageBuilder, sender)
+  const reply = yield compose.serializeFromContentMap({ message, contentMap })
+  yield * transmit(deps, account, reply)
 }
 
 function * transmit (
