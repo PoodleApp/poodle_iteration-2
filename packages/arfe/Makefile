@@ -4,7 +4,7 @@
 .PHONY: all build clean
 
 # Install `babel-cli` in a project to get the transpiler.
-babel := node_modules/.bin/babel
+babel := ../../node_modules/.bin/babel
 
 # Identify modules to be transpiled by recursively searching the `src/`
 # directory.
