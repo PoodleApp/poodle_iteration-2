@@ -1,21 +1,18 @@
 /* @flow */
 
-const ok = Promise.resolve
-const err = Promise.reject
-
 export default class State<A, S> {
   run: (initialState: S) => Promise<{ value: A, state: S }>
 
   static result<A, S> (value: A): State<A, S> {
-    return new State(state => ok({ state, value }))
+    return new State(state => Promise.resolve({ state, value }))
   }
 
   static error<A, S> (error: Error): State<A, S> {
-    return new State(state => err(error))
+    return new State(state => Promise.reject(error))
   }
 
   static getState<S> (): State<S, S> {
-    return new State(state => ok({ value: state, state }))
+    return new State(state => Promise.resolve({ value: state, state }))
   }
 
   static modifyState<S> (f: (s: S) => S): State<void, S> {
@@ -23,7 +20,7 @@ export default class State<A, S> {
   }
 
   static putState<S> (state: S): State<void, S> {
-    return new State(s0 => ok({ value: undefined, state }))
+    return new State(s0 => Promise.resolve({ value: undefined, state }))
   }
 
   static lift<A, S> (promise: Promise<A>): State<A, S> {
