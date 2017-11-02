@@ -1,7 +1,6 @@
 /* @flow strict */
 
 import * as AS from 'activitystrea.ms'
-import * as imap from 'imap'
 import * as m from 'mori'
 import Address from '../models/Address'
 import Message from '../models/Message'

@@ -1,7 +1,7 @@
 /* @flow strict */
 
 import BuildMail from 'buildmail'
-import * as imap from 'imap'
+import type { MessagePart, MessageStruct } from 'imap'
 import * as m from 'mori'
 import { type Readable } from 'stream'
 import type Address from '../models/Address'
@@ -52,10 +52,10 @@ export async function serializeFromContentMap (
 
 async function nodesFromStruct (
   fetchContent: (partId: string) => Promise<?Readable>,
-  struct: imap.MessageStruct
+  struct: MessageStruct
 ): Promise<BuildMail> {
-  const part: imap.MessagePart = (struct[0]: any)
-  const rest: imap.MessageStruct[] = (struct.slice(1): any)
+  const part: MessagePart = (struct[0]: any)
+  const rest: MessageStruct[] = (struct.slice(1): any)
 
   const node = new BuildMail(Part.contentType(part), {
     disableFileAccess: true,

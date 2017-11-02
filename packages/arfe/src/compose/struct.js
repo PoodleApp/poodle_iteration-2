@@ -1,6 +1,6 @@
 /* @flow */
 
-import { type MessagePart, type MessageStruct } from 'imap'
+import type { MessagePart, MessageStruct } from 'imap'
 import * as MP from '../models/MessagePart'
 
 opaque type Alternatives = MessageStruct

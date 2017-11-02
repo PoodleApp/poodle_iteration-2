@@ -1,6 +1,5 @@
 /* @flow */
 
-import * as imap from 'imap'
 import { type Seqable } from 'mori'
 import { type Readable } from 'stream'
 import Address from '../models/Address'

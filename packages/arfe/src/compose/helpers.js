@@ -1,7 +1,7 @@
 /* @flow */
 
 import * as AS from 'activitystrea.ms'
-import * as imap from 'imap'
+import type { Address as ImapAddress, Disposition, MessagePart } from 'imap'
 import * as mediaType from 'media-type'
 import * as m from 'mori'
 import * as uuid from 'node-uuid'
@@ -30,12 +30,12 @@ export function buildContentPart ({
 }: {
   content: Content,
   id: ID,
-  disposition?: ?imap.Disposition
-}): imap.MessagePart {
+  disposition?: ?Disposition
+}): MessagePart {
   const { type, subtype, suffix, parameters } = mediaType.fromString(
     content.mediaType
   )
-  const part: imap.MessagePart = {
+  const part: MessagePart = {
     type,
     subtype: suffix ? [subtype, suffix].join('+') : subtype,
     params: parameters,
@@ -54,7 +54,7 @@ export function getUniqueId (senderEmail?: Address) {
 
 /* formatting helpers */
 
-export function envelopeAddresses (addrs: m.Seqable<Address>): imap.Address[] {
+export function envelopeAddresses (addrs: m.Seqable<Address>): ImapAddress[] {
   return m.intoArray(
     m.map(({ name, mailbox, host }) => ({ name, mailbox, host }))
   )

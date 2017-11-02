@@ -1,7 +1,11 @@
 /* @flow strict */
 
 import * as AS from 'activitystrea.ms'
-import * as imap from 'imap'
+import type {
+  Disposition,
+  MessagePart,
+  MessageStruct
+} from 'imap'
 import * as m from 'mori'
 import Address from '../models/Address'
 import * as LV from '../models/LanguageValue'
@@ -20,7 +24,7 @@ export type BuilderState = {
   messageId?: ID,
   sender: Address,
   contentMap: m.Map<ID, Content>,
-  partMap: m.Map<ID, imap.MessagePart>,
+  partMap: m.Map<ID, MessagePart>,
   primaryParts: m.Vector<ID>,
   relatedParts: m.Vector<ID>,
   attachments: m.Vector<ID>
@@ -109,7 +113,7 @@ export function activityPart (
 
 export function contentPart (
   content: Content,
-  disposition?: imap.Disposition
+  disposition?: Disposition
 ): Builder<{ id: ID, uri: URI }> {
   return getContentId().flatMap(id => {
     const part = compose.buildContentPart({ content, id, disposition })
@@ -164,7 +168,7 @@ function addAttachment (id: ID): Builder<void> {
   }))
 }
 
-export function getPart (id: ID): Builder<imap.MessagePart> {
+export function getPart (id: ID): Builder<MessagePart> {
   return State.getState().flatMap(state => {
     const part = m.get(state.partMap, id)
     return part
@@ -255,7 +259,7 @@ export function messageId (): Builder<ID> {
   })
 }
 
-export function struct (): Builder<imap.MessageStruct> {
+export function struct (): Builder<MessageStruct> {
   return State.getState().then(state => {
     const hydrateParts = ids =>
       m.intoArray(
