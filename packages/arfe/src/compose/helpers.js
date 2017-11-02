@@ -56,7 +56,11 @@ export function getUniqueId (senderEmail?: Address) {
 
 export function envelopeAddresses (addrs: m.Seqable<Address>): ImapAddress[] {
   return m.intoArray(
-    m.map(({ name, mailbox, host }) => ({ name, mailbox, host }))
+    m.map(
+      ({ name, mailbox, host }) =>
+        name ? { name, mailbox, host } : { mailbox, host },
+      addrs
+    )
   )
 }
 
@@ -64,7 +68,7 @@ export function headerAddresses (
   addrs: m.Seqable<Address>
 ): { value: { address: string, name: ?string }[] } {
   const value = m.intoArray(
-    m.map(addr => ({ name: addr.name, address: addr.email }))
+    m.map(addr => ({ name: addr.name, address: addr.email }), addrs)
   )
   return { value }
 }

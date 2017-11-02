@@ -107,6 +107,7 @@ function writeHeaders (headers: Msg.Headers, root: BuildMail) {
 }
 
 function writeHeader (name: string, value: Msg.HeaderValue, root: BuildMail) {
+  root.setHeader(name, processHeaderValue(value))
 }
 
 function processHeaderValue (value: Msg.HeaderValue): mixed {

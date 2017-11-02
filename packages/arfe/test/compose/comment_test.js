@@ -88,7 +88,7 @@ test('produces a reply', async t => {
 
   const { envelope } = reply
   if (!envelope) {
-    return
+    throw new Error('envelope is not defined')
   }
   t.is(envelope.from, loraine.email, 'reply is from Loraine')
   t.is(envelope.to[0], joseph.email, 'reply is to Joseph')
