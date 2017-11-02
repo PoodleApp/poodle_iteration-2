@@ -20,7 +20,6 @@ import type { Seqable } from 'mori'
 
 type CommentOptions = MessageParams & {
   content: Content,
-  conversation: Conversation,
   fallbackContent?: Content, // default value is value of `content`
   attachments?: Content[],
   related?: Content[]

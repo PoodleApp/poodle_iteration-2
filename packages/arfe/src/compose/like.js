@@ -11,7 +11,6 @@ import { type Content, type MessageParams } from './types'
 
 type LikeOptions = MessageParams & {
   likedObjectUris: m.Seqable<URI>,
-  conversation: Conversation,
   fallbackContent: Content
 }
 

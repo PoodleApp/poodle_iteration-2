@@ -13,7 +13,6 @@ import { type Content, type MessageParams } from './types'
 type EditOptions = MessageParams & {
   attachments?: Content[],
   content: Content,
-  conversation: Conversation,
   activity: DerivedActivity,
   fallbackContent?: Content, // default value is value of `content`
   related?: Content[]
