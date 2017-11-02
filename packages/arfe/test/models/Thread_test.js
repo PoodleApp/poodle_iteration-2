@@ -1,11 +1,11 @@
 /* @flow */
 
-import * as m   from 'mori'
-import describe from 'tape'
-import * as MB  from '../builders/message'
+import test from 'ava'
+import * as m from 'mori'
+import * as MB from '../builders/message'
 
 import { getActivities } from '../../src/models/Activity'
-import { buildThread }   from '../../src/models/Thread'
+import { buildThread } from '../../src/models/Thread'
 
 import type { Thread } from '../../src/models/Thread'
 
@@ -18,33 +18,33 @@ const d = MB.randomMessageId()
 
 const messages = [
   {
-    from:      [ppl.Merrilee],
-    to:        [ppl.Reiko],
-    cc:        [ppl.Melba, ppl.Loraine],
-    messageId: a,
+    from: [ppl.Merrilee],
+    to: [ppl.Reiko],
+    cc: [ppl.Melba, ppl.Loraine],
+    messageId: a
   },
   {
-    from:      [ppl.Reiko],
-    to:        [ppl.Merrilee],
+    from: [ppl.Reiko],
+    to: [ppl.Merrilee],
     messageId: b,
-    inReplyTo: a,
+    inReplyTo: a
   },
   {
-    from:      [ppl.Reiko],
-    to:        [ppl.Merrilee],
-    cc:        [ppl.Melba, ppl.Loraine],
+    from: [ppl.Reiko],
+    to: [ppl.Merrilee],
+    cc: [ppl.Melba, ppl.Loraine],
     messageId: c,
-    inReplyTo: a,
+    inReplyTo: a
   },
   {
-    from:      [ppl.Merrilee],
-    to:        [ppl.Reiko],
+    from: [ppl.Merrilee],
+    to: [ppl.Reiko],
     messageId: d,
-    inReplyTo: b,
-  },
+    inReplyTo: b
+  }
 ]
 
-async function testThread(): Promise<Thread> {
+async function testThread (): Promise<Thread> {
   const [msgs, fetchPartContent] = MB.newThread(messages)
   const activitiesByMessage = await Promise.all(
     m.intoArray(m.map(getActivities.bind(null, fetchPartContent), msgs))
@@ -53,18 +53,20 @@ async function testThread(): Promise<Thread> {
   return buildThread(activities)
 }
 
-describe('Thread', ({ test }) => {
+test('assembles a thread', async t => {
+  t.plan(2)
 
-  test('assembles a thread', async t => {
-    t.plan(2)
+  const thread = await testThread()
+  t.is(m.count(thread), 1, 'thread has one top-level message')
 
-    const thread = await testThread()
-    t.equal(m.count(thread), 1, 'thread has one top-level message')
+  const [_, replies] = m.first(thread)
+  if (!replies) {
+    throw new Error('Expected a reply')
+  }
 
-    const [_, replies] = m.first(thread)
-    if (!replies) { throw new Error('Expected a reply') }
-
-    t.equal(m.count(replies), 2, 'there are two messages that reply directly to the top-level message')
-  })
-
+  t.is(
+    m.count(replies),
+    2,
+    'there are two messages that reply directly to the top-level message'
+  )
 })

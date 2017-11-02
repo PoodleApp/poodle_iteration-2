@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Federated social protocol on top of email",
   "scripts": {
-    "test": "tape -r babel-register test/**/*_test.js | tap-summary",
+    "test": "ava",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
     "prepublishOnly": "npm test && npm run build"
@@ -36,12 +36,22 @@
       ]
     ]
   },
+  "ava": {
+    "files": [
+      "test/**/*_test.js"
+    ],
+    "source": [
+      "src/**/*.js"
+    ],
+    "require": [
+      "babel-register"
+    ],
+    "babel": "inherit",
+    "color": false
+  },
   "devDependencies": {
-    "ava": "^0.22.0",
-    "string-to-stream": "^1.1.0",
-    "tap-summary": "^3.0.1",
-    "tape": "^4.6.3",
-    "tape-async": "^2.3.0"
+    "ava": "^0.23.0",
+    "string-to-stream": "^1.1.0"
   },
   "dependencies": {
     "activitystrea.ms": "hallettj/activitystrea.ms#fix/template-idempotency",
