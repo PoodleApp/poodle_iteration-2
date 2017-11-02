@@ -46,7 +46,7 @@ export default class Task<A> {
   /*
    * Task that resolves to the state of the IMAP connection
    */
-  static getState<A> (): Task<State> {
+  static getState (): Task<State> {
     return new Task((context, state) => kefir.constant({ value: state, state }))
   }
 
@@ -80,8 +80,7 @@ export default class Task<A> {
    */
   static isolate<A> (task: Task<A>): Task<A> {
     return new Task((context, state) =>
-      task.perform(context, state)
-      .map(value => ({ value, state }))
+      task.perform(context, state).map(value => ({ value, state }))
     )
   }
 
@@ -106,7 +105,7 @@ export default class Task<A> {
    */
   static seq<A> (ts: Task<A>[]): Task<A> {
     return new Task((context, state) => {
-      function rec(i) {
+      function rec (i) {
         const t = ts[i]
         if (t) {
           return kefirUtil.andThen(t.perform(context, state), () => rec(i + 1))
@@ -131,8 +130,7 @@ export default class Task<A> {
   ): Task<(...args: Args) => Promise<A>> {
     return new Task((context, state) =>
       kefir.constant({
-        value: (...args) =>
-          taskFn(...args).perform(context, state).toPromise(),
+        value: (...args) => taskFn(...args).perform(context, state).toPromise(),
         state
       })
     )
