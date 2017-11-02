@@ -32,18 +32,28 @@ export async function serialize (
   }
 }
 
-export async function serializeFromContentMap (
-  { message, contentMap }: { message: Message, contentMap: m.Map<ID, Content> }
-): Promise<MessageConfiguration> {
+export async function serializeFromContentMap ({
+  message,
+  contentMap
+}: {
+  message: Message,
+  contentMap: m.Map<ID, Content>
+}): Promise<MessageConfiguration> {
   async function fetcher (msg: Message, partId: string): Promise<Readable> {
     const part = msg.getPart({ partId })
-    if (!part) { throw new Error(`unable to find part ${partId}`) }
+    if (!part) {
+      throw new Error(`unable to find part ${partId}`)
+    }
 
     const contentId = part.id
-    if (!contentId) { throw new Error(`no content ID for part ${partId}`) }
+    if (!contentId) {
+      throw new Error(`no content ID for part ${partId}`)
+    }
 
     const content = m.get(contentMap, contentId)
-    if (!content) { throw new Error(`no content found in content map for part ID ${partId}`) }
+    if (!content) {
+      throw new Error(`no content found in content map for part ID ${partId}`)
+    }
 
     return content.stream
   }
@@ -77,7 +87,9 @@ async function nodesFromStruct (
     node.setContent(content)
   }
 
-  const children = rest.map(nodesFromStruct.bind(null, fetchContent))
+  const children = await Promise.all(
+    rest.map(nodesFromStruct.bind(null, fetchContent))
+  )
   for (const child of children) {
     node.appendChild(child)
   }
@@ -123,5 +135,5 @@ function processHeaderValue (value: Msg.HeaderValue): mixed {
 const dateFormat = /^\d{4}-\d{2}-\d{2}T.*/
 
 function isDate (value: Msg.HeaderValue): boolean %checks {
-  return (typeof value === 'string') && !!value.match(dateFormat)
+  return typeof value === 'string' && !!value.match(dateFormat)
 }
