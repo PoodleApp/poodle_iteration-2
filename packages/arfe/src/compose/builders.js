@@ -1,11 +1,7 @@
 /* @flow strict */
 
 import * as AS from 'activitystrea.ms'
-import type {
-  Disposition,
-  MessagePart,
-  MessageStruct
-} from 'imap'
+import type { Disposition, MessagePart, MessageStruct } from 'imap'
 import * as m from 'mori'
 import Address from '../models/Address'
 import * as LV from '../models/LanguageValue'
@@ -14,11 +10,7 @@ import { type URI, midUri } from '../models/uri'
 import State from '../util/State'
 import * as compose from './helpers'
 import * as Struct from './struct'
-import {
-  type Content,
-  type ID,
-  type MessageParams
-} from './types'
+import { type Content, type ID, type MessageParams } from './types'
 
 export type BuilderState = {
   messageId?: ID,
@@ -194,9 +186,8 @@ export function message ({
   ...params
 }: MessageParams): Builder<Message> {
   const date = params.date || new Date()
-  const inReplyTo =
-    conversation && compose.idToHeaderValue(conversation.latestActivity.id)
-  const refs = conversation && compose.references(conversation)
+  const refs = conversation && conversation.references
+  const inReplyTo = refs && m.last(refs)
   const subject =
     params.subject || (conversation ? LV.getString(conversation.subject) : '')
 
@@ -223,13 +214,11 @@ export function message ({
       ['to', compose.headerAddresses(to)]
     ])
     ;[
-      (
       ['cc', cc],
-        ['bcc', bcc],
-        ['references', refs],
-        ['in-reply-to', inReplyTo],
-        ['subject', subject]
-      )
+      ['bcc', bcc],
+      ['references', refs && compose.idsToHeaderValue(refs)],
+      ['in-reply-to', inReplyTo && compose.idToHeaderValue(inReplyTo)],
+      ['subject', subject]
     ].forEach(([key, value]) => {
       if (value) {
         headers.set(key, value)

@@ -10,12 +10,6 @@ import Conversation from '../models/Conversation'
 import * as asutil from '../util/activity'
 import { type Content, type ID } from './types'
 
-// TODO: remove references from list if necessary to keep length down (always
-// keep at least first and last reference)
-export function references (conversation: Conversation): string {
-  return m.intoArray(m.map(id => `<${id}>`, conversation.references)).join(' ')
-}
-
 export function buildActivityContent (activity: AS.models.Activity): Content {
   return {
     mediaType: 'application/activity+json',
@@ -79,4 +73,10 @@ export function idToHeaderValue (id: string): string {
   } else {
     return `<${id}>`
   }
+}
+
+// TODO: remove references from list if necessary to keep length down (always
+// keep at least first and last reference)
+export function idsToHeaderValue (ids: m.Seqable<string>): string {
+  return m.intoArray(m.map(id => `<${id}>`, ids)).join(' ')
 }
