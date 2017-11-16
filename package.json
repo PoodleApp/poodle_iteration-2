@@ -6,7 +6,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-3": "^6.24.1",
     "babel-register": "^6.26.0",
-    "flow-bin": "^0.58.0",
+    "flow-bin": "^0.59.0",
     "prettier-standard": "^6.0.0",
     "watch": "^1.0.2"
   },
