@@ -7,7 +7,7 @@ import { type Readable } from 'stream'
 import type Address from '../models/Address'
 import Message, * as Msg from '../models/Message'
 import * as Part from '../models/MessagePart'
-import { type ID, type Content, type MessageConfiguration } from './types'
+import { type MessageConfiguration } from './types'
 
 export async function serialize (
   fetchPartContent: (msg: Message, partId: string) => Promise<Readable>,
@@ -34,28 +34,20 @@ export async function serialize (
 
 export async function serializeFromContentMap ({
   message,
-  contentMap
+  parts
 }: {
   message: Message,
-  contentMap: m.Map<ID, Content>
+  parts: { part: MessagePart, content: Readable }[]
 }): Promise<MessageConfiguration> {
   async function fetcher (msg: Message, partId: string): Promise<Readable> {
-    const part = msg.getPart({ partId })
-    if (!part) {
+    // TODO: part ID vs content ID distinction
+    const partWithContent = parts.find(
+      ({ part }) => part.partID === partId || part.id === partId
+    )
+    if (!partWithContent) {
       throw new Error(`unable to find part ${partId}`)
     }
-
-    const contentId = part.id
-    if (!contentId) {
-      throw new Error(`no content ID for part ${partId}`)
-    }
-
-    const content = m.get(contentMap, contentId)
-    if (!content) {
-      throw new Error(`no content found in content map for part ID ${partId}`)
-    }
-
-    return content.stream
+    return partWithContent.content
   }
   return serialize(fetcher, message)
 }

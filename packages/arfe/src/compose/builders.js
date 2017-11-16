@@ -3,6 +3,7 @@
 import * as AS from 'activitystrea.ms'
 import type { Disposition, MessagePart, MessageStruct } from 'imap'
 import * as m from 'mori'
+import { type Readable } from 'stream'
 import Address from '../models/Address'
 import * as LV from '../models/LanguageValue'
 import Message from '../models/Message'
@@ -28,7 +29,10 @@ export type Builder<A> = State<A, BuilderState>
 export async function build (
   builder: Builder<Message>,
   sender: Address
-): Promise<{ message: Message, contentMap: m.Map<ID, Content> }> {
+): Promise<{
+  message: Message,
+  parts: { part: MessagePart, content: Readable }[]
+}> {
   const initState = {
     sender,
     contentMap: m.hashMap(),
@@ -38,7 +42,21 @@ export async function build (
     attachments: m.vector()
   }
   const { value, state } = await builder.run(initState)
-  return { message: value, contentMap: state.contentMap }
+
+  // Match up metadata for each content part with content data
+  const parts = m.intoArray(
+    m.map(entry => {
+      const id: ID = (m.first(entry): any)
+      const part: MessagePart = (m.second(entry): any)
+      const content = m.get(state.contentMap, id)
+      if (!content) {
+        throw new Error(`found part but no content for ID ${id}`)
+      }
+      return { part, content: content.stream }
+    }, state.partMap)
+  )
+
+  return { message: value, parts }
 }
 
 export function getContentId (): Builder<ID> {

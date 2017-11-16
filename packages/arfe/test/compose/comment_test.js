@@ -84,8 +84,8 @@ test('produces a reply', async t => {
     },
     conversation
   })
-  const { message, contentMap } = await compose.build(replyBuilder, loraine)
-  const reply = await compose.serializeFromContentMap({ message, contentMap })
+  const { message, parts } = await compose.build(replyBuilder, loraine)
+  const reply = await compose.serializeFromContentMap({ message, parts })
 
   const { envelope } = reply
   if (!envelope) {
