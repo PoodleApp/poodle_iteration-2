@@ -9,11 +9,11 @@ import Task from './Task'
 
 export function storeLocalCopyOfMessage (
   message: cache.MessageRecord,
-  content: { part: MessagePart, data: Readable }[]
+  parts: { part: MessagePart, content: Readable }[]
 ): Task<void> {
-  const contentTasks = content.map(({ part, data }) =>
+  const contentTasks = parts.map(({ part, content }) =>
     dbTask(db =>
-      kefir.fromPromise(cache.persistPart(message._id, part, data, db))
+      kefir.fromPromise(cache.persistPart(message._id, part, content, db))
       .map(_ => {})
     )
   )

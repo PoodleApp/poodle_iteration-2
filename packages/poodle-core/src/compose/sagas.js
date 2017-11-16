@@ -5,6 +5,9 @@
 
 import * as compose from 'arfe/lib/compose'
 import * as Addr from 'arfe/lib/models/Address'
+import Message from 'arfe/lib/models/Message'
+import { type MessagePart } from 'arfe/lib/models/MessagePart'
+import * as cache from 'poodle-service/lib/cache'
 import * as C from 'poodle-service/lib/ImapInterface/Client'
 import * as tasks from 'poodle-service/lib/tasks'
 import {
@@ -15,6 +18,7 @@ import {
   put,
   takeEvery
 } from 'redux-saga/effects'
+import { type Readable } from 'stream'
 import stringToStream from 'string-to-stream'
 import { type Account } from '../actions/auth'
 import * as chrome from '../actions/chrome'
@@ -43,7 +47,8 @@ function * sendEdit (
     conversation,
     activity
   })
-  yield * transmit(deps, account, message)
+  // TODO: update `compose.edit` to return a `compose.Builder` value
+  // yield * transmit(deps, account, message)
 }
 
 function * sendReply (
@@ -63,21 +68,27 @@ function * sendReply (
     },
     conversation
   })
-  const { message, contentMap } = yield compose.build(messageBuilder, sender)
-  const reply = yield compose.serializeFromContentMap({ message, contentMap })
-  yield * transmit(deps, account, reply)
+  const messageWithContent = yield compose.build(messageBuilder, sender)
+  yield * transmit(deps, account, messageWithContent)
 }
 
 function * transmit (
   deps: Dependencies,
   account: Account,
-  message: compose.MessageConfiguration
+  { message, parts }: { message: Message, parts: { part: MessagePart, content: Readable }[] }
 ): Generator<Effect, void, any> {
   try {
     yield put(composeActions.sending())
-    const result = yield C.perform(deps.imapClient, tasks.sendMail, [
-      message
-    ], {
+
+    // write copy of message and content to local cache
+    const messageRecord = cache.messageToRecord(message)
+    yield C.perform(deps.imapClient, tasks.storeLocalCopyOfMessage, [messageRecord, parts], {
+      accountName: account.email
+    }).toPromise()
+
+    // serialize and transmit message via SMTP
+    const serialized = yield compose.serializeFromContentMap({ message, parts })
+    const result = yield C.perform(deps.imapClient, tasks.sendMail, [serialized], {
       accountName: account.email
     }).toPromise()
     console.log('DeliveryResult') // TODO: debugging output
