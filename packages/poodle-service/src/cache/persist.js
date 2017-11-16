@@ -17,14 +17,20 @@ export async function persistMessage (
   message: Message,
   db: PouchDB
 ): Promise<void> {
+  return persistMessageRecord(messageToRecord(message))
+}
+
+export async function persistMessageRecord (
+  message: MessageRecord,
+  db: PouchDB
+): Promise<void> {
   const requestedAt = toISOStringSecondPrecision(new Date())
-  const headers = Array.from(message.headers.entries())
   await pouchdbUtil.update(db, (existing: ?MessageRecord) => {
     return {
-      _id: message.id,
+      _id: message._id,
       conversationId: message.conversationId,
-      headers,
-      message: message.attributes,
+      headers: message.headers,
+      message: message.message,
       perBoxMetadata: mergePerBoxMetadata(
         existing && existing.perBoxMetadata,
         message && message.perBoxMetadata
@@ -33,6 +39,20 @@ export async function persistMessage (
       type: 'Message'
     }
   })
+}
+
+export function messageToRecord(message: Message): MessageRecord {
+  const headers = Array.from(message.headers.entries())
+  const requestedAt = toISOStringSecondPrecision(new Date())
+  return {
+    _id: message.id,
+    conversationId: message.conversationId,
+    headers: headers,
+    message: message.attributes,
+    perBoxMetadata: message.perBoxMetadata || [],
+    requestedAt,
+    type: 'Message'
+  }
 }
 
 /*
