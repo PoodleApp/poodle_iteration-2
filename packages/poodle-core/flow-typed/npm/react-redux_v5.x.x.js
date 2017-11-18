@@ -17,11 +17,11 @@ declare module "react-redux" {
   declare type MapStateToProps<S, OP: Object, SP: Object> = (
     state: S,
     ownProps: OP
-  ) => SP | MapStateToProps<S, OP, SP>;
+  ) => ((state: S, ownProps: OP) => SP) | SP;
 
   declare type MapDispatchToProps<A, OP: Object, DP: Object> =
     | ((dispatch: Dispatch<A>, ownProps: OP) => DP)
-    | $NonMaybeType<DP>;
+    | DP;
 
   declare type MergeProps<SP, DP: Object, OP: Object, P: Object> = (
     stateProps: SP,
@@ -50,6 +50,11 @@ declare module "react-redux" {
     store: Store<S, A>,
     children?: any
   }> {}
+
+  declare function createProvider(
+    storeKey?: string,
+    subKey?: string
+  ): Provider<*, *>;
 
   declare type ConnectOptions = {
     pure?: boolean,
