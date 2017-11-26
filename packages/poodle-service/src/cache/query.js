@@ -2,6 +2,7 @@
 
 import type Conversation from 'arfe/lib/models/Conversation'
 import Message, * as Msg from 'arfe/lib/models/Message'
+import * as Part from 'arfe/lib/models/MessagePart'
 import unique from 'array-unique'
 import * as kefir from 'kefir'
 import PouchDB from 'pouchdb-node'
@@ -192,12 +193,12 @@ async function getThread (
 export function fetchPartContent (
   db: PouchDB,
   msg: Message,
-  contentId: string
+  partRef: Part.PartRef
 ): Promise<Readable> {
-  const part = msg.getPart({ contentId })
+  const part = msg.getPart(partRef)
   if (!part) {
     return Promise.reject(
-      new Error(`No part with ID ${contentId} for message ${msg.id}`)
+      new Error(`No part with ID ${String(partRef)} for message ${msg.id}`)
     )
   }
   return db.getAttachment(msg.uriForPart(part), 'content').then(buffer => {

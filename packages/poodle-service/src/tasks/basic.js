@@ -3,6 +3,7 @@
 import * as AS from 'activitystrea.ms'
 import Conversation, * as Conv from 'arfe/lib/models/Conversation'
 import Message from 'arfe/lib/models/Message'
+import * as Part from 'arfe/lib/models/MessagePart'
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import { type URI, parseMidUri } from 'arfe/lib/models/uri'
 import dateformat from 'dateformat'
@@ -62,34 +63,35 @@ export function requireCapability (capability: string): Task<void> {
  */
 export function downloadMessages (uids: UID[]): Task<void> {
   uids = uids.map(String) // We will get cache misses if uids are not correct type
-  return getBox().flatMap(box => {
-    const boxName = box.name
-    const uidvalidity = String(box.uidvalidity)
+  return getBox()
+    .flatMap(box => {
+      const boxName = box.name
+      const uidvalidity = String(box.uidvalidity)
 
-    const uidsInCache = dbTask(db =>
-      kefir.fromPromise(
-        cache
-          .verifyExistenceUids(
-            uids.map(uid => ({ boxName, uidvalidity, uid })),
-            db
-          )
-          .then(keys => keys.map(({ uid }) => uid))
-      )
-    )
-
-    const uidsToFetch = uidsInCache.map(inCache =>
-      uids.filter(uid => !inCache.includes(uid))
-    )
-
-    return uidsToFetch
-      .filter(uids => uids.length > 0)
-      .flatMap(uids =>
-        fetchMessages(uids).flatMap(message =>
-          dbTask(db => kefir.fromPromise(cache.persistMessage(message, db)))
+      const uidsInCache = dbTask(db =>
+        kefir.fromPromise(
+          cache
+            .verifyExistenceUids(
+              uids.map(uid => ({ boxName, uidvalidity, uid })),
+              db
+            )
+            .then(keys => keys.map(({ uid }) => uid))
         )
       )
-  })
-  .emitWhenDone()
+
+      const uidsToFetch = uidsInCache.map(inCache =>
+        uids.filter(uid => !inCache.includes(uid))
+      )
+
+      return uidsToFetch
+        .filter(uids => uids.length > 0)
+        .flatMap(uids =>
+          fetchMessages(uids).flatMap(message =>
+            dbTask(db => kefir.fromPromise(cache.persistMessage(message, db)))
+          )
+        )
+    })
+    .emitWhenDone()
 }
 
 export function downloadPart (opts: {
@@ -176,6 +178,17 @@ function fetchPartContentByUri (uri: URI): Task<?Readable> {
         `Unable to parse messageID and contentID from URI: ${uri}`
       )
     }
+
+    // Some message parts do not have content IDs. (content IDs are explicit
+    // headers on parts, part IDs are assigned to content parts in order when
+    // parsing a message). In cases with no content ID we fall back to part IDs
+    // for `mid:` URIs (in contradiction of RFC-2392). Unfortunately that means
+    // that when we parse a `mid` URI we do not know whether the result is
+    // a content ID or a part ID. The ambiguous ID type encodes a ref for those
+    // cases. In general an ambiguous ID will result in a lookup by content ID
+    // first, and then by part ID in case the content ID lookup fails.
+    const partRef = Part.ambiguousId(contentId)
+
     return dbTask(db =>
       kefir.fromPromise(
         cache.getMessage(messageId, db).catch(err => {
@@ -186,7 +199,7 @@ function fetchPartContentByUri (uri: URI): Task<?Readable> {
         })
       )
     )
-      .flatMap(message => fetchPartContent(message, contentId))
+      .flatMap(message => fetchPartContent(message, partRef))
       .modifyObservable(obs =>
         // Insert `undefined` so that we get a value emitted in case an error
         // occurred
@@ -202,20 +215,19 @@ function fetchPartContentByUri (uri: URI): Task<?Readable> {
  */
 export function fetchPartContent (
   msg: Message,
-  contentId: string
+  partRef: Part.PartRef
 ): Task<Readable> {
-  if (contentId.startsWith('<')) { // TODO
-    throw new Error('Remove angle brackets from contentId!')
-  }
-  return fetchPartContentFromCache(msg, contentId).flatMap(data => {
+  return fetchPartContentFromCache(msg, partRef).flatMap(data => {
     if (data) {
       return Task.result(data)
     }
     // TODO: check uid validity
-    const part = msg.getPart({ contentId })
+    const part = msg.getPart(partRef)
     if (!part) {
       return Task.error(
-        new Error(`Cannot find part with ID ${contentId} in message, ${msg.id}`)
+        new Error(
+          `Cannot find part with ID ${String(partRef)} in message, ${msg.id}`
+        )
       )
     }
     const meta = msg.perBoxMetadata && msg.perBoxMetadata[0]
@@ -244,11 +256,11 @@ export function fetchPartContent (
 
 function fetchPartContentFromCache (
   msg: Message,
-  contentId: string
+  partRef: Part.PartRef
 ): Task<?Readable> {
   return dbTask(db =>
     kefir.fromPromise(
-      cache.fetchPartContent(db, msg, contentId).catch(() => undefined) // Resolve to `undefined` if content is not in cache
+      cache.fetchPartContent(db, msg, partRef).catch(() => undefined) // Resolve to `undefined` if content is not in cache
     )
   )
 }
@@ -286,15 +298,14 @@ export function getActivityContent (
     )
   }
 
-  return fetchPartContentByUri(link.href)
-    .flatMap(stream => {
-      if (stream) {
-        return Task.liftPromise(toString(stream, 'utf8')) // TODO: check charset
-          .map(content => ({ content, mediaType: link.mediaType }))
-      } else {
-        return Task.result(undefined)
-      }
-    })
+  return fetchPartContentByUri(link.href).flatMap(stream => {
+    if (stream) {
+      return Task.liftPromise(toString(stream, 'utf8')) // TODO: check charset
+        .map(content => ({ content, mediaType: link.mediaType }))
+    } else {
+      return Task.result(undefined)
+    }
+  })
 }
 
 export function getActivityContentSnippet (
@@ -302,8 +313,9 @@ export function getActivityContentSnippet (
   length: number = 100,
   preferences: string[] = ['text/plain', 'text/html']
 ): Task<?string> {
-  return getActivityContent(activity, preferences)
-    .map(result => result && result.content.slice(0, length))
+  return getActivityContent(activity, preferences).map(
+    result => result && result.content.slice(0, length)
+  )
 }
 
 export function getAttributes (
@@ -359,16 +371,17 @@ function getHeaders (message: ImapMessage): Observable<Headers, Error> {
 export function getConversation (uri: URI): Task<Conversation> {
   return Task.promisify(fetchPartContent).flatMap(fetchPartContent => {
     return dbTask(db =>
-        kefir.fromPromise(cache.getConversation(uri, db))
-      )
-      .flatMap(messages => {
-        if (messages.length < 1) {
-          return Task.error(new Error(`No messages in cache for conversation, ${uri}`))
-        }
-        return Task.liftPromise(
-          Conv.messagesToConversation(fetchPartContent, messages)
+      kefir.fromPromise(cache.getConversation(uri, db))
+    ).flatMap(messages => {
+      if (messages.length < 1) {
+        return Task.error(
+          new Error(`No messages in cache for conversation, ${uri}`)
         )
-      })
+      }
+      return Task.liftPromise(
+        Conv.messagesToConversation(fetchPartContent, messages)
+      )
+    })
   })
 }
 
