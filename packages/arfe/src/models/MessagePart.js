@@ -27,6 +27,10 @@ export function ambiguousId(id: string): PartRef {
 }
 
 export function contentId(id: string): PartRef {
+  if (id.startsWith('<')) {
+    // TODO
+    throw new Error('Remove angle brackets from contentId!')
+  }
   return { type: CONTENT_ID, contentId: id }
 }
 
