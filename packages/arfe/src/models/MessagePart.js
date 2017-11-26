@@ -4,6 +4,21 @@ import type { MessagePart as ImapMessagePart } from 'imap'
 
 export type MessagePart = ImapMessagePart
 
+export const CONTENT_ID = 'contentId'
+export const PART_ID = 'partId'
+
+export type PartRef =
+  | { type: typeof CONTENT_ID, contentId: string }
+  | { type: typeof PART_ID, partId: string }
+
+export function contentId(id: string): PartRef {
+  return { type: CONTENT_ID, contentId: id }
+}
+
+export function partId(id: string): PartRef {
+  return { type: PART_ID, partId: id }
+}
+
 export function charset (part: MessagePart): ?string {
   return part.params && part.params.charset
 }

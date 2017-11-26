@@ -6,6 +6,7 @@ import * as m from 'mori'
 import * as asutil from '../util/activity'
 import { catMaybes } from '../util/maybe'
 import Address from './Address'
+import * as P from './MessagePart'
 import { midUri, parseMidUri } from './uri'
 
 export { parseMidUri } from './uri'
@@ -77,31 +78,12 @@ export default class Message {
   // is assigned by the `Content-ID` header of the MIME part (which may be
   // absent). A part ID is assigned to every MIME part based on order of
   // appearance in the message.
-  getPart ({
-    partId,
-    contentId
-  }: {
-    partId?: string,
-    contentId?: string
-  }): ?MessagePart {
-    if ((partId && contentId) || (!partId && !contentId)) {
-      throw new Error(
-        'must specify *one of* `partId` or `contentId` when requesting message part'
-      )
-    }
-    if (partId) {
-      return getPartByPartId(partId, this.attributes)
-    }
-    if (contentId) {
-      const part = getPartByContentId(contentId, this.attributes)
-      if (part) {
-        return part
-      }
-
-      // TODO: because we are falling back to part IDs for `mid:` URIs (in
-      // contradiction of RFC-2392) it is useful to fall back to looking up
-      // a part by part ID if lookup by content ID fails
-      return getPartByPartId(contentId, this.attributes)
+  getPart (partRef: P.PartRef): ?MessagePart {
+    switch (partRef.type) {
+      case P.CONTENT_ID:
+        return getPartByContentId(partRef.contentId, this.attributes)
+      case P.PART_ID:
+        return getPartByPartId(partRef.partId, this.attributes)
     }
   }
 

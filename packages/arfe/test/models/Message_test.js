@@ -5,6 +5,7 @@ import * as m from 'mori'
 import * as F from '../fixtures/messages'
 
 import Message from '../../src/models/Message'
+import * as P from '../../src/models/MessagePart'
 
 const msg = new Message(F.multipartAlternative, new Map())
 
@@ -56,7 +57,7 @@ test('extracts both html and text parts from a message', t => {
 test('gets a message part by part ID', t => {
   t.plan(2)
 
-  const part = msg.getPart({ partId: '2' })
+  const part = msg.getPart(P.partId('2'))
   t.truthy(part, 'found html part')
   if (!part) {
     throw new Error('Expected an HTML part')
