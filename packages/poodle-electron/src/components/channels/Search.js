@@ -3,7 +3,6 @@
 import * as kefir from 'kefir'
 import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chromeActions from 'poodle-core/lib/actions/chrome'
-import * as q from 'poodle-core/lib/queries/conversations'
 import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
 import * as tasks from 'poodle-service/lib/tasks'
 import { perform } from '../../imapClient'
