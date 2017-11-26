@@ -17,7 +17,7 @@ export async function persistMessage (
   message: Message,
   db: PouchDB
 ): Promise<void> {
-  return persistMessageRecord(messageToRecord(message))
+  return persistMessageRecord(messageToRecord(message), db)
 }
 
 export async function persistMessageRecord (
