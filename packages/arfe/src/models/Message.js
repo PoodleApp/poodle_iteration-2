@@ -80,6 +80,12 @@ export default class Message {
   // appearance in the message.
   getPart (partRef: P.PartRef): ?MessagePart {
     switch (partRef.type) {
+      case P.AMBIGUOUS_ID:
+        const id = partRef.id
+        return (
+          getPartByContentId(id, this.attributes) ||
+          getPartByPartId(id, this.attributes)
+        )
       case P.CONTENT_ID:
         return getPartByContentId(partRef.contentId, this.attributes)
       case P.PART_ID:
@@ -150,6 +156,22 @@ export default class Message {
   // TODO
   uriForContentId (contentId: string): URI {
     return midUri(this.id, contentId)
+  }
+
+  uriForPartRef (partRef: P.PartRef): URI {
+    let id
+    switch (partRef.type) {
+      case P.AMBIGUOUS_ID:
+        id = partRef.id
+        break
+      case P.CONTENT_ID:
+        id = partRef.contentId
+        break
+      case P.PART_ID:
+        id = partRef.partId
+        break
+    }
+    return midUri(this.id, id)
   }
 
   // If the given URI has the `cid:` scheme, then it is relative to some message,
@@ -354,8 +376,6 @@ function unpack (struct: MessageStruct): [MessagePart, MessageStruct[]] {
 
 // Use a regular expression to trim angle brackets off
 const messageIdPattern = /<(.*)>/
-
-// `
 
 export function idFromHeaderValue (id: MessageId): MessageId {
   return id.replace(messageIdPattern, (_, id) => id)

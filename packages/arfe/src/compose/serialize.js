@@ -40,19 +40,11 @@ export async function serializeFromContentMap ({
   parts: { part: MessagePart, content: Readable }[]
 }): Promise<MessageConfiguration> {
   async function fetcher (msg: Message, partRef: Part.PartRef): Promise<Readable> {
-    let contentId
-    switch (partRef.type) {
-      case Part.CONTENT_ID:
-        contentId = partRef.contentId
-        break
-      case Part.PART_ID:
-        // The `parts` structure does not have partID values, but `message` does. In
-        // case the ref that is given is a partID we look up the part in `message`,
-        // get the `contentID`, and use that to look up the part in `parts`.
-        const msgPart = message.getPart(partRef)
-        contentId = msgPart && msgPart.id
-        break
-    }
+    // The `parts` structure does not have partID values, but `message` does. In
+    // case the ref that is given is a partID we look up the part in `message`,
+    // get the `contentID`, and use that to look up the part in `parts`.
+    const msgPart = message.getPart(partRef)
+    const contentId = msgPart && msgPart.id
     const partWithContent = contentId && parts.find(
       ({ part }) => part.id === contentId
     )

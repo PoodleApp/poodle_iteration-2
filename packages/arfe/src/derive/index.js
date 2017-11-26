@@ -1,18 +1,19 @@
 /* @flow */
 
-import * as m            from 'mori'
-import Activity          from '../models/Activity'
-import DerivedActivity   from '../models/DerivedActivity'
+import * as m from 'mori'
+import Activity from '../models/Activity'
+import DerivedActivity from '../models/DerivedActivity'
 import Message, * as Msg from '../models/Message'
-import { buildThread }   from '../models/Thread'
+import * as P from '../models/MessagePart'
+import { buildThread } from '../models/Thread'
 
 import collapseAsides from './collapseAsides'
-import collapseEdits  from './collapseEdits'
-import collapseLikes  from './collapseLikes'
-import insertJoins    from './insertJoins'
+import collapseEdits from './collapseEdits'
+import collapseLikes from './collapseLikes'
+import insertJoins from './insertJoins'
 
-import type { Seqable }              from 'mori'
-import type { Readable }             from 'stream'
+import type { Seqable } from 'mori'
+import type { Readable } from 'stream'
 import type { Fetcher, Transformer } from './types'
 
 // Processed in order from first to last
@@ -21,12 +22,12 @@ const transformers: Seqable<Transformer> = [
   insertJoins,
   collapseEdits,
   collapseLikes,
-  recursivelyDeriveAsides,
+  recursivelyDeriveAsides
 ]
 
-export default function derive(
-  fetchPartContent: (msg: Message, contentId: string) => Promise<Readable>,
-  activities: Seqable<Activity>,
+export default function derive (
+  fetchPartContent: (msg: Message, P.PartRef) => Promise<Readable>,
+  activities: Seqable<Activity>
 ): Promise<Seqable<DerivedActivity>> {
   const f = fetcher(fetchPartContent, activities)
 
@@ -37,10 +38,10 @@ export default function derive(
   return deriveRec(f, transformers, derivedActivities)
 }
 
-async function deriveRec(
+async function deriveRec (
   f: Fetcher,
   transformers: Seqable<Transformer>,
-  activities: Seqable<DerivedActivity>,
+  activities: Seqable<DerivedActivity>
 ): Promise<Seqable<DerivedActivity>> {
   const transformer = m.first(transformers)
   if (!transformer) {
@@ -50,15 +51,17 @@ async function deriveRec(
   return deriveRec(f, m.rest(transformers), transformed)
 }
 
-function fetcher(
-  fetchPartContent: (msg: Message, contentId: string) => Promise<Readable>,
-  activities: Seqable<Activity>,
+function fetcher (
+  fetchPartContent: (msg: Message, P.PartRef) => Promise<Readable>,
+  activities: Seqable<Activity>
 ): Fetcher {
   return uri => {
     const parsed = Msg.parseMidUri(uri)
     if (!parsed) {
       return Promise.reject(
-        new Error(`Could not parse URI according to 'mid:' or 'cid:' scheme: ${uri}`)
+        new Error(
+          `Could not parse URI according to 'mid:' or 'cid:' scheme: ${uri}`
+        )
       )
     }
 
@@ -70,26 +73,36 @@ function fetcher(
     }
 
     const msg = m.first(
-      m.filter(msg => msg && msg.id === messageId,
-      m.map(act => act.message, activities)
-    ))
+      m.filter(
+        msg => msg && msg.id === messageId,
+        m.map(act => act.message, activities)
+      )
+    )
     if (!msg) {
       return Promise.reject(
         new Error(`could not find message with matching ID in thread: ${uri}`)
       )
     }
 
-    return fetchPartContent(msg, contentId)
+    // Some message parts do not have content IDs. (content IDs are explicit
+    // headers on parts, part IDs are assigned to content parts in order when
+    // parsing a message). In cases with no content ID we fall back to part IDs
+    // for `mid:` URIs (in contradiction of RFC-2392). Unfortunately that means
+    // that when we parse a `mid` URI we do not know whether the result is
+    // a content ID or a part ID. The ambiguous ID type encodes a ref for those
+    // cases. In general an ambiguous ID will result in a lookup by content ID
+    // first, and then by part ID in case the content ID lookup fails.
+    return fetchPartContent(msg, P.ambiguousId(contentId))
   }
 }
 
-function recursivelyDeriveAsides(
+function recursivelyDeriveAsides (
   f: Fetcher,
   activities: Seqable<DerivedActivity>
 ): Promise<Seqable<DerivedActivity>> {
   return m.reduce(
     async (transformed, activity) => {
-      const aside        = activity.aside
+      const aside = activity.aside
       const derivedAside = aside && deriveRec(f, transformers, aside)
       return m.conj(
         await transformed,

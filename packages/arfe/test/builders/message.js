@@ -10,6 +10,7 @@ import * as uuid     from 'node-uuid'
 import stream        from 'string-to-stream'
 import Address       from '../../src/models/Address'
 import Message       from '../../src/models/Message'
+import * as Part     from '../../src/models/MessagePart'
 import { catMaybes } from '../../src/util/maybe'
 
 import type {
@@ -48,7 +49,7 @@ export const participants = {
 const defaultFrom = [participants.Merrilee]
 const defaultTo   = [participants.Reiko]
 
-export type FetchPartContent = (msg: Message, contentId: string) => Promise<Readable>
+export type FetchPartContent = (msg: Message, partRef: Part.PartRef) => Promise<Readable>
 
 export function newThread(params: MessageParams[]): [Seq<Message>, FetchPartContent] {
   const withRefs = m.map(addReferences.bind(null, params), params)
@@ -56,11 +57,11 @@ export function newThread(params: MessageParams[]): [Seq<Message>, FetchPartCont
   const msgs     = m.map(([msg, _]) => msg, pairs)
   return [msgs, fetchPartContent]
 
-  function fetchPartContent(msg: Message, contentId: string): Promise<Readable> {
+  function fetchPartContent(msg: Message, partRef: Part.PartRef): Promise<Readable> {
     const match = m.first(m.filter(([m, _]) => m.id === msg.id, pairs))
     if (match) {
       const [_, f] = match
-      return f(msg, contentId)
+      return f(msg, partRef)
     }
     else {
       return Promise.reject(
@@ -163,14 +164,14 @@ function buildStruct(messageId: MessageId, params: MessageParams): [MessageStruc
 
   return [struct, fetchPartContent]
 
-  function fetchPartContent(msg: Message, contentId: string): Promise<Readable> {
+  function fetchPartContent(msg: Message, partRef: Part.PartRef): Promise<Readable> {
     function toStream(content: ?string): Promise<Readable> {
       if (content) {
         return Promise.resolve(stream(content))
       }
       else {
         return Promise.reject(
-          new Error(`no content for ${msg.uriForContentId(contentId)}`)
+          new Error(`no content for ${msg.uriForPartRef(partRef)}`)
         )
       }
     }
@@ -181,12 +182,16 @@ function buildStruct(messageId: MessageId, params: MessageParams): [MessageStruc
       )
     }
 
-    switch(contentId) {
-      case 'text':     return toStream(params.text)
-      case 'html':     return toStream(params.html)
-      case 'activity': return toStream(params.activity && JSON.stringify(params.activity))
-      case 'revision': return toStream(params.revision && JSON.stringify(params.revision))
-      default:         return toStream(null)
+    if (partRef.type === Part.CONTENT_ID) {
+      switch(partRef.contentId) {
+        case 'text':     return toStream(params.text)
+        case 'html':     return toStream(params.html)
+        case 'activity': return toStream(params.activity && JSON.stringify(params.activity))
+        case 'revision': return toStream(params.revision && JSON.stringify(params.revision))
+        default:         return toStream(null)
+      }
+    } else {
+      return toStream(null)
     }
   }
 }

@@ -11,6 +11,7 @@ import * as Actor from './Actor'
 import Address, * as Addr from './Address'
 import DerivedActivity, * as Drv from './DerivedActivity'
 import Message from './Message'
+import * as P from './MessagePart'
 import * as Thrd from './Thread'
 
 import type { List, Map, Seq, Seqable, Set, Vector } from 'mori'
@@ -129,7 +130,7 @@ export function asideToConversation (activity: DerivedActivity): Conversation {
 }
 
 export async function threadToConversation (
-  fetchPartContent: (msg: Message, partId: string) => Promise<Readable>,
+  fetchPartContent: (msg: Message, P.PartRef) => Promise<Readable>,
   activities: Seqable<Activity>
 ): Promise<Conversation> {
   const firstActivity = m.first(activities)
@@ -144,7 +145,7 @@ export async function threadToConversation (
 }
 
 export async function messagesToConversation (
-  fetchPartContent: (msg: Message, contentId: string) => Promise<Readable>,
+  fetchPartContent: (msg: Message, P.PartRef) => Promise<Readable>,
   messages: Seqable<Message>
 ): Promise<Conversation> {
   const activitiesByMessage = await Promise.all(
@@ -157,7 +158,7 @@ export async function messagesToConversation (
 }
 
 async function tryToGetActivities (
-  fetchPartContent: (msg: Message, partId: string) => Promise<Readable>,
+  fetchPartContent: (msg: Message, P.PartRef) => Promise<Readable>,
   message: Message
 ): Promise<Seqable<Activity>> {
   try {
