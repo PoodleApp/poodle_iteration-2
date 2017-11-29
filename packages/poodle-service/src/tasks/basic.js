@@ -2,6 +2,7 @@
 
 import * as AS from 'activitystrea.ms'
 import Conversation, * as Conv from 'arfe/lib/models/Conversation'
+import * as mediaType from 'arfe/lib/models/mediaType'
 import Message from 'arfe/lib/models/Message'
 import * as Part from 'arfe/lib/models/MessagePart'
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
@@ -279,9 +280,14 @@ export function getActivityContent (
   activity: DerivedActivity,
   preferences: string[] = ['text/html', 'text/plain']
 ): Task<?Content> {
+  const prefTypes = preferences.map(mediaType.fromString)
   const links = m.mapcat(
-    pref => m.filter(l => l.mediaType === pref, activity.objectLinks),
-    preferences
+    pref =>
+      m.filter(
+        l => mediaType.isCompatible(pref, mediaType.fromString(l.mediaType)),
+        activity.objectLinks
+      ),
+    prefTypes
   )
   const link = m.first(links)
 
