@@ -86,8 +86,13 @@ function * transmit (
       accountName: account.email
     }).toPromise()
 
-    // serialize and transmit message via SMTP
-    const serialized = yield compose.serializeFromContentMap({ message, parts })
+    // recording local record consumes content streams, so read content back
+    // from database to serialize message for transmission
+    const serialized = yield C.perform(deps.imapClient, tasks.serialize, [message], {
+      accountName: account.email
+    }).toPromise()
+
+    // transmit the message
     const result = yield C.perform(deps.imapClient, tasks.sendMail, [serialized], {
       accountName: account.email
     }).toPromise()

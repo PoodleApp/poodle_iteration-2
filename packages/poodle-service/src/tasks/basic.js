@@ -1,6 +1,7 @@
 /* @flow */
 
 import * as AS from 'activitystrea.ms'
+import * as compose from 'arfe/lib/compose'
 import Conversation, * as Conv from 'arfe/lib/models/Conversation'
 import * as mediaType from 'arfe/lib/models/mediaType'
 import Message from 'arfe/lib/models/Message'
@@ -428,4 +429,12 @@ function connectionTask<T> (action: actions.Action<T>): Task<T> {
 
 export function dbTask<T> (fn: (db: PouchDB) => Observable<T, Error>): Task<T> {
   return Task.getContext().flatMap(({ db }) => Task.lift(fn(db)))
+}
+
+export function serialize (
+  message: Message
+): Task<compose.MessageConfiguration> {
+  return Task.promisify(fetchPartContent).flatMap(fetcher =>
+    Task.liftPromise(compose.serialize(fetcher, message))
+  )
 }
