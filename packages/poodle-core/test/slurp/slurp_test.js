@@ -1,4 +1,5 @@
-/* @flow */
+/* @noflow */
+// TODO
 
 import test from 'ava'
 import kefir from 'kefir'
