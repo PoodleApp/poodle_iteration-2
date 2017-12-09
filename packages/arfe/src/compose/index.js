@@ -1,5 +1,6 @@
 /* @flow */
 
+export type { Builder } from './builders'
 export { build } from './builders'
 export { default as comment } from './comment'
 export { default as edit } from './edit'

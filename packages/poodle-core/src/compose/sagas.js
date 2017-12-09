@@ -38,7 +38,7 @@ function * sendEdit (
     return
   }
   const { account, activity, conversation, recipients, content } = action
-  const message = compose.edit({
+  const messageBuilder = compose.edit({
     ...recipients,
     content: {
       mediaType: content.mediaType,
@@ -47,8 +47,7 @@ function * sendEdit (
     conversation,
     activity
   })
-  // TODO: update `compose.edit` to return a `compose.Builder` value
-  // yield * transmit(deps, account, message)
+  yield * transmit(deps, account, messageBuilder)
 }
 
 function * sendReply (
@@ -59,7 +58,6 @@ function * sendReply (
     return
   }
   const { account, conversation, recipients, content } = action
-  const sender = Addr.build(account)
   const messageBuilder = compose.comment({
     ...recipients,
     content: {
@@ -68,15 +66,16 @@ function * sendReply (
     },
     conversation
   })
-  const messageWithContent = yield compose.build(messageBuilder, sender)
-  yield * transmit(deps, account, messageWithContent)
+  yield * transmit(deps, account, messageBuilder)
 }
 
 function * transmit (
   deps: Dependencies,
   account: Account,
-  { message, parts }: { message: Message, parts: { part: MessagePart, content: Readable }[] }
+  messageBuilder: compose.Builder<Message>
 ): Generator<Effect, void, any> {
+  const sender = Addr.build(account)
+  const { message, parts } = yield compose.build(messageBuilder, sender)
   try {
     yield put(composeActions.sending())
 

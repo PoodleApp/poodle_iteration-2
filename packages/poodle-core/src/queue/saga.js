@@ -2,6 +2,9 @@
 
 import * as compose from 'arfe/lib/compose'
 import composeLike from 'arfe/lib/compose/like'
+import * as Addr from 'arfe/lib/models/Address'
+import Message from 'arfe/lib/models/Message'
+import * as cache from 'poodle-service/lib/cache'
 import * as C from 'poodle-service/lib/ImapInterface/Client'
 import * as tasks from 'poodle-service/lib/tasks'
 import {
@@ -33,7 +36,7 @@ function * sendLike (
   }
 
   const { account, conversation, likedObjectUris, recipients } = action
-  const message = composeLike({
+  const messageBuilder = composeLike({
     ...recipients,
     conversation,
     fallbackContent: {
@@ -45,14 +48,38 @@ function * sendLike (
   })
   try {
     yield put(queue.sendingLikes(action.likedObjectUris))
-    const result = yield C.perform(deps.imapClient, tasks.sendMail, [message], {
-      accountName: account.email
-    }).toPromise()
+    yield * transmit(deps, account, messageBuilder)
     yield put(queue.doneSendingLikes(action.likedObjectUris))
   } catch (err) {
     yield put(chrome.showError(err))
     yield put(queue.doneSendingLikes(action.likedObjectUris))
   }
+}
+
+function * transmit (
+  deps: Dependencies,
+  account: Account,
+  messageBuilder: compose.Builder<Message>
+): Generator<Effect, void, any> {
+  const sender = Addr.build(account)
+  const { message, parts } = yield compose.build(messageBuilder, sender)
+
+  // write copy of message and content to local cache
+  const messageRecord = cache.messageToRecord(message)
+  yield C.perform(deps.imapClient, tasks.storeLocalCopyOfMessage, [messageRecord, parts], {
+    accountName: account.email
+  }).toPromise()
+
+  // recording local record consumes content streams, so read content back
+  // from database to serialize message for transmission
+  const serialized = yield C.perform(deps.imapClient, tasks.serialize, [message], {
+    accountName: account.email
+  }).toPromise()
+
+  // transmit the message
+  const result = yield C.perform(deps.imapClient, tasks.sendMail, [serialized], {
+    accountName: account.email
+  }).toPromise()
 }
 
 export default function * root (
