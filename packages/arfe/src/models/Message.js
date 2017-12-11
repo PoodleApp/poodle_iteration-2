@@ -122,7 +122,10 @@ export default class Message {
   }
 
   get references (): MessageId[] {
-    const refs = getHeaderValue('references', this.headers)
+    const val = getHeaderValue('references', this.headers)
+    const refs = typeof val === 'string'
+      ? val.split(/\s+/)
+      : val
     return refs.map(idFromHeaderValue).filter(id => !!id)
   }
 
@@ -387,7 +390,7 @@ function addressList (addrs: ?(ImapAddress[])): ?(Address[]) {
   }
 }
 
-function getHeaderValue (key: string, headers: Headers): string[] {
+function getHeaderValue (key: string, headers: Headers): string | string[] {
   return normalizeHeaderValue(headers.get(key))
 }
 
@@ -397,7 +400,7 @@ function normalizeHeaderValue (v: any): any {
     return []
   }
   if (typeof v === 'string') {
-    return [v]
+    return v
   }
   if (v instanceof Array) {
     return v.filter(e => typeof e === 'string')
