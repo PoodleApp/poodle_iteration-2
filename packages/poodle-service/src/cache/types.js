@@ -42,6 +42,13 @@ export type PartRecord = {
   type: 'PartContent'
 }
 
+export type ChangeEvent<Doc> = {
+  id: string,
+  seq: number,
+  changes: { rev: string }[],
+  doc: Doc
+}
+
 // NOTE: `requestedAt` times indicate time when a message or part was most
 // recently relevent - at least as best as could be determined when the record
 // was last updated. For example, a reply to a conversation causes all prior

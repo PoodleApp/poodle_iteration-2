@@ -37,6 +37,10 @@ export default class Task<A> {
     return new Task((context, state) => kefir.constant({ value, state }))
   }
 
+  static never<A> (): Task<A> {
+    return new Task((context, state) => kefir.never())
+  }
+
   static getContext (): Task<Context> {
     return new Task((context, state) =>
       kefir.constant({ value: context, state })

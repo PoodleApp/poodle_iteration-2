@@ -12,7 +12,7 @@ import * as pouchdbUtil from '../util/pouchdb'
 import type { UID } from 'imap'
 import type { Observable } from 'kefir'
 import type { Readable } from 'stream'
-import type { MessageRecord, QueryParams } from './types'
+import type { ChangeEvent, MessageRecord, QueryParams } from './types'
 
 export async function createIndexes (db: PouchDB): Promise<void> {
   const indexes = [
@@ -161,7 +161,9 @@ export async function verifyExistenceUids (
   const result = await db.query('messages/byUid', {
     include_docs: false,
     keys: query.map(({ boxName, uidvalidity, uid }) => [
-      boxName, uidvalidity, uid
+      boxName,
+      uidvalidity,
+      uid
     ])
   })
   return result.rows.map(row => row.key)
@@ -215,6 +217,38 @@ export function fetchContentByUri (db: PouchDB, uri: string): Promise<Readable> 
     const rs = new stream.PassThrough()
     rs.end(buffer)
     return rs
+  })
+}
+
+export function conversationUpdates (
+  db: PouchDB,
+  conversationId: string
+): kefir.Observable<ChangeEvent<MessageRecord>, Error> {
+  return kefir.stream(emitter => {
+    const pouchEmitter = db.changes({
+      include_docs: true,
+      live: true,
+      since: 'now'
+    })
+    pouchEmitter.on('change', change => {
+      // TODO: we could use the `filter` option in `db.changes`
+      if (
+        change.doc &&
+        change.doc.type === 'Message' &&
+        change.doc.conversationId === conversationId
+      ) {
+        emitter.value(change)
+      }
+    })
+    pouchEmitter.on('complete', () => {
+      emitter.end()
+    })
+    pouchEmitter.on('error', err => {
+      emitter.error(err)
+    })
+    return () => {
+      pouchEmitter.cancel()
+    }
   })
 }
 

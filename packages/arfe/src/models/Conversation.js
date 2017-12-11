@@ -118,6 +118,16 @@ export default class Conversation {
   }
 }
 
+export function changes (
+  origConversation: Conversation,
+  updatedConversation: Conversation
+): Seqable<DerivedActivity> {
+  return m.filter(
+    act => !m.some(a => a.id === act.id, origConversation.activities),
+    updatedConversation.activities
+  )
+}
+
 export function asideToConversation (activity: DerivedActivity): Conversation {
   if (!activity.hasType(Drv.syntheticTypes.Aside)) {
     throw 'Cannot convert non-aside activity to conversation'
@@ -167,7 +177,9 @@ async function tryToGetActivities (
   } catch (err) {
     return [
       Drv.newSyntheticActivity(
-        AS.activity(Drv.syntheticTypes.Failure).object(AS.object().content(err.message)),
+        AS.activity(Drv.syntheticTypes.Failure).object(
+          AS.object().content(err.message)
+        ),
         {},
         message
       ).activity

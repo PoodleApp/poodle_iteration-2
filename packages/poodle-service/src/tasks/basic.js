@@ -24,6 +24,7 @@ import * as kefirUtil from '../util/kefir'
 import * as promises from '../util/promises'
 import { openBox } from './stateChanges'
 import Task from './Task'
+import { type LiveConversation } from './types'
 
 import type {
   Box,
@@ -389,6 +390,24 @@ export function getConversation (uri: URI): Task<Conversation> {
         Conv.messagesToConversation(fetchPartContent, messages)
       )
     })
+  })
+}
+
+// Gets a conversation from cache by URI; emits updates to conversation as new
+// messages appear in cache.
+export function watchConversation (uri: URI): Task<LiveConversation> {
+  return getConversation(uri).flatMap(conversation => {
+    return dbTask(db => cache.conversationUpdates(db, conversation.id))
+      .flatMap(() => getConversation(uri))
+      .modifyObservable(updatedConvs =>
+        updatedConvs.scan(
+          (prev, next) => {
+            const changes = m.intoArray(Conv.changes(prev.conversation, next))
+            return { conversation: next, changes }
+          },
+          { conversation }
+        )
+      )
   })
 }
 
