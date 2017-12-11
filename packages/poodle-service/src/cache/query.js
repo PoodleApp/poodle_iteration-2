@@ -222,7 +222,7 @@ export function fetchContentByUri (db: PouchDB, uri: string): Promise<Readable> 
 
 export function conversationUpdates (
   db: PouchDB,
-  conversationId: string
+  conversationUri: string
 ): kefir.Observable<ChangeEvent<MessageRecord>, Error> {
   return kefir.stream(emitter => {
     const pouchEmitter = db.changes({
@@ -234,8 +234,10 @@ export function conversationUpdates (
       // TODO: we could use the `filter` option in `db.changes`
       if (
         change.doc &&
-        change.doc.type === 'Message' &&
-        change.doc.conversationId === conversationId
+        change.doc.type === 'Message'
+        // TODO: test that message belongs to given conversation
+        // change.doc.conversationId &&
+        // U.sameUri(conversationUri, U.midUri(change.doc.conversationId))
       ) {
         emitter.value(change)
       }
