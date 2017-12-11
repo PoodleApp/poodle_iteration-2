@@ -1,6 +1,5 @@
 /* @flow */
 
-import ArfeConversation from 'arfe/lib/models/Conversation'
 import * as LV from 'arfe/lib/models/LanguageValue'
 import * as kefir from 'kefir'
 import AppBar from 'material-ui/AppBar'
@@ -31,7 +30,7 @@ type OwnProps = {
 }
 
 type Props = OwnProps & {
-  conversation: Slurp<ArfeConversation>,
+  data: Slurp<tasks.LiveConversation>,
   dispatch: Dispatch<any>,
   editing?: ActivityId[],
   pendingLikes: ActivityId[]
@@ -64,7 +63,9 @@ const styles = {
 
 export function Conversation (props: Props) {
   const dispatch = props.dispatch
-  const { value: conversation, error, latest } = props.conversation
+  const { value, error, latest } = props.data
+  const conversation = value && value.conversation
+  const changes = value && value.changes
 
   let content
   if (error && latest === error) {
@@ -73,7 +74,7 @@ export function Conversation (props: Props) {
         <p>
           {String(error)}
         </p>
-        <RaisedButton label='Retry' onClick={props.conversation.reload} />
+        <RaisedButton label='Retry' onClick={props.data.reload} />
       </div>
     )
   } else if (conversation) {
@@ -118,7 +119,7 @@ export function Conversation (props: Props) {
             <IconButton iconClassName='material-icons'>refresh</IconButton>
           }
           onLeftIconButtonTouchTap={() => dispatch(router.goBack())}
-          onRightIconButtonTouchTap={props.conversation.reload}
+          onRightIconButtonTouchTap={props.data.reload}
         />
       </header>
       <div style={styles.body}>
@@ -133,13 +134,13 @@ export function Conversation (props: Props) {
 export default slurp(
   ({ auth, chrome, queue }: State, { conversationId }: OwnProps) => {
     const email = auth.account && auth.account.email
-    const conversation = email ? perform(
-      tasks.getConversation,
+    const data = email ? perform(
+      tasks.watchConversation,
       [conversationId],
       { accountName: email }
     ) : perform(tasks.Task.error, [new Error('not logged in')])
     return {
-      conversation,
+      data,
       editing: chrome.editing,
       pendingLikes: queue.pendingLikes || []
     }
