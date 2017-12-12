@@ -2,6 +2,7 @@
 
 import * as compose from 'arfe/lib/compose'
 import composeLike from 'arfe/lib/compose/like'
+import composeConversation from 'arfe/lib/compose/conversation'
 import * as Addr from 'arfe/lib/models/Address'
 import Message from 'arfe/lib/models/Message'
 import * as cache from 'poodle-service/lib/cache'
@@ -49,11 +50,29 @@ function * sendLike (
   try {
     yield put(queue.sendingLikes(action.likedObjectUris))
     yield * transmit(deps, account, messageBuilder)
-    yield put(queue.doneSendingLikes(action.likedObjectUris))
-  } catch (err) {
-    yield put(chrome.showError(err))
+  } finally {
     yield put(queue.doneSendingLikes(action.likedObjectUris))
   }
+}
+
+function * newConversation (
+  deps: Dependencies,
+  action: queue.Action
+): Generator<Effect, void, any> {
+  if (action.type !== queue.NEW_CONVERSATION) {
+    return
+  }
+
+  const { account, recipients, content, subject } = action
+  const messageBuilder = composeConversation({
+    ...recipients,
+    content: {
+      mediaType: content.mediaType,
+      stream: stringToStream(content.string)
+    },
+    subject
+  })
+  yield * transmit(deps, account, messageBuilder)
 }
 
 function * transmit (
@@ -63,27 +82,53 @@ function * transmit (
 ): Generator<Effect, void, any> {
   const sender = Addr.build(account)
   const { message, parts } = yield compose.build(messageBuilder, sender)
+  yield put(queue.sending([message.uri]))
 
-  // write copy of message and content to local cache
-  const messageRecord = cache.messageToRecord(message)
-  yield C.perform(deps.imapClient, tasks.storeLocalCopyOfMessage, [messageRecord, parts], {
-    accountName: account.email
-  }).toPromise()
+  try {
+    // write copy of message and content to local cache
+    const messageRecord = cache.messageToRecord(message)
+    yield C.perform(
+      deps.imapClient,
+      tasks.storeLocalCopyOfMessage,
+      [messageRecord, parts],
+      {
+        accountName: account.email
+      }
+    ).toPromise()
 
-  // recording local record consumes content streams, so read content back
-  // from database to serialize message for transmission
-  const serialized = yield C.perform(deps.imapClient, tasks.serialize, [message], {
-    accountName: account.email
-  }).toPromise()
+    // recording local record consumes content streams, so read content back
+    // from database to serialize message for transmission
+    const serialized = yield C.perform(
+      deps.imapClient,
+      tasks.serialize,
+      [message],
+      {
+        accountName: account.email
+      }
+    ).toPromise()
 
-  // transmit the message
-  const result = yield C.perform(deps.imapClient, tasks.sendMail, [serialized], {
-    accountName: account.email
-  }).toPromise()
+    // transmit the message
+    const result = yield C.perform(
+      deps.imapClient,
+      tasks.sendMail,
+      [serialized],
+      {
+        accountName: account.email
+      }
+    ).toPromise()
+  } catch (err) {
+    yield put(chrome.showError(err))
+    throw err
+  } finally {
+    yield put(queue.doneSending([message.uri]))
+  }
 }
 
 export default function * root (
   deps: Dependencies
 ): Generator<Effect, void, any> {
-  yield all([fork(takeEvery, queue.SEND_LIKES, sendLike, deps)])
+  yield all([
+    fork(takeEvery, queue.NEW_CONVERSATION, newConversation, deps),
+    fork(takeEvery, queue.SEND_LIKES, sendLike, deps)
+  ])
 }
