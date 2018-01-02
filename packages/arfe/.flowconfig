@@ -12,7 +12,6 @@
 ./types/
 
 [options]
-unsafe.enable_getters_and_setters=true
 
 [lints]
 sketchy-null-number=error

@@ -537,6 +537,12 @@ execspawn@^1.0.1:
   dependencies:
     util-extend "^1.0.1"
 
+executioner@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/executioner/-/executioner-2.0.1.tgz#add328e03bc45dd598f358fbb529fc0be0ec6fcd"
+  dependencies:
+    mixly "^1.0.0"
+
 expand-template@^1.0.0:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/expand-template/-/expand-template-1.0.3.tgz#6c303323177a62b1b22c070279f7861287b69b1a"
@@ -602,6 +608,10 @@ fstream@^1.0.0, fstream@^1.0.2:
     inherits "~2.0.0"
     mkdirp ">=0.5 0"
     rimraf "2"
+
+fulcon@^1.0.1:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/fulcon/-/fulcon-1.0.2.tgz#8a4dfda4c73fcd9cc62a79d5045c392b45547320"
 
 gauge@~1.2.5:
   version "1.2.7"
@@ -852,6 +862,12 @@ inline-process-browser@^1.0.0:
     falafel "^1.0.1"
     through2 "^0.6.5"
 
+install-peers@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/install-peers/-/install-peers-1.0.2.tgz#cadf14b8c6fccfe6f94eea50655a744bfdb411cb"
+  dependencies:
+    executioner "^2.0.1"
+
 is-array-buffer-x@^1.0.13:
   version "1.0.13"
   resolved "https://registry.yarnpkg.com/is-array-buffer-x/-/is-array-buffer-x-1.0.13.tgz#d31d8185545bd42f0944303ea4404bc560cec0b2"
@@ -1009,6 +1025,12 @@ jws@^3.0.0, jws@~3.0.0:
   dependencies:
     base64url "~1.0.4"
     jwa "~1.0.0"
+
+kefir@^3.8.0:
+  version "3.8.0"
+  resolved "https://registry.yarnpkg.com/kefir/-/kefir-3.8.0.tgz#63b5dce575f1a7ab3286788e771eb104b181b676"
+  dependencies:
+    symbol-observable "1.0.4"
 
 keypress@0.1.x:
   version "0.1.0"
@@ -1213,6 +1235,12 @@ minimist@0.0.8, minimist@~0.0.1:
 minimist@^1.1.0, minimist@^1.1.2, minimist@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
+
+mixly@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/mixly/-/mixly-1.0.0.tgz#9b5a2e1f63e6dfba0d30e6797ffae62ab1dc24ef"
+  dependencies:
+    fulcon "^1.0.1"
 
 "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1:
   version "0.5.1"
@@ -1813,6 +1841,10 @@ strip-json-comments@~1.0.4:
 supports-color@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-2.0.0.tgz#535d045ce6b6363fa40117084629995e9df324c7"
+
+symbol-observable@1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.4.tgz#29bf615d4aa7121bdd898b22d4b3f9bc4e2aa03d"
 
 tar-fs@^1.7.0:
   version "1.15.0"

@@ -50,17 +50,19 @@
     "poodle-service": "link:../poodle-service",
     "process-nextick-args": "^1.0.7",
     "prop-types": "^15.5.10",
+    "react-router-redux": "^5.0.0-alpha.9",
     "string-to-stream": "^1.1.0"
   },
   "devDependencies": {
     "ava": "^0.21.0",
+    "install-peers": "^1.0.2",
     "react-test-renderer": "^15.6.1"
   },
   "files": [
     "lib/"
   ],
   "peerDependencies": {
-    "kefir": "*",
+    "kefir": "^3.8.0",
     "react-redux": "*",
     "redux": "*",
     "redux-fractal": "*",
