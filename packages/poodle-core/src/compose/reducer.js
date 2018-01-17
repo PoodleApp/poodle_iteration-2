@@ -21,6 +21,12 @@ export default function reducer (
   action: Action
 ): State {
   switch (action.type) {
+    case compose.DISCARD:
+      return {
+        ...state,
+        content: m.dissoc(state.content, action.draftId),
+        sending: m.disj(state.sending, action.draftId)
+      }
     case compose.SENDING:
       return {
         ...state,

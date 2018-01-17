@@ -25,6 +25,7 @@ export type Props = {
   draftId: ID,
   dispatch: (action: Object) => void,
   onContentChange: (content: string) => void,
+  onDiscard: () => void,
   onEdit: (
     activity: DerivedActivity,
     conversation: Conversation,
@@ -66,6 +67,9 @@ export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
       dispatch,
       onContentChange (...args) {
         dispatch(compose.setContent(draftId, ...args))
+      },
+      onDiscard () {
+        dispatch(compose.discard(draftId))
       },
       onEdit (...args) {
         dispatch(compose.edit(draftId, account, ...args))

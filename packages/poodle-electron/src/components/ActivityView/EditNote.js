@@ -84,7 +84,10 @@ export function EditNote (props: Props) {
           <FlatButton
             label='Cancel'
             disabled={props.sending}
-            onTouchTap={event => props.dispatch(chrome.stopEditing(props.activity.id))}
+            onTouchTap={event => {
+                props.onDiscard()
+                props.dispatch(chrome.stopEditing(props.activity.id))
+            }}
           />
         </form>
       </Paper>

@@ -4,6 +4,7 @@ import Conversation, { type Participants } from 'arfe/lib/models/Conversation'
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import { type Account } from '../actions/auth'
 
+export const DISCARD = 'compose/discard'
 export const EDIT = 'compose/edit'
 export const REPLY = 'compose/reply'
 export const NEW_DISCUSSION = 'compose/newDiscussion'
@@ -12,6 +13,10 @@ export const SENT = 'compose/sent'
 export const SET_CONTENT = 'compose/setContent'
 
 export type Action =
+  | {
+      type: typeof DISCARD,
+      draftId: ID
+    }
   | {
       type: typeof EDIT,
       account: Account,
@@ -58,6 +63,10 @@ export type Content = {
 
 type ID = string
 
+export function discard (draftId: ID): Action {
+  return { type: DISCARD, draftId }
+}
+
 export function edit (
   draftId: ID,
   account: Account,
@@ -94,7 +103,14 @@ export function newDiscussion (
   content: Content,
   subject: string
 ): Action {
-  return { type: NEW_DISCUSSION, account, draftId, recipients, content, subject }
+  return {
+    type: NEW_DISCUSSION,
+    account,
+    draftId,
+    recipients,
+    content,
+    subject
+  }
 }
 
 export function sending (draftId: ID): Action {
