@@ -1,6 +1,7 @@
 /* @flow */
 
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
+import * as mediaType from 'arfe/lib/models/mediaType'
 import marked from 'marked'
 import spacing from 'material-ui/styles/spacing'
 import opn from 'opn'
@@ -42,9 +43,9 @@ export function DisplayContent ({ activity, content, style }: Props) {
     )
   }
 
-  if (value && value.mediaType === 'text/html') {
+  if (value && mediaType.isHtml(value.mediaType)) {
     return displayHtml(value.content, style)
-  } else if (value && value.mediaType.startsWith('text/')) {
+  } else if (value && mediaType.isText(value.mediaType)) {
     return displayText(value.content, style)
   } else {
     return displayUnknown(value, style)

@@ -1,6 +1,6 @@
 /* @flow */
 
-import { type MediaType } from 'media-type'
+import { type MediaType, fromString } from 'media-type'
 export { fromString } from 'media-type'
 
 export function isCompatible (
@@ -11,4 +11,14 @@ export function isCompatible (
     expectedType.type === actualType.type &&
     expectedType.subtype === actualType.subtype
   )
+}
+
+export function isHtml (mediaType: string): boolean {
+  const m = fromString(mediaType)
+  return m.type === 'text' && m.subtype === 'html'
+}
+
+export function isText (mediaType: string): boolean {
+  const m = fromString(mediaType)
+  return m.type === 'text'
 }
