@@ -42,8 +42,8 @@ export default function reducer (
   }
 }
 
-export function getContent (state: State, draftId: ID): string {
-  return m.get(state.content, draftId, '')
+export function getContent (state: State, draftId: ID): ?string {
+  return m.get(state.content, draftId, null)
 }
 
 export function isSending (state: State, draftId: ID): boolean {
