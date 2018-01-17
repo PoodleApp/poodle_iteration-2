@@ -8,7 +8,6 @@ import queue, { type State as QueueState } from 'poodle-core/lib/queue/reducer'
 import auth, { type State as AuthState } from 'poodle-core/lib/reducers/auth'
 import * as slurp from 'poodle-core/lib/slurp'
 import { combineReducers } from 'redux'
-import { localReducer } from 'redux-fractal'
 
 import type { Reducer } from 'redux'
 
@@ -16,7 +15,6 @@ export type State = {
   auth: AuthState,
   chrome: ChromeState,
   imap: ImapState,
-  local: Object,
   queue: QueueState,
   router: Object,
   slurp: slurp.State
@@ -29,7 +27,6 @@ export default function buildRootReducer (
     auth,
     chrome,
     imap,
-    local: localReducer,
     queue,
     router: routerReducer,
     slurp: slurp.reducer

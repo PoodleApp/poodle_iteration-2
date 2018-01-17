@@ -69,7 +69,6 @@
     "react-router-redux": "next",
     "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.7.2",
-    "redux-fractal": "^1.7.1",
     "redux-logger": "^3.0.6",
     "redux-saga": "^0.15.6",
     "repa": "^1.0.0",

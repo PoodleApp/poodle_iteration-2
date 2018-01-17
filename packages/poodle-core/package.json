@@ -65,7 +65,6 @@
     "kefir": "^3.8.0",
     "react-redux": "*",
     "redux": "*",
-    "redux-fractal": "*",
     "redux-saga": "*"
   }
 }
