@@ -1,59 +1,78 @@
 /* @flow */
 
+import Conversation, { type Participants } from 'arfe/lib/models/Conversation'
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
-import Conversation from 'arfe/lib/models/Conversation'
-import { connect } from 'react-redux'
-import { type Dispatch, applyMiddleware, createStore } from 'redux'
-import { local } from 'redux-fractal'
-import createSagaMiddleware from 'redux-saga'
+import { type Dispatch } from 'redux'
+import * as redux from 'react-redux'
+import { type Account } from '../actions/auth'
 import * as compose from './actions'
-import reducer, { type State } from './reducer'
-import rootSaga, { type Dependencies } from './sagas'
+import { type State, getContent, isSending } from './reducer'
 
 type ExpectedProps = {
-  activity?: DerivedActivity,
-  conversation: Conversation
+  account: Account,
+  draftId: ID
 }
 
-export type ComposeProps = State & {
-  dispatch: (action: any) => void,
-  onContentChange: typeof compose.setContent,
-  onEdit: typeof compose.edit,
-  onSend: typeof compose.send
+// Props that will be available on a decorated component, including props that
+// from `ExpectedProps`, which must be passed in.
+export type Props = {
+  account: Account,
+  content: string,
+  draftId: ID,
+  dispatch: (action: Object) => void,
+  onContentChange: (content: string) => void,
+  onEdit: (
+    activity: DerivedActivity,
+    conversation: Conversation,
+    recipients: Participants,
+    content: compose.Content
+  ) => void,
+  onReply: (
+    conversation: Conversation,
+    recipients: Participants,
+    content: compose.Content
+  ) => void,
+  onNewDiscussion: (
+    recipients: Participants,
+    content: compose.Content,
+    subject: string
+  ) => void,
+  sending: boolean
 }
+
+export type ID = string
 
 export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
-  deps: Dependencies,
   component: *
 ) {
-  return local({
-    key: (props: OwnProps) =>
-      props.activity
-        ? `edit-${props.activity.id}`
-        : `reply-${props.conversation.id}`,
-    createStore: (props: OwnProps) => {
-      const sagaMiddleware = createSagaMiddleware()
-      const store = createStore(reducer, applyMiddleware(sagaMiddleware))
-      sagaMiddleware.run(rootSaga, deps)
-      // TODO
-      // return { store, cleanup: () => sagaMiddleware.cancel() }
-      return store
-    },
-    mapDispatchToProps
-  })(component)
-}
-
-function mapDispatchToProps (dispatch: Dispatch<*>) {
-  return {
-    dispatch,
-    onContentChange (...args) {
-      dispatch(compose.setContent(...args))
-    },
-    onEdit (...args) {
-      dispatch(compose.edit(...args))
-    },
-    onSend (...args) {
-      dispatch(compose.send(...args))
+  function mapStateToProps<S: { compose: State }> (
+    state: S,
+    ownProps: OwnProps
+  ) {
+    return {
+      content: getContent(state.compose, ownProps.draftId),
+      sending: isSending(state.compose, ownProps.draftId)
     }
   }
+  function mapDispatchToProps (
+    dispatch: Dispatch<*>,
+    { draftId, account }: OwnProps
+  ) {
+    return {
+      dispatch,
+      onContentChange (...args) {
+        dispatch(compose.setContent(draftId, ...args))
+      },
+      onEdit (...args) {
+        dispatch(compose.edit(draftId, account, ...args))
+      },
+      onReply (...args) {
+        dispatch(compose.reply(draftId, account, ...args))
+      },
+      onNewDiscussion (...args) {
+        dispatch(compose.newDiscussion(draftId, account, ...args))
+      }
+    }
+  }
+  return redux.connect(mapStateToProps, mapDispatchToProps)(component)
 }

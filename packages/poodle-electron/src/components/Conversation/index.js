@@ -93,10 +93,15 @@ export function Conversation (props: Props) {
         conversation.activities
       )
     )
+    const replyDraftId = `${conversation.id}-reply`
     content = (
       <div>
         {activities}
-        <ComposeReply account={props.account} conversation={conversation} />
+        <ComposeReply
+          account={props.account}
+          conversation={conversation}
+          draftId={replyDraftId}
+        />
       </div>
     )
   } else {
@@ -134,11 +139,11 @@ export function Conversation (props: Props) {
 export default slurp(
   ({ auth, chrome, queue }: State, { conversationId }: OwnProps) => {
     const email = auth.account && auth.account.email
-    const data = email ? perform(
-      tasks.watchConversation,
-      [conversationId],
-      { accountName: email }
-    ) : perform(tasks.Task.error, [new Error('not logged in')])
+    const data = email
+      ? perform(tasks.watchConversation, [conversationId], {
+        accountName: email
+      })
+      : perform(tasks.Task.error, [new Error('not logged in')])
     return {
       data,
       editing: chrome.editing,

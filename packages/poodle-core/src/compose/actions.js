@@ -4,11 +4,12 @@ import Conversation, { type Participants } from 'arfe/lib/models/Conversation'
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import { type Account } from '../actions/auth'
 
-export const EDIT: 'compose/edit' = 'compose/edit'
-export const SEND: 'compose/send' = 'compose/send'
-export const SENDING: 'compose/sending' = 'compose/sending'
-export const SENT: 'compose/sent' = 'compose/sent'
-export const SET_CONTENT: 'compose/setContent' = 'compose/setContent'
+export const EDIT = 'compose/edit'
+export const REPLY = 'compose/reply'
+export const NEW_DISCUSSION = 'compose/newDiscussion'
+export const SENDING = 'compose/sending'
+export const SENT = 'compose/sent'
+export const SET_CONTENT = 'compose/setContent'
 
 export type Action =
   | {
@@ -16,59 +17,94 @@ export type Action =
       account: Account,
       activity: DerivedActivity,
       conversation: Conversation,
+      draftId: ID,
       recipients: Participants,
       content: Content
     }
   | {
-      type: typeof SEND,
+      type: typeof REPLY,
       account: Account,
       conversation: Conversation,
+      draftId: ID,
       recipients: Participants,
       content: Content
     }
   | {
-      type: typeof SENDING
+      type: typeof NEW_DISCUSSION,
+      account: Account,
+      draftId: ID,
+      recipients: Participants,
+      content: Content,
+      subject: string
     }
   | {
-      type: typeof SENT
+      type: typeof SENDING,
+      draftId: ID
+    }
+  | {
+      type: typeof SENT,
+      draftId: ID
     }
   | {
       type: typeof SET_CONTENT,
-      content: string
+      content: string,
+      draftId: ID
     }
 
-type Content = {
+export type Content = {
   mediaType: string,
   string: string
 }
 
+type ID = string
+
 export function edit (
+  draftId: ID,
   account: Account,
   activity: DerivedActivity,
   conversation: Conversation,
   recipients: Participants,
   content: Content
 ): Action {
-  return { type: EDIT, account, activity, conversation, recipients, content }
+  return {
+    type: EDIT,
+    account,
+    activity,
+    conversation,
+    draftId,
+    recipients,
+    content
+  }
 }
 
-export function send (
+export function reply (
+  draftId: ID,
   account: Account,
   conversation: Conversation,
   recipients: Participants,
   content: Content
 ): Action {
-  return { type: SEND, account, conversation, recipients, content }
+  return { type: REPLY, account, conversation, draftId, recipients, content }
 }
 
-export function sending (): Action {
-  return { type: SENDING }
+export function newDiscussion (
+  draftId: ID,
+  account: Account,
+  recipients: Participants,
+  content: Content,
+  subject: string
+): Action {
+  return { type: NEW_DISCUSSION, account, draftId, recipients, content, subject }
 }
 
-export function sent (): Action {
-  return { type: SENT }
+export function sending (draftId: ID): Action {
+  return { type: SENDING, draftId }
 }
 
-export function setContent (content: string): Action {
-  return { type: SET_CONTENT, content }
+export function sent (draftId: ID): Action {
+  return { type: SENT, draftId }
+}
+
+export function setContent (draftId: ID, content: string): Action {
+  return { type: SET_CONTENT, content, draftId }
 }

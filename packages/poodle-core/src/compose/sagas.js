@@ -37,7 +37,14 @@ function * sendEdit (
   if (action.type !== composeActions.EDIT) {
     return
   }
-  const { account, activity, conversation, recipients, content } = action
+  const {
+    account,
+    activity,
+    conversation,
+    draftId,
+    recipients,
+    content
+  } = action
   const messageBuilder = compose.edit({
     ...recipients,
     content: {
@@ -47,17 +54,17 @@ function * sendEdit (
     conversation,
     activity
   })
-  yield * transmit(deps, account, messageBuilder)
+  yield * transmit(deps, draftId, account, messageBuilder)
 }
 
 function * sendReply (
   deps: Dependencies,
   action: composeActions.Action
 ): Generator<Effect, void, any> {
-  if (action.type !== composeActions.SEND) {
+  if (action.type !== composeActions.REPLY) {
     return
   }
-  const { account, conversation, recipients, content } = action
+  const { account, conversation, draftId, recipients, content } = action
   const messageBuilder = compose.comment({
     ...recipients,
     content: {
@@ -66,38 +73,73 @@ function * sendReply (
     },
     conversation
   })
-  yield * transmit(deps, account, messageBuilder)
+  yield * transmit(deps, draftId, account, messageBuilder)
+}
+
+function * sendNewDiscussion (
+  deps: Dependencies,
+  action: composeActions.Action
+): Generator<Effect, void, any> {
+  if (action.type !== composeActions.NEW_DISCUSSION) {
+    return
+  }
+  const { account, recipients, content, draftId, subject } = action
+  const messageBuilder = compose.discussion({
+    ...recipients,
+    content: {
+      mediaType: content.mediaType,
+      stream: stringToStream(content.string)
+    },
+    subject
+  })
+  yield * transmit(deps, draftId, account, messageBuilder)
 }
 
 function * transmit (
   deps: Dependencies,
+  draftId: string,
   account: Account,
   messageBuilder: compose.Builder<Message>
 ): Generator<Effect, void, any> {
   const sender = Addr.build(account)
   const { message, parts } = yield compose.build(messageBuilder, sender)
   try {
-    yield put(composeActions.sending())
+    yield put(composeActions.sending(draftId))
 
     // write copy of message and content to local cache
     const messageRecord = cache.messageToRecord(message)
-    yield C.perform(deps.imapClient, tasks.storeLocalCopyOfMessage, [messageRecord, parts], {
-      accountName: account.email
-    }).toPromise()
+    yield C.perform(
+      deps.imapClient,
+      tasks.storeLocalCopyOfMessage,
+      [messageRecord, parts],
+      {
+        accountName: account.email
+      }
+    ).toPromise()
 
     // recording local record consumes content streams, so read content back
     // from database to serialize message for transmission
-    const serialized = yield C.perform(deps.imapClient, tasks.serialize, [message], {
-      accountName: account.email
-    }).toPromise()
+    const serialized = yield C.perform(
+      deps.imapClient,
+      tasks.serialize,
+      [message],
+      {
+        accountName: account.email
+      }
+    ).toPromise()
 
     // transmit the message
-    const result = yield C.perform(deps.imapClient, tasks.sendMail, [serialized], {
-      accountName: account.email
-    }).toPromise()
+    const result = yield C.perform(
+      deps.imapClient,
+      tasks.sendMail,
+      [serialized],
+      {
+        accountName: account.email
+      }
+    ).toPromise()
     console.log('DeliveryResult') // TODO: debugging output
     console.dir(result)
-    yield put(composeActions.sent())
+    yield put(composeActions.sent(draftId))
   } catch (err) {
     yield put(chrome.showError(err))
   }
@@ -108,6 +150,7 @@ export default function * root (
 ): Generator<Effect, void, any> {
   yield all([
     fork(takeEvery, composeActions.EDIT, sendEdit, deps),
-    fork(takeEvery, composeActions.SEND, sendReply, deps)
+    fork(takeEvery, composeActions.REPLY, sendReply, deps),
+    fork(takeEvery, composeActions.NEW_DISCUSSION, sendNewDiscussion, deps)
   ])
 }

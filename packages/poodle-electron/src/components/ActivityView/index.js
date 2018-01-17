@@ -69,11 +69,11 @@ export default function ActivityView (props: ActivityViewProps) {
     return <JoinView {...props} />
   } else if (activity.hasObjectType(Vocab.Note)) {
     return helpers.editing(props, activity)
-      ? <EditNote {...props} />
+      ? <EditNote {...props} draftId={activity.id} />
       : <NoteView {...props} />
   } else if (activity.hasObjectType(Vocab.Document)) {
     return helpers.editing(props, activity)
-      ? <EditNote {...props} />
+      ? <EditNote {...props} draftId={activity.id} />
       : <DocumentView {...props} />
   } else {
     return <UnknownView {...props} />

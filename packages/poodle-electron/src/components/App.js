@@ -4,6 +4,7 @@ import React from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import Search from './channels/Search'
 import AuthenticatedRoute from './AuthenticatedRoute'
+import ComposeConversation from './ComposeConversation'
 import Conversation from './Conversation'
 import Login from './Login'
 
@@ -13,6 +14,14 @@ export default function App ({ }: AppProps) {
   return (
     <Switch>
       <AuthenticatedRoute path='/activity' component={Search} />
+      <AuthenticatedRoute
+        path='/compose/discussion'
+        render={props =>
+          <ComposeConversation
+            draftId={decodeURIComponent(props.match.params.draftId)}
+            {...props}
+          />}
+      />
       <AuthenticatedRoute
         path='/conversations/:id'
         render={props =>

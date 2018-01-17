@@ -8,21 +8,22 @@ import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import spacing from 'material-ui/styles/spacing'
 import * as auth from 'poodle-core/lib/actions/auth'
 import * as chrome from 'poodle-core/lib/actions/chrome'
-import { type ComposeProps, ComposeHOC } from 'poodle-core/lib/compose'
+import * as compose from 'poodle-core/lib/compose'
 import PropTypes from 'prop-types'
 import provideContent, { type ContentProps } from './provideContent'
 import * as React from 'react'
-import imapClient from '../../imapClient'
+import { type ConnectedComponentClass } from 'react-redux'
 
 type OwnProps = {
   account: auth.Account,
   activity: DerivedActivity,
   conversation: Conversation,
+  draftId: compose.ID,
   hintText?: string,
   showAddPeople?: boolean
 }
 
-type Props = OwnProps & ComposeProps & { initialContent: string }
+type Props = OwnProps & compose.Props & { initialContent: string }
 
 const styles = {
   activityCard: {
@@ -44,7 +45,6 @@ export function EditNote (props: Props) {
   function onEdit (event) {
     event.preventDefault()
     props.onEdit(
-      props.account,
       props.activity,
       props.conversation,
       recipients,
@@ -132,11 +132,12 @@ function onMenuAction (
   }
 }
 
-export const EditNoteWithState: React.ComponentType<
-  OwnProps & { initialContent: string }
-> = ComposeHOC({ imapClient }, EditNote)
+export const EditNoteWithState: ConnectedComponentClass<
+  OwnProps & { initialContent: string },
+  Props & OwnProps & { initialContent: string }
+> = compose.ComposeHOC(EditNote)
 
-const EditNoteWithStaetAndInitialContent: React.ComponentType<
+const EditNoteWithStateAndInitialContent: React.ComponentType<
   OwnProps
 > = provideContent(function GetInitialContent (
   props: OwnProps & ContentProps
@@ -155,4 +156,4 @@ const EditNoteWithStaetAndInitialContent: React.ComponentType<
   }
 })
 
-export default EditNoteWithStaetAndInitialContent
+export default EditNoteWithStateAndInitialContent

@@ -2,7 +2,6 @@
 
 import * as compose from 'arfe/lib/compose'
 import composeLike from 'arfe/lib/compose/like'
-import composeConversation from 'arfe/lib/compose/conversation'
 import * as Addr from 'arfe/lib/models/Address'
 import Message from 'arfe/lib/models/Message'
 import * as cache from 'poodle-service/lib/cache'
@@ -53,26 +52,6 @@ function * sendLike (
   } finally {
     yield put(queue.doneSendingLikes(action.likedObjectUris))
   }
-}
-
-function * newConversation (
-  deps: Dependencies,
-  action: queue.Action
-): Generator<Effect, void, any> {
-  if (action.type !== queue.NEW_CONVERSATION) {
-    return
-  }
-
-  const { account, recipients, content, subject } = action
-  const messageBuilder = composeConversation({
-    ...recipients,
-    content: {
-      mediaType: content.mediaType,
-      stream: stringToStream(content.string)
-    },
-    subject
-  })
-  yield * transmit(deps, account, messageBuilder)
 }
 
 function * transmit (
@@ -128,7 +107,6 @@ export default function * root (
   deps: Dependencies
 ): Generator<Effect, void, any> {
   yield all([
-    fork(takeEvery, queue.NEW_CONVERSATION, newConversation, deps),
     fork(takeEvery, queue.SEND_LIKES, sendLike, deps)
   ])
 }

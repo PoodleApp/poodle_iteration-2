@@ -10,18 +10,18 @@ import * as m from 'mori'
 import PropTypes from 'prop-types'
 import * as React from 'react'
 import * as auth from 'poodle-core/lib/actions/auth'
-import { type ComposeProps, ComposeHOC } from 'poodle-core/lib/compose'
-import imapClient from '../imapClient'
+import * as compose from 'poodle-core/lib/compose'
 import { type State } from '../reducers'
 
 type OwnProps = {
   account: auth.Account,
   conversation: Conversation,
+  draftId: compose.ID,
   hintText?: string,
   showAddPeople?: boolean
 }
 
-type Props = OwnProps & ComposeProps
+type Props = OwnProps & compose.Props
 
 const styles = {
   activityCard: {
@@ -41,7 +41,7 @@ export function ComposeReply (props: Props) {
 
   function onSend (event) {
     event.preventDefault()
-    props.onSend(props.account, props.conversation, recipients, {
+    props.onReply(props.conversation, recipients, {
       mediaType: 'text/html',
       string: marked(props.content || '')
     })
@@ -118,6 +118,6 @@ function onMenuAction (
   }
 }
 
-export default (ComposeHOC({ imapClient }, ComposeReply): React.ComponentType<
+export default (compose.ComposeHOC(ComposeReply): React.ComponentType<
   OwnProps
 >)
