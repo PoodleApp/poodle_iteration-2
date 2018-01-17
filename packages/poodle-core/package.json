@@ -62,7 +62,7 @@
     "lib/"
   ],
   "peerDependencies": {
-    "kefir": "^3.8.0",
+    "kefir": "^3.8.1",
     "react-redux": "*",
     "redux": "*",
     "redux-saga": "*"

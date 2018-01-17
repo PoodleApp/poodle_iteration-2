@@ -52,7 +52,7 @@
     "arfe": "link:../arfe",
     "electron-context-menu": "^0.9.1",
     "history": "^4.6.1",
-    "kefir": "^3.7.3",
+    "kefir": "3.8.1",
     "keytar": "^3.0.2",
     "marked": "^0.3.6",
     "material-ui": "^0.19.0",
