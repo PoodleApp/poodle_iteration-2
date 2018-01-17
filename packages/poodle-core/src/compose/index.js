@@ -8,6 +8,10 @@ import { type Account } from '../actions/auth'
 import * as compose from './actions'
 import { type State, getContent, isSending } from './reducer'
 
+export { default as reducer } from './reducer'
+export type { State } from './reducer'
+export { default as sagas } from './sagas'
+
 type ExpectedProps = {
   account: Account,
   draftId: ID
