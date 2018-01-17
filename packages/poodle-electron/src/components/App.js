@@ -1,5 +1,6 @@
 /* @flow */
 
+import * as queryString from 'query-string'
 import React from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import Search from './channels/Search'
@@ -16,11 +17,10 @@ export default function App ({ }: AppProps) {
       <AuthenticatedRoute path='/activity' component={Search} />
       <AuthenticatedRoute
         path='/compose/discussion'
-        render={props =>
-          <ComposeConversation
-            draftId={decodeURIComponent(props.match.params.draftId)}
-            {...props}
-          />}
+        render={props => {
+          const query = queryString.parse(props.location.search)
+          return <ComposeConversation draftId={query.draftId} {...props} />
+        }}
       />
       <AuthenticatedRoute
         path='/conversations/:id'

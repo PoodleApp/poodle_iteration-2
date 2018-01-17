@@ -1,7 +1,11 @@
 /* @flow */
 
+import * as authActions from 'poodle-core/lib/actions/auth'
+import * as React from 'react'
+
 type Props = {
-  draftId: ?string
+  account: authActions.Account,
+  draftId: string
 }
 
 export default function ComposeConversation (props: Props) {

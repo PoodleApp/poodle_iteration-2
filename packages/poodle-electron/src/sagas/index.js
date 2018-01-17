@@ -4,6 +4,7 @@ import keytar from 'keytar'
 import * as auth from 'poodle-core/lib/actions/auth'
 import * as compose from 'poodle-core/lib/compose'
 import authSaga, { type Dependencies } from 'poodle-core/lib/sagas/auth'
+import chromeSaga from 'poodle-core/lib/sagas/chrome'
 import queueSaga from 'poodle-core/lib/queue/saga'
 import { type OauthCredentials } from 'poodle-service/lib/models/ImapAccount'
 import { all, fork } from 'redux-saga/effects'
@@ -55,6 +56,7 @@ const authDeps: Dependencies = {
 export default function * root (): Generator<Effect, void, any> {
   yield all([
     fork(authSaga, authDeps),
+    fork(chromeSaga),
     fork(compose.sagas, { imapClient }),
     fork(queueSaga, { imapClient })
   ])

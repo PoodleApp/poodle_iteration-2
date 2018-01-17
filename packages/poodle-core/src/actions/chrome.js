@@ -5,19 +5,19 @@
  */
 
 import { type URI } from 'arfe/lib/models/uri'
+import { type Account } from './auth'
 
-export const START_EDITING: 'chrome/startEditing' = 'chrome/startEditing'
-export const STOP_EDITING: 'chrome/stopEditing' = 'chrome/stopEditing'
-export const DISMISS_ERROR: 'chrome/dismissError' = 'chrome/dismissError'
-export const DISMISS_NOTIFY: 'chrome/dismissNotify' = 'chrome/dismissNotify'
-export const LEFT_NAV_TOGGLE: 'chrome/leftNavToggle' = 'chrome/leftNavToggle'
-export const SHOW_ERROR: 'chrome/showError' = 'chrome/showError'
-export const SHOW_NOTIFICATION: 'chrome/showNotification' =
-  'chrome/showNotification'
-export const INDICATE_LOADING: 'chrome/indicateLoading' =
-  'chrome/indicateLoading'
-export const DONE_LOADING: 'chrome/doneLoading' = 'chrome/doneLoading'
-export const SEARCH: 'chrome/search' = 'chrome/search'
+export const START_EDITING = 'chrome/startEditing'
+export const STOP_EDITING = 'chrome/stopEditing'
+export const DISMISS_ERROR = 'chrome/dismissError'
+export const DISMISS_NOTIFY = 'chrome/dismissNotify'
+export const LEFT_NAV_TOGGLE = 'chrome/leftNavToggle'
+export const COMPOSE_NEW_DISCUSSION = 'chrome/composeNewDiscussion'
+export const SHOW_ERROR = 'chrome/showError'
+export const SHOW_NOTIFICATION = 'chrome/showNotification'
+export const INDICATE_LOADING = 'chrome/indicateLoading'
+export const DONE_LOADING = 'chrome/doneLoading'
+export const SEARCH = 'chrome/search'
 
 export type Action =
   | { type: typeof START_EDITING, activityId: URI }
@@ -25,6 +25,7 @@ export type Action =
   | { type: typeof DISMISS_ERROR, index: number }
   | { type: typeof DISMISS_NOTIFY }
   | { type: typeof LEFT_NAV_TOGGLE, open: ?boolean }
+  | { type: typeof COMPOSE_NEW_DISCUSSION, account: Account }
   | { type: typeof SHOW_ERROR, error: Error }
   | { type: typeof SHOW_NOTIFICATION, notification: string }
   | { type: typeof INDICATE_LOADING, key: string, message: string }
@@ -51,6 +52,13 @@ export function leftNavToggle (open: ?boolean): Action {
   return {
     type: LEFT_NAV_TOGGLE,
     open
+  }
+}
+
+export function composeNewDiscussion (account: Account): Action {
+  return {
+    type: COMPOSE_NEW_DISCUSSION,
+    account
   }
 }
 

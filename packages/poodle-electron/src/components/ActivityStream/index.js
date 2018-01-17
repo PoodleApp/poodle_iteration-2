@@ -17,14 +17,15 @@ import * as authActions from 'poodle-core/lib/actions/auth'
 import * as chrome from 'poodle-core/lib/actions/chrome'
 import { type Slurp } from 'poodle-core/lib/slurp'
 import { type ConversationListItem } from 'poodle-service/lib/tasks'
-import React from 'react'
+import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { type Dispatch } from 'redux'
 
 import Avatar from '../Avatar'
-import ChannelListSidebar from './ChannelListSidebar'
+import ComposeButton from '../ComposeButton'
 import Errors from '../Errors'
 import SearchBar from '../SearchBar'
+import ChannelListSidebar from './ChannelListSidebar'
 
 type Props = {
   account: authActions.Account,
@@ -131,6 +132,7 @@ export default function ActivityStream (props: Props) {
           <ChannelListSidebar />
         </nav>
       </div>
+      <ComposeButton account={props.account} />
       <Errors errors={props.errors} onDismiss={props.onDismissError} />
     </div>
   )

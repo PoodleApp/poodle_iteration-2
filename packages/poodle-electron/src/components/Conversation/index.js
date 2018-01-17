@@ -18,6 +18,7 @@ import * as router from 'react-router-redux'
 import { perform } from '../../imapClient'
 
 import ActivityView from '../ActivityView'
+import ComposeButton from '../ComposeButton'
 import ComposeReply from '../ComposeReply'
 
 import type { Match } from 'react-router-dom'
@@ -132,6 +133,7 @@ export function Conversation (props: Props) {
           {content}
         </main>
       </div>
+      <ComposeButton account={props.account} />
     </div>
   )
 }
