@@ -281,9 +281,9 @@ function addressMismatch (
 export function participants (
   activities: Seqable<Activity>
 ): {
-  to: Seq<Address>,
-  from: Seq<Address>,
-  cc: Seq<Address>
+  to: Seqable<Address>,
+  from: Seqable<Address>,
+  cc: Seqable<Address>
 } {
   const { to, from, cc } = m.reduce(
     (ls, activity) => {

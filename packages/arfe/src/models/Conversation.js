@@ -22,9 +22,9 @@ import type { Thread } from './Thread'
 import type { URI } from './uri'
 
 export type Participants = {
-  to: Seq<Address>,
-  from: Seq<Address>,
-  cc: Seq<Address>
+  to: Seqable<Address>,
+  from: Seqable<Address>,
+  cc: Seqable<Address>
 }
 
 type ConstructorOpts = {

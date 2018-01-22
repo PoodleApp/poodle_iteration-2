@@ -6,7 +6,7 @@ import { type Dispatch } from 'redux'
 import * as redux from 'react-redux'
 import { type Account } from '../actions/auth'
 import * as compose from './actions'
-import { type State, getContent, isSending } from './reducer'
+import { type State, getContent, getRecipients, isSending } from './reducer'
 
 export { default as reducer } from './reducer'
 export type { State } from './reducer'
@@ -24,7 +24,7 @@ export type Props = {
   content: string,
   draftId: ID,
   dispatch: (action: Object) => void,
-  onContentChange: (content: string) => void,
+  onContentChange: (_: compose.Content) => void,
   onDiscard: () => void,
   onEdit: (
     activity: DerivedActivity,
@@ -42,6 +42,7 @@ export type Props = {
     content: compose.Content,
     subject: string
   ) => void,
+  recipients: ?Participants,
   sending: boolean
 }
 
@@ -56,6 +57,7 @@ export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
   ) {
     return {
       content: getContent(state.compose, ownProps.draftId),
+      recipients: getRecipients(state.compose, ownProps.draftId),
       sending: isSending(state.compose, ownProps.draftId)
     }
   }
