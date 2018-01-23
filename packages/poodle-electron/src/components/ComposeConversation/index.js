@@ -10,6 +10,7 @@ import spacing from 'material-ui/styles/spacing'
 import * as m from 'mori'
 import * as React from 'react'
 import * as router from 'react-router-redux'
+import EditRecipients from '../EditRecipients'
 
 const styles = {
   body: {
@@ -49,23 +50,29 @@ export function ComposeConversation (props: compose.Props) {
 }
 
 function Composer (props: compose.Props) {
-  const { content } = props
-  // const recipients = props.recipients || { to:  }
-  // TODO: ^^
-
+  const content = props.content && props.content.string
+  const mediaType = props.content && props.content.mediaType
+  const subject = props.subject
+  const valid = props.content && props.recipients
+  const onNewDiscussion = () => {
+    const { content, recipients } = props
+    if (content && recipients && valid) {
+      props.onNewDiscussion(recipients, content, subject)
+    }
+  }
   return (
     <form style={styles.body} onSubmit={onNewDiscussion}>
+      <EditRecipients {...props} />
+      <br />
       <TextField
-        hintText={'To:'}
+        hintText='Subject'
         multiLine={false}
         fullWidth={true}
-        name='recipients'
-        onChange={event => {
-          recipients = event.currentTarget.value
-        }}
+        name='subject'
+        onChange={event => props.onSubjectChange(event.target.value)}
+        value={props.subject || ''}
       />
       <br />
-
       <TextField
         hintText={'Write your message here'}
         multiLine={true}
@@ -73,16 +80,16 @@ function Composer (props: compose.Props) {
         name='body'
         onChange={event =>
           props.onContentChange({
-            mediaType: 'text/html',
+            mediaType: 'text/html', // TODO
             string: event.currentTarget.value
           })}
-        value={content}
+        value={content || ''}
       />
       <br />
 
       <FlatButton
         label='Send'
-        disabled={props.sending}
+        disabled={props.sending || !valid}
         onClick={onNewDiscussion}
       />
     </form>

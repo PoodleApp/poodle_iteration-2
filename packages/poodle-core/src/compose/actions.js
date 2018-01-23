@@ -12,6 +12,7 @@ export const SENDING = 'compose/sending'
 export const SENT = 'compose/sent'
 export const SET_CONTENT = 'compose/setContent'
 export const SET_RECIPIENTS = 'compose/setRecipients'
+export const SET_SUBJECT = 'compose/setSubject'
 
 export type Action =
   | {
@@ -41,7 +42,7 @@ export type Action =
       draftId: ID,
       recipients: Participants,
       content: Content,
-      subject: string
+      subject: ?string
     }
   | {
       type: typeof SENDING,
@@ -60,6 +61,11 @@ export type Action =
       type: typeof SET_RECIPIENTS,
       draftId: ID,
       recipients: Participants
+    }
+  | {
+      type: typeof SET_SUBJECT,
+      draftId: ID,
+      subject: string
     }
 
 export type Content = {
@@ -107,7 +113,7 @@ export function newDiscussion (
   account: Account,
   recipients: Participants,
   content: Content,
-  subject: string
+  subject: ?string
 ): Action {
   return {
     type: NEW_DISCUSSION,
@@ -133,4 +139,8 @@ export function setContent (draftId: ID, content: Content): Action {
 
 export function setRecipients (draftId: ID, recipients: Participants): Action {
   return { type: SET_RECIPIENTS, draftId, recipients }
+}
+
+export function setSubject (draftId: ID, subject: string): Action {
+  return { type: SET_SUBJECT, draftId, subject }
 }

@@ -6,7 +6,7 @@ import { type Dispatch } from 'redux'
 import * as redux from 'react-redux'
 import { type Account } from '../actions/auth'
 import * as compose from './actions'
-import { type State, getContent, getRecipients, isSending } from './reducer'
+import * as reducer from './reducer'
 
 export { default as reducer } from './reducer'
 export type { State } from './reducer'
@@ -21,7 +21,7 @@ type ExpectedProps = {
 // from `ExpectedProps`, which must be passed in.
 export type Props = {
   account: Account,
-  content: string,
+  content: ?compose.Content,
   draftId: ID,
   dispatch: (action: Object) => void,
   onContentChange: (_: compose.Content) => void,
@@ -40,10 +40,13 @@ export type Props = {
   onNewDiscussion: (
     recipients: Participants,
     content: compose.Content,
-    subject: string
+    subject: ?string
   ) => void,
+  onRecipientsChange: (recipients: Participants) => void,
+  onSubjectChange: (subject: string) => void,
   recipients: ?Participants,
-  sending: boolean
+  sending: boolean,
+  subject: ?string
 }
 
 export type ID = string
@@ -51,14 +54,16 @@ export type ID = string
 export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
   component: *
 ) {
-  function mapStateToProps<S: { compose: State }> (
+  function mapStateToProps<S: { compose: reducer.State }> (
     state: S,
     ownProps: OwnProps
   ) {
+    const { draftId } = ownProps
     return {
-      content: getContent(state.compose, ownProps.draftId),
-      recipients: getRecipients(state.compose, ownProps.draftId),
-      sending: isSending(state.compose, ownProps.draftId)
+      content: reducer.getContent(state.compose, draftId),
+      recipients: reducer.getRecipients(state.compose, draftId),
+      sending: reducer.isSending(state.compose, draftId),
+      subject: reducer.getSubject(state.compose, draftId)
     }
   }
   function mapDispatchToProps (
@@ -81,6 +86,12 @@ export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
       },
       onNewDiscussion (...args) {
         dispatch(compose.newDiscussion(draftId, account, ...args))
+      },
+      onRecipientsChange (...args) {
+        dispatch(compose.setRecipients(draftId, ...args))
+      },
+      onSubjectChange (...args) {
+        dispatch(compose.setSubject(draftId, ...args))
       }
     }
   }

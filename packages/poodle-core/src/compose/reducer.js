@@ -10,7 +10,8 @@ type ID = string
 type DraftState = {
   content: ?Content,
   recipients: ?Participants,
-  sending: boolean
+  sending: boolean,
+  subject: ?string
 }
 
 export type State = {
@@ -24,7 +25,8 @@ export const initialState = {
 export const initialDraftState = Object.freeze({
   content: null,
   recipients: null,
-  sending: false
+  sending: false,
+  subject: null
 })
 
 export default function reducer (
@@ -59,6 +61,12 @@ export default function reducer (
         ...draft,
         recipients
       }))
+    case compose.SET_SUBJECT:
+      const subject = action.subject
+      return updateDraftState(state, action.draftId, draft => ({
+        ...draft,
+        subject
+      }))
     default:
       return state
   }
@@ -90,6 +98,10 @@ export function getContent (state: State, draftId: ID): ?Content {
 
 export function getRecipients (state: State, draftId: ID): ?Participants {
   return withDraftState(state, draftId, draft => draft.recipients)
+}
+
+export function getSubject (state: State, draftId: ID): ?string {
+  return withDraftState(state, draftId, draft => draft.subject)
 }
 
 export function isSending (state: State, draftId: ID): boolean {
