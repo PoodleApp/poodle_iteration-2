@@ -55,13 +55,11 @@ export function ComposeConversation (props: compose.Props) {
 
 function Composer (props: compose.Props) {
   const content = props.content && props.content.string
-  const mediaType = props.content && props.content.mediaType
   const subject = props.subject
-  const valid = props.content && props.recipients
   const onNewDiscussion = () => {
-    const { content, recipients } = props
-    if (content && recipients && valid) {
-      props.onNewDiscussion(recipients, content, subject)
+    const { content, participants, valid } = props
+    if (content && participants && valid) {
+      props.onNewDiscussion(participants, content, subject)
     }
   }
   return (
@@ -92,7 +90,7 @@ function Composer (props: compose.Props) {
       <br />
       <FlatButton
         label='Send'
-        disabled={props.sending || !valid}
+        disabled={props.sending || !props.valid}
         onClick={onNewDiscussion}
       />
     </form>

@@ -1,6 +1,5 @@
 /* @flow */
 
-import { type Participants } from 'arfe/lib/models/Conversation'
 import * as m from 'mori'
 import * as compose from './actions'
 import { type Action, type Content } from './actions'
@@ -9,7 +8,7 @@ type ID = string
 
 type DraftState = {
   content: ?Content,
-  recipients: ?Participants,
+  recipients: ?compose.Recipients,
   sending: boolean,
   subject: ?string
 }
@@ -96,7 +95,7 @@ export function getContent (state: State, draftId: ID): ?Content {
   return withDraftState(state, draftId, draft => draft.content)
 }
 
-export function getRecipients (state: State, draftId: ID): ?Participants {
+export function getRecipients (state: State, draftId: ID): ?compose.Recipients {
   return withDraftState(state, draftId, draft => draft.recipients)
 }
 

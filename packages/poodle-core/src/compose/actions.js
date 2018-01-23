@@ -14,6 +14,12 @@ export const SET_CONTENT = 'compose/setContent'
 export const SET_RECIPIENTS = 'compose/setRecipients'
 export const SET_SUBJECT = 'compose/setSubject'
 
+export type Recipients = {
+  to?: string,
+  cc?: string,
+  bcc?: string
+}
+
 export type Action =
   | {
       type: typeof DISCARD,
@@ -60,7 +66,7 @@ export type Action =
   | {
       type: typeof SET_RECIPIENTS,
       draftId: ID,
-      recipients: Participants
+      recipients: Recipients
     }
   | {
       type: typeof SET_SUBJECT,
@@ -137,7 +143,10 @@ export function setContent (draftId: ID, content: Content): Action {
   return { type: SET_CONTENT, content, draftId }
 }
 
-export function setRecipients (draftId: ID, recipients: Participants): Action {
+export function setRecipients (
+  draftId: ID,
+  recipients: Recipients
+): Action {
   return { type: SET_RECIPIENTS, draftId, recipients }
 }
 

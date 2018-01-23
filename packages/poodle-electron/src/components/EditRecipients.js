@@ -1,17 +1,20 @@
 /* @flow */
 
 import * as Addr from 'arfe/lib/models/Address'
-import { type Participants } from 'arfe/lib/models/Conversation'
 import TextField from 'material-ui/TextField'
+import * as compose from 'poodle-core/lib/compose/actions'
 import * as React from 'react'
 
 type Props = {
-  onRecipientsChange: (recipients: Participants) => void,
-  recipients: ?Participants
+  onRecipientsChange: (recipients: compose.Recipients) => void,
+  recipients: ?compose.Recipients
 }
 
 export default function EditRecipients (props: Props) {
-  const recipients = props.recipients || { to: [], from: [], cc: [] }
+  const recipients = props.recipients || {}
+  const errorText = recipients.to && !Addr.parseAddressList(recipients.to)
+    ? 'Invalid address list'
+    : ''
   return (
     <TextField
       hintText={'To:'}
@@ -19,12 +22,14 @@ export default function EditRecipients (props: Props) {
       fullWidth={true}
       name='recipients'
       onChange={event => {
-        const to = Addr.parseAddressList(event.currentTarget.value) || []
+        const to = event.currentTarget.value
         props.onRecipientsChange({
           ...recipients,
           to
         })
       }}
+      value={recipients.to || ''}
+      errorText={errorText}
     />
   )
 }

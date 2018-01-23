@@ -58,7 +58,27 @@ export function build ({
     : new Address({ mailbox, host })
 }
 
-export function parseAddressList (as: string): ?(Address[]) {
+const specialChar = /[()<>\[\]:;@\\,."]/
+
+// Print an address according to RFC 5322
+export function formatAddress (a: Address): string {
+  const rawName = a.name
+  if (!rawName) {
+    return `${a.mailbox}@${a.host}`
+  }
+  const name = rawName.match(specialChar)
+    ? '"' + rawName.replace(/"/g, '\\"') + '"'
+    : rawName
+  return `${name} <${a.mailbox}@${a.host}>`
+}
+
+// Print list of addresses as a single string according to RFC 5322
+export function formatAddressList (as: Address[]): string {
+  return as.map(formatAddress).join(', ')
+}
+
+// Parse a list of addresses according to RFC 5322
+export function parseAddressList (as: ?string): ?(Address[]) {
   const results = addrs.parseAddressList(as)
   if (!results) {
     return results

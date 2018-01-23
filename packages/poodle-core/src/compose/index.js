@@ -1,5 +1,6 @@
 /* @flow */
 
+import * as Addr from 'arfe/lib/models/Address'
 import Conversation, { type Participants } from 'arfe/lib/models/Conversation'
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import { type Dispatch } from 'redux'
@@ -42,11 +43,13 @@ export type Props = {
     content: compose.Content,
     subject: ?string
   ) => void,
-  onRecipientsChange: (recipients: Participants) => void,
+  onRecipientsChange: (recipients: compose.Recipients) => void,
   onSubjectChange: (subject: string) => void,
-  recipients: ?Participants,
+  recipients: ?compose.Recipients,
+  participants: ?Participants,
   sending: boolean,
-  subject: ?string
+  subject: ?string,
+  valid: boolean
 }
 
 export type ID = string
@@ -59,11 +62,21 @@ export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
     ownProps: OwnProps
   ) {
     const { draftId } = ownProps
+    const content = reducer.getContent(state.compose, draftId)
+    const recipients = reducer.getRecipients(state.compose, draftId)
+    const to = recipients && Addr.parseAddressList(recipients.to)
+    const participants = to && {
+      to,
+      from: [],
+      cc: []
+    }
     return {
-      content: reducer.getContent(state.compose, draftId),
-      recipients: reducer.getRecipients(state.compose, draftId),
+      content,
+      recipients,
+      participants,
       sending: reducer.isSending(state.compose, draftId),
-      subject: reducer.getSubject(state.compose, draftId)
+      subject: reducer.getSubject(state.compose, draftId),
+      valid: content && participants
     }
   }
   function mapDispatchToProps (
