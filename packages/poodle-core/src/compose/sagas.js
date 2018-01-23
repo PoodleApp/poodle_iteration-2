@@ -7,9 +7,11 @@ import * as compose from 'arfe/lib/compose'
 import * as Addr from 'arfe/lib/models/Address'
 import Message from 'arfe/lib/models/Message'
 import { type MessagePart } from 'arfe/lib/models/MessagePart'
+import { type URI } from 'arfe/lib/models/uri'
 import * as cache from 'poodle-service/lib/cache'
 import * as C from 'poodle-service/lib/ImapInterface/Client'
 import * as tasks from 'poodle-service/lib/tasks'
+import * as router from 'react-router-redux'
 import {
   type Effect,
   all,
@@ -92,7 +94,10 @@ function * sendNewDiscussion (
     },
     subject
   })
-  yield * transmit(deps, draftId, account, messageBuilder)
+  const messageUri = yield * transmit(deps, draftId, account, messageBuilder)
+  if (messageUri) {
+    yield put(router.replace(`/conversations/${encodeURIComponent(messageUri)}`))
+  }
 }
 
 function * transmit (
@@ -100,7 +105,7 @@ function * transmit (
   draftId: string,
   account: Account,
   messageBuilder: compose.Builder<Message>
-): Generator<Effect, void, any> {
+): Generator<Effect, ?URI, any> {
   const sender = Addr.build(account)
   const { message, parts } = yield compose.build(messageBuilder, sender)
   try {
@@ -140,6 +145,7 @@ function * transmit (
     console.log('DeliveryResult') // TODO: debugging output
     console.dir(result)
     yield put(composeActions.sent(draftId))
+    return message.uri
   } catch (err) {
     yield put(chrome.showError(err))
   }
