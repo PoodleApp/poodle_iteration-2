@@ -21,6 +21,10 @@ const styles = {
     flex: 1,
     padding: spacing.desktopGutter + 'px'
   },
+  form: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
   root: {
     display: 'flex',
     minHeight: '100vh',
@@ -61,7 +65,7 @@ function Composer (props: compose.Props) {
     }
   }
   return (
-    <form style={styles.body} onSubmit={onNewDiscussion}>
+    <form style={styles.form} onSubmit={onNewDiscussion}>
       <EditRecipients {...props} />
       <br />
       <TextField
@@ -86,7 +90,6 @@ function Composer (props: compose.Props) {
         value={content || ''}
       />
       <br />
-
       <FlatButton
         label='Send'
         disabled={props.sending || !valid}
