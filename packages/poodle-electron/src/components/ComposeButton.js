@@ -1,11 +1,24 @@
 /* @flow */
 
 import FloatingActionButton from 'material-ui/FloatingActionButton'
+import spacing from 'material-ui/styles/spacing'
 import ContentAdd from 'material-ui/svg-icons/content/add'
 import * as auth from 'poodle-core/lib/actions/auth'
 import * as chrome from 'poodle-core/lib/actions/chrome'
 import * as React from 'react'
 import * as redux from 'react-redux'
+
+const styles = {
+  floatingButton: {
+    margin: 0,
+    top: 'auto',
+    right: spacing.desktopGutter + 'px',
+    bottom: spacing.desktopGutter + 'px',
+    left: 'auto',
+    position: 'fixed',
+    zIndex: 505
+  }
+}
 
 type Props = {
   onNewDiscussion(account: auth.Account): void
@@ -13,7 +26,10 @@ type Props = {
 
 export function ComposeButton (props: Props) {
   return (
-    <FloatingActionButton onClick={props.onNewDiscussion}>
+    <FloatingActionButton
+      onClick={props.onNewDiscussion}
+      style={styles.floatingButton}
+    >
       <ContentAdd />
     </FloatingActionButton>
   )
@@ -21,7 +37,7 @@ export function ComposeButton (props: Props) {
 
 const ComposeButtonWithActions = redux.connect(null, (dispatch, ownProps) => {
   return {
-    onNewDiscussion() {
+    onNewDiscussion () {
       dispatch(chrome.composeNewDiscussion(ownProps.account))
     }
   }
