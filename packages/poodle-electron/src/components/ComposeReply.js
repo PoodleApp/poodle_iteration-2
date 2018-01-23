@@ -62,7 +62,11 @@ export function ComposeReply (props: Props) {
             multiLine={true}
             fullWidth={true}
             name='body'
-            onChange={event => props.onContentChange(event.currentTarget.value)}
+            onChange={event =>
+              props.onContentChange({
+                mediaType: 'text/html',
+                string: event.currentTarget.value
+              })}
             value={props.content || ''}
           />
           <br />
@@ -118,6 +122,4 @@ function onMenuAction (
   }
 }
 
-export default (compose.ComposeHOC(ComposeReply): React.ComponentType<
-  OwnProps
->)
+export default (compose.ComposeHOC(ComposeReply): React.ComponentType<OwnProps>)

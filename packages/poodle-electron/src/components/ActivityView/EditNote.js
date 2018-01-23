@@ -40,19 +40,15 @@ const styles = {
 
 export function EditNote (props: Props) {
   const recipients = props.conversation.replyRecipients(props.account)
-  const content = typeof props.content === 'string' ? props.content : props.initialContent
+  const content =
+    typeof props.content === 'string' ? props.content : props.initialContent
 
   function onEdit (event) {
     event.preventDefault()
-    props.onEdit(
-      props.activity,
-      props.conversation,
-      recipients,
-      {
-        mediaType: 'text/html',
-        string: content
-      }
-    )
+    props.onEdit(props.activity, props.conversation, recipients, {
+      mediaType: 'text/html',
+      string: content
+    })
   }
 
   return (
@@ -70,7 +66,11 @@ export function EditNote (props: Props) {
             multiLine={true}
             fullWidth={true}
             name='body'
-            onChange={event => props.onContentChange(event.currentTarget.value)}
+            onChange={event =>
+              props.onContentChange({
+                mediaType: 'text/html',
+                string: event.currentTarget.value
+              })}
             value={content}
           />
           <br />
@@ -85,8 +85,8 @@ export function EditNote (props: Props) {
             label='Cancel'
             disabled={props.sending}
             onTouchTap={event => {
-                props.onDiscard()
-                props.dispatch(chrome.stopEditing(props.activity.id))
+              props.onDiscard()
+              props.dispatch(chrome.stopEditing(props.activity.id))
             }}
           />
         </form>
@@ -142,9 +142,7 @@ export const EditNoteWithState: ConnectedComponentClass<
 
 const EditNoteWithStateAndInitialContent: React.ComponentType<
   OwnProps
-> = provideContent(function GetInitialContent (
-  props: OwnProps & ContentProps
-) {
+> = provideContent(function GetInitialContent (props: OwnProps & ContentProps) {
   const { content } = props
   if (content.value) {
     return (
