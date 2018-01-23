@@ -58,8 +58,12 @@ export function build ({
     : new Address({ mailbox, host })
 }
 
-export function parseAddressList (as: string): Address[] {
-  return addrs.parseAddressList(as).map(
+export function parseAddressList (as: string): ?(Address[]) {
+  const results = addrs.parseAddressList(as)
+  if (!results) {
+    return results
+  }
+  return results.map(
     p =>
       new Address({
         name: p.name,

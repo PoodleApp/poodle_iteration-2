@@ -19,7 +19,7 @@ export default function EditRecipients (props: Props) {
       fullWidth={true}
       name='recipients'
       onChange={event => {
-        const to = Addr.parseAddressList(event.currentTarget.value || '')
+        const to = Addr.parseAddressList(event.currentTarget.value) || []
         props.onRecipientsChange({
           ...recipients,
           to
