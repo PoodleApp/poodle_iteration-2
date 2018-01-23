@@ -61,13 +61,13 @@ export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
     state: S,
     ownProps: OwnProps
   ) {
-    const { draftId } = ownProps
+    const { account, draftId } = ownProps
     const content = reducer.getContent(state.compose, draftId)
     const recipients = reducer.getRecipients(state.compose, draftId)
     const to = recipients && Addr.parseAddressList(recipients.to)
     const participants = to && {
       to,
-      from: [],
+      from: [Addr.build(account)],
       cc: []
     }
     return {
