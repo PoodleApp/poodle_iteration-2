@@ -1,5 +1,6 @@
 /* @flow */
 
+import * as Addr from 'arfe/lib/models/Address'
 import { type Participants } from 'arfe/lib/models/Conversation'
 import TextField from 'material-ui/TextField'
 import * as React from 'react'
@@ -18,7 +19,7 @@ export default function EditRecipients (props: Props) {
       fullWidth={true}
       name='recipients'
       onChange={event => {
-        const to = (event.currentTarget.value || '').split(/\s*[,;]+\s*/)
+        const to = Addr.parseAddressList(event.currentTarget.value || '')
         props.onRecipientsChange({
           ...recipients,
           to

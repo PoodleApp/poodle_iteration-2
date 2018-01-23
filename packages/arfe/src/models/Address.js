@@ -1,5 +1,6 @@
 /* @flow */
 
+import * as addrs from 'email-addresses'
 import { mailtoUri } from './uri'
 
 import type { Address as ImapAddress } from 'imap'
@@ -55,4 +56,15 @@ export function build ({
       host
     })
     : new Address({ mailbox, host })
+}
+
+export function parseAddressList (as: string): Address[] {
+  return addrs.parseAddressList(as).map(
+    p =>
+      new Address({
+        name: p.name,
+        mailbox: p.local,
+        host: p.domain
+      })
+  )
 }
