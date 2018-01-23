@@ -23,7 +23,7 @@ type OwnProps = {
   showAddPeople?: boolean
 }
 
-type Props = OwnProps & compose.Props & { initialContent: string }
+type Props = OwnProps & compose.Props & { initialContent: compose.Content }
 
 const styles = {
   activityCard: {
@@ -40,15 +40,11 @@ const styles = {
 
 export function EditNote (props: Props) {
   const recipients = props.conversation.replyRecipients(props.account)
-  const content =
-    typeof props.content === 'string' ? props.content : props.initialContent
+  const content = props.content || props.initialContent
 
   function onEdit (event) {
     event.preventDefault()
-    props.onEdit(props.activity, props.conversation, recipients, {
-      mediaType: 'text/html',
-      string: content
-    })
+    props.onEdit(props.activity, props.conversation, recipients, content)
   }
 
   return (
@@ -71,7 +67,7 @@ export function EditNote (props: Props) {
                 mediaType: 'text/html',
                 string: event.currentTarget.value
               })}
-            value={content}
+            value={content.string}
           />
           <br />
 
@@ -136,8 +132,8 @@ function onMenuAction (
 }
 
 export const EditNoteWithState: ConnectedComponentClass<
-  OwnProps & { initialContent: string },
-  Props & OwnProps & { initialContent: string }
+  OwnProps & { initialContent: compose.Content },
+  Props & OwnProps & { initialContent: compose.Content }
 > = compose.ComposeHOC(EditNote)
 
 const EditNoteWithStateAndInitialContent: React.ComponentType<
@@ -148,7 +144,10 @@ const EditNoteWithStateAndInitialContent: React.ComponentType<
     return (
       <EditNoteWithState
         {...props}
-        initialContent={content.value.content}
+        initialContent={{
+          string: content.value.content,
+          mediaType: content.value.mediaType
+        }}
         mediaType={content.value.mediaType}
       />
     )

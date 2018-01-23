@@ -9,6 +9,7 @@ import { type Account } from '../actions/auth'
 import * as compose from './actions'
 import * as reducer from './reducer'
 
+export type { Content, Recipients } from './actions'
 export { default as reducer } from './reducer'
 export type { State } from './reducer'
 export { default as sagas } from './sagas'

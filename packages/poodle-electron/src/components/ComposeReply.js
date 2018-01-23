@@ -38,13 +38,17 @@ const styles = {
 
 export function ComposeReply (props: Props) {
   const recipients = props.conversation.replyRecipients(props.account)
+  const contentString = props.content && props.content.string
 
   function onSend (event) {
     event.preventDefault()
-    props.onReply(props.conversation, recipients, {
-      mediaType: 'text/html',
-      string: marked(props.content || '')
-    })
+    const content = props.content
+    if (content) {
+      props.onReply(props.conversation, recipients, {
+        mediaType: 'text/html',
+        string: marked(content.string)
+      })
+    }
   }
 
   return (
@@ -64,10 +68,10 @@ export function ComposeReply (props: Props) {
             name='body'
             onChange={event =>
               props.onContentChange({
-                mediaType: 'text/html',
+                mediaType: 'text/markdown',
                 string: event.currentTarget.value
               })}
-            value={props.content || ''}
+            value={contentString || ''}
           />
           <br />
 
