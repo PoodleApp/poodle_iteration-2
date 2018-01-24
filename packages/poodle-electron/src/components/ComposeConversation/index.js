@@ -10,6 +10,7 @@ import spacing from 'material-ui/styles/spacing'
 import * as m from 'mori'
 import * as React from 'react'
 import * as router from 'react-router-redux'
+import AddAttachments from '../compose/AddAttachments'
 import EditRecipients from '../EditRecipients'
 
 const styles = {
@@ -65,7 +66,6 @@ function Composer (props: compose.Props) {
   return (
     <form style={styles.form} onSubmit={onNewDiscussion}>
       <EditRecipients {...props} />
-      <br />
       <TextField
         hintText='Subject'
         multiLine={false}
@@ -74,7 +74,6 @@ function Composer (props: compose.Props) {
         onChange={event => props.onSubjectChange(event.target.value)}
         value={props.subject || ''}
       />
-      <br />
       <TextField
         hintText={'Write your message here'}
         multiLine={true}
@@ -87,7 +86,7 @@ function Composer (props: compose.Props) {
           })}
         value={content || ''}
       />
-      <br />
+      <AddAttachments {...props} />
       <FlatButton
         label='Send'
         disabled={props.sending || !props.valid}

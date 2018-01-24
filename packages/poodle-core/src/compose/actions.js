@@ -13,6 +13,8 @@ export const SENT = 'compose/sent'
 export const SET_CONTENT = 'compose/setContent'
 export const SET_RECIPIENTS = 'compose/setRecipients'
 export const SET_SUBJECT = 'compose/setSubject'
+export const ADD_ATTACHMENTS = 'compose/addAttachments'
+export const REMOVE_ATTACHMENT = 'compose/removeAttachment'
 
 export type Recipients = {
   to?: string,
@@ -73,6 +75,16 @@ export type Action =
       draftId: ID,
       subject: string
     }
+  | {
+    type: typeof ADD_ATTACHMENTS,
+    draftId: ID,
+    attachments: File[]
+  }
+  | {
+    type: typeof REMOVE_ATTACHMENT,
+    draftId: ID,
+    attachment: File
+  }
 
 export type Content = {
   mediaType: string,
@@ -152,4 +164,12 @@ export function setRecipients (
 
 export function setSubject (draftId: ID, subject: string): Action {
   return { type: SET_SUBJECT, draftId, subject }
+}
+
+export function addAttachments (draftId: ID, attachments: File[]): Action {
+  return { type: ADD_ATTACHMENTS, draftId, attachments }
+}
+
+export function removeAttachment (draftId: ID, attachment: File): Action {
+  return { type: REMOVE_ATTACHMENT, draftId, attachment }
 }

@@ -23,6 +23,7 @@ type ExpectedProps = {
 // from `ExpectedProps`, which must be passed in.
 export type Props = {
   account: Account,
+  attachments: ?(File[]),
   content: ?compose.Content,
   draftId: ID,
   dispatch: (action: Object) => void,
@@ -46,6 +47,8 @@ export type Props = {
   ) => void,
   onRecipientsChange: (recipients: compose.Recipients) => void,
   onSubjectChange: (subject: string) => void,
+  onAddAttachments: (attachments: File[]) => void,
+  onRemoveAttachment: (attachment: File) => void,
   recipients: ?compose.Recipients,
   participants: ?Participants,
   sending: boolean,
@@ -72,6 +75,7 @@ export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
       cc: []
     }
     return {
+      attachments: reducer.getAttachments(state.compose, draftId),
       content,
       recipients,
       participants,
@@ -106,6 +110,12 @@ export function ComposeHOC<OwnProps: ExpectedProps, TopState: Object> (
       },
       onSubjectChange (...args) {
         dispatch(compose.setSubject(draftId, ...args))
+      },
+      onAddAttachments (...args) {
+        dispatch(compose.addAttachments(draftId, ...args))
+      },
+      onRemoveAttachment (...args) {
+        dispatch(compose.removeAttachment(draftId, ...args))
       }
     }
   }

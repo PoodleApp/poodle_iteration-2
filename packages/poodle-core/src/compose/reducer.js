@@ -7,6 +7,7 @@ import { type Action, type Content } from './actions'
 type ID = string
 
 type DraftState = {
+  attachments: ?(File[]),
   content: ?Content,
   recipients: ?compose.Recipients,
   sending: boolean,
@@ -22,6 +23,7 @@ export const initialState = {
 }
 
 export const initialDraftState = Object.freeze({
+  attachments: null,
   content: null,
   recipients: null,
   sending: false,
@@ -66,6 +68,24 @@ export default function reducer (
         ...draft,
         subject
       }))
+    case compose.ADD_ATTACHMENTS:
+      const attachments = action.attachments
+      return updateDraftState(state, action.draftId, draft => {
+        const existing = draft.attachments || []
+        return {
+          ...draft,
+          attachments: existing.concat(attachments)
+        }
+      })
+    case compose.REMOVE_ATTACHMENT:
+      const toRemove = action.attachment
+      return updateDraftState(state, action.draftId, draft => {
+        const existing = draft.attachments || []
+        return {
+          ...draft,
+          attachments: existing.filter(a => a !== toRemove)
+        }
+      })
     default:
       return state
   }
@@ -89,6 +109,10 @@ function withDraftState<T> (state: State, draftId: ID, fn: DraftState => T): ?T 
   if (draft) {
     return fn(draft)
   }
+}
+
+export function getAttachments (state: State, draftId: ID): ?(File[]) {
+  return withDraftState(state, draftId, draft => draft.attachments)
 }
 
 export function getContent (state: State, draftId: ID): ?Content {
