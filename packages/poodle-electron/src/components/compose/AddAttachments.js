@@ -33,11 +33,12 @@ const styles = {
 
 export default function AddAttachments (props: Props) {
   // TODO: handle rejected files (second argument to `onDrop` callback)
+  // TODO: Dropzone can provide file previews - at least for images
   const attachments = props.attachments || []
   return (
     <section style={styles.attachmentsEditor}>
       <div>
-        <Dropzone onDrop={props.onAddAttachments}>
+        <Dropzone onDrop={props.onAddAttachments} disablePreview={true}>
           <p style={styles.dropTargetText}>
             To add attachments drop files here, or click to select files.
           </p>
