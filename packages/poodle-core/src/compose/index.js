@@ -40,11 +40,12 @@ export type Props = {
     recipients: Participants,
     content: compose.Content
   ) => void,
-  onNewDiscussion: (
-    recipients: Participants,
+  onNewDiscussion: (opts: {
+    attachments: ?(File[]),
+    participants: Participants,
     content: compose.Content,
     subject: ?string
-  ) => void,
+  }) => void,
   onRecipientsChange: (recipients: compose.Recipients) => void,
   onSubjectChange: (subject: string) => void,
   onAddAttachments: (attachments: File[]) => void,

@@ -48,7 +48,8 @@ export type Action =
       type: typeof NEW_DISCUSSION,
       account: Account,
       draftId: ID,
-      recipients: Participants,
+      attachments: ?(File[]),
+      participants: Participants,
       content: Content,
       subject: ?string
     }
@@ -76,15 +77,15 @@ export type Action =
       subject: string
     }
   | {
-    type: typeof ADD_ATTACHMENTS,
-    draftId: ID,
-    attachments: File[]
-  }
+      type: typeof ADD_ATTACHMENTS,
+      draftId: ID,
+      attachments: File[]
+    }
   | {
-    type: typeof REMOVE_ATTACHMENT,
-    draftId: ID,
-    attachment: File
-  }
+      type: typeof REMOVE_ATTACHMENT,
+      draftId: ID,
+      attachment: File
+    }
 
 export type Content = {
   mediaType: string,
@@ -129,17 +130,21 @@ export function reply (
 export function newDiscussion (
   draftId: ID,
   account: Account,
-  recipients: Participants,
-  content: Content,
-  subject: ?string
+  opts: {
+    attachments: ?(File[]),
+    participants: Participants,
+    content: Content,
+    subject: ?string
+  }
 ): Action {
   return {
     type: NEW_DISCUSSION,
     account,
     draftId,
-    recipients,
-    content,
-    subject
+    attachments: opts.attachments,
+    participants: opts.participants,
+    content: opts.content,
+    subject: opts.subject
   }
 }
 
@@ -155,10 +160,7 @@ export function setContent (draftId: ID, content: Content): Action {
   return { type: SET_CONTENT, content, draftId }
 }
 
-export function setRecipients (
-  draftId: ID,
-  recipients: Recipients
-): Action {
+export function setRecipients (draftId: ID, recipients: Recipients): Action {
   return { type: SET_RECIPIENTS, draftId, recipients }
 }
 

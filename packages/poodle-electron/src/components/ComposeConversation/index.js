@@ -58,9 +58,14 @@ function Composer (props: compose.Props) {
   const content = props.content && props.content.string
   const subject = props.subject
   const onNewDiscussion = () => {
-    const { content, participants, valid } = props
+    const { attachments, content, participants, valid } = props
     if (content && participants && valid) {
-      props.onNewDiscussion(participants, content, subject)
+      props.onNewDiscussion({
+        attachments,
+        participants,
+        content,
+        subject
+      })
     }
   }
   return (

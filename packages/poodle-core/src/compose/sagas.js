@@ -25,6 +25,7 @@ import stringToStream from 'string-to-stream'
 import { type Account } from '../actions/auth'
 import * as chrome from '../actions/chrome'
 import * as composeActions from './actions'
+import contentFromFile from './contentFromFile'
 
 export interface Dependencies {
   imapClient: C.Client
@@ -85,9 +86,17 @@ function * sendNewDiscussion (
   if (action.type !== composeActions.NEW_DISCUSSION) {
     return
   }
-  const { account, recipients, content, draftId, subject } = action
+  const {
+    account,
+    attachments,
+    participants,
+    content,
+    draftId,
+    subject
+  } = action
   const messageBuilder = compose.discussion({
-    ...recipients,
+    ...participants,
+    attachments: attachments ? attachments.map(contentFromFile) : [],
     content: {
       mediaType: content.mediaType,
       stream: stringToStream(content.string)
@@ -96,7 +105,9 @@ function * sendNewDiscussion (
   })
   const messageUri = yield * transmit(deps, draftId, account, messageBuilder)
   if (messageUri) {
-    yield put(router.replace(`/conversations/${encodeURIComponent(messageUri)}`))
+    yield put(
+      router.replace(`/conversations/${encodeURIComponent(messageUri)}`)
+    )
   }
 }
 

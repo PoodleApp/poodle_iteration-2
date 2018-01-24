@@ -46,6 +46,7 @@
   "dependencies": {
     "arfe": "link:../arfe",
     "deep-equal": "^1.0.1",
+    "filereader-stream": "^1.0.0",
     "lodash.mapvalues": "^4.6.0",
     "poodle-service": "link:../poodle-service",
     "process-nextick-args": "^1.0.7",

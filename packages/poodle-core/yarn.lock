@@ -1332,9 +1332,9 @@ elliptic@=3.0.3:
     hash.js "^1.0.0"
     inherits "^2.0.1"
 
-email-addresses@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/email-addresses/-/email-addresses-2.0.2.tgz#cf529f3fe8ec1d1e5967de6b4e36d0cce42ac8fc"
+email-addresses@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/email-addresses/-/email-addresses-3.0.1.tgz#c1fc20c189e7f96d4012d375db5feaccdd24391c"
 
 empower-core@^0.6.1:
   version "0.6.2"
@@ -1589,6 +1589,13 @@ filename-regex@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/filename-regex/-/filename-regex-2.0.1.tgz#c1c4b9bee3e09725ddb106b75c1e301fe2f18b26"
 
+filereader-stream@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/filereader-stream/-/filereader-stream-1.0.0.tgz#25e1728b1b4bd2b041a1ad005ccd1c6a22b43f3c"
+  dependencies:
+    from2 "^2.1.0"
+    typedarray-to-buffer "^3.0.4"
+
 fill-range@^2.1.0:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/fill-range/-/fill-range-2.2.3.tgz#50b77dfd7e469bc7492470963699fe7a8485a723"
@@ -1657,6 +1664,13 @@ form-data@~2.1.1:
     asynckit "^0.4.0"
     combined-stream "^1.0.5"
     mime-types "^2.1.12"
+
+from2@^2.1.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/from2/-/from2-2.3.0.tgz#8bfb5502bde4a4d36cfdeea007fcca21d7e382af"
+  dependencies:
+    inherits "^2.0.1"
+    readable-stream "^2.0.0"
 
 fs.realpath@^1.0.0:
   version "1.0.0"
@@ -2306,7 +2320,7 @@ is-stream@^1.0.0, is-stream@^1.0.1, is-stream@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-stream/-/is-stream-1.1.0.tgz#12d4a3dd4e68e0b79ceb8dbc84173ae80d91ca44"
 
-is-typedarray@~1.0.0:
+is-typedarray@^1.0.0, is-typedarray@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-typedarray/-/is-typedarray-1.0.0.tgz#e479c80858df0c1b11ddda6940f96011fcda4a9a"
 
@@ -2488,12 +2502,6 @@ jws@~3.0.0:
   dependencies:
     base64url "~1.0.4"
     jwa "~1.0.0"
-
-kefir@^3.8.1:
-  version "3.8.1"
-  resolved "https://registry.yarnpkg.com/kefir/-/kefir-3.8.1.tgz#6b202bc78c01ed4aa1c329e885b43631bf62ec0c"
-  dependencies:
-    symbol-observable "1.0.4"
 
 kind-of@^3.0.2:
   version "3.2.2"
@@ -4126,13 +4134,13 @@ supports-color@^4.0.0:
   dependencies:
     has-flag "^2.0.0"
 
-symbol-observable@1.0.4, symbol-observable@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.4.tgz#29bf615d4aa7121bdd898b22d4b3f9bc4e2aa03d"
-
 symbol-observable@^0.2.2:
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-0.2.4.tgz#95a83db26186d6af7e7a18dbd9760a2f86d08f40"
+
+symbol-observable@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.4.tgz#29bf615d4aa7121bdd898b22d4b3f9bc4e2aa03d"
 
 tar-fs@^1.7.0:
   version "1.15.3"
@@ -4270,6 +4278,12 @@ tunnel-agent@~0.4.1:
 tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
+
+typedarray-to-buffer@^3.0.4:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/typedarray-to-buffer/-/typedarray-to-buffer-3.1.2.tgz#1017b32d984ff556eba100f501589aba1ace2e04"
+  dependencies:
+    is-typedarray "^1.0.0"
 
 typedarray@~0.0.5:
   version "0.0.6"
