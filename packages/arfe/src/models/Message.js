@@ -121,11 +121,13 @@ export default class Message {
     return textParts(this.attributes)
   }
 
+  get attachmentParts (): Vector<MessagePart> {
+    return attachmentParts(this.attributes)
+  }
+
   get references (): MessageId[] {
     const val = getHeaderValue('references', this.headers)
-    const refs = typeof val === 'string'
-      ? val.split(/\s+/)
-      : val
+    const refs = typeof val === 'string' ? val.split(/\s+/) : val
     return refs.map(idFromHeaderValue).filter(id => !!id)
   }
 
@@ -274,6 +276,78 @@ function flatParts (msg: MessageAttributes): Seq<MessagePart> {
   }
 }
 
+// Traverse MIME tree, using a `selectSubtrees` callback to choose which
+// subtrees to traverse
+function foldParts<T> (
+  f: (accum: T, part: MessagePart, nestedStructs: MessageStruct[]) => T,
+  accum: T,
+  selectSubtrees: (
+    subtype: string,
+    nestedStructs: MessageStruct[]
+  ) => MessageStruct[],
+  struct: MessageStruct
+): T {
+  const [part, nestedStructs] = unpack(struct)
+  const result = f(accum, part, nestedStructs)
+
+  // Not sure if it is a client library issue: in multipart types I'm seeing the
+  // multipart as the `type` property, with no value for `subtype`. In other
+  // part types `type` and `subtype` are assigned as I expect.
+  const subtype = part.subtype || part.type
+
+  if (nestedStructs.length === 0) {
+    return result
+  }
+  const structs = selectSubtrees(subtype, nestedStructs)
+  return m.reduce(
+    (acc, str) => foldParts(f, acc, selectSubtrees, str),
+    result,
+    selectSubtrees(subtype, nestedStructs)
+  )
+}
+
+// A subtree selector for use with `foldParts`
+function selectPrimaryContent (
+  filter: (_: MessagePart) => boolean // Determines which part to pick in an `alternative`
+): (subtype: string, nestedStructs: MessageStruct[]) => MessageStruct[] {
+  return (subtype, nestedStructs) => {
+    if (subtype === 'mixed') {
+      // mixed: the first part is primary, the remaining parts are attachments
+      return nestedStructs.slice(0, 1)
+    } else if (subtype === 'alternative') {
+      // alternative: recurse into the last part that matches the filter, or that
+      // is an ancestor of a part that matches the predicate
+      // Look ahead to find to try to find a part in each subtree that matches the
+      // filter.
+      const matchingStructs = nestedStructs.filter(struct =>
+        foldParts(
+          (accum, part) => accum || filter(part),
+          false,
+          selectPrimaryContent(filter),
+          struct
+        )
+      )
+      // Identify the last nested struct that contains a part that matches the
+      // filter.
+      return matchingStructs.slice(-1)
+    } else if (subtype === 'related') {
+      // related: the first part is primary, the remaining parts are referenced by
+      // the primary content (e.g., inline images)
+      return nestedStructs.slice(0, 1)
+    } else if (subtype.indexOf('signed') > -1) {
+      // signed: the first part is the primary content (which is signed);
+      // there should be another part, which should be the signature
+      // TODO: verify signatures
+      return nestedStructs.slice(0, 1)
+    } else {
+      // TODO: What to do when encountering unknown multipart subtype?
+      throw new Error(
+        `Encountered unknown multipart subtype: multipart/${subtype}`
+      )
+    }
+  }
+}
+
 // The email spec has rules about which MIME parts in a MIME hierarchy represent
 // content to be displayed as message content, as opposed to attachments,
 // supporting content that may be referred to by the primary content,
@@ -285,81 +359,7 @@ function foldPrimaryContent<T> (
   filter: (_: MessagePart) => boolean, // Determines which part to pick in an `alternative`
   struct: MessageStruct
 ): T {
-  const [part, nestedStructs] = unpack(struct)
-
-  const result = f(accum, part, nestedStructs)
-
-  // Not sure if it is a client library issue: in multipart types I'm seeing the
-  // multipart as the `type` property, with no value for `subtype`. In other
-  // part types `type` and `subtype` are assigned as I expect.
-  const subtype = part.subtype || part.type
-
-  // No subparts means that this is a leaf node on the MIME tree. This is the
-  // base case.
-  if (nestedStructs.length === 0) {
-    return result
-  } else if (subtype === 'mixed') {
-    // mixed: the first part is primary, the remaining parts are attachments
-    const primary = m.first(nestedStructs)
-    if (primary) {
-      return foldPrimaryContent(f, result, filter, primary)
-    } else {
-      return result
-    }
-  } else if (subtype === 'alternative') {
-    // alternative: recurse into the last part that matches the filter, or that
-    // is an ancestor of a part that matches the predicate
-    // Look ahead to find to try to find a part in each subtree that matches the
-    // filter.
-    const nestedMatches: Seq<?MessagePart> = m.map(
-      struct =>
-        foldPrimaryContent(
-          (accum, part) => accum || (filter(part) ? part : undefined),
-          undefined,
-          filter,
-          struct
-        ),
-      nestedStructs
-    )
-
-    // Filter `nestedStructs` down to values that contain a matching part.
-    const matchingStructs: Seq<MessageStruct> = catMaybes(
-      m.map((struct, match) => match && struct, nestedStructs, nestedMatches)
-    )
-
-    // Identify the last nested struct that contains a part that matches the
-    // filter.
-    const primary = m.last(matchingStructs)
-
-    if (primary) {
-      return foldPrimaryContent(f, result, filter, primary)
-    } else {
-      return result
-    }
-  } else if (subtype === 'related') {
-    // related: the first part is primary, the remaining parts are referenced by
-    // the primary content (e.g., inline images)
-    const primary = m.first(nestedStructs)
-    if (primary) {
-      return foldPrimaryContent(f, result, filter, primary)
-    } else {
-      return result
-    }
-  } else if (subtype.indexOf('signed') > -1) {
-    // signed: the first part is the primary content (which is signed);
-    // there should be another part, which should be the signature
-    const primary = m.first(nestedStructs)
-    if (primary) {
-      return foldPrimaryContent(f, result, filter, primary)
-    } else {
-      return result
-    }
-  } else {
-    // TODO: What to do when encountering unknown multipart subtype?
-    throw new Error(
-      `Encountered unknown multipart subtype: multipart/${subtype}`
-    )
-  }
+  return foldParts(f, accum, selectPrimaryContent(filter), struct)
 }
 
 function getPrimaryParts (
@@ -369,6 +369,33 @@ function getPrimaryParts (
   const f = (parts, part) => (filter(part) ? m.conj(parts, part) : parts)
   const zero = m.vector()
   return foldPrimaryContent(f, zero, filter, msg.struct)
+}
+
+// TODO: I think this will get the primary content part if the message contains
+// exactly one part (i.e., no multipart parts)
+function foldAttachmentParts<T> (
+  f: (accum: T, part: MessagePart, nestedStructs: MessageStruct[]) => T,
+  accum: T,
+  filter: (_: MessagePart) => boolean, // Determines which part to pick in an `alternative`
+  struct: MessageStruct
+): T {
+  const fallbackSelector = selectPrimaryContent(filter)
+  function selector (subtype: string, nestedStructs: MessageStruct[]): MessageStruct[] {
+    if (subtype === 'mixed') {
+      // mixed: the first part is primary, the remaining parts are attachments
+      return nestedStructs.slice(1)
+    } else {
+      return fallbackSelector(subtype, nestedStructs)
+    }
+  }
+  return foldParts(f, accum, selector, struct)
+}
+
+function attachmentParts (msg: MessageAttributes): Vector<MessagePart> {
+  const f = (parts, part) => (!P.isMultipart(part) ? m.conj(parts, part) : parts)
+  const filter = _ => true
+  const zero = m.vector()
+  return foldAttachmentParts(f, zero, filter, msg.struct)
 }
 
 /* More user-friendly access to `MessageStruct` values */
