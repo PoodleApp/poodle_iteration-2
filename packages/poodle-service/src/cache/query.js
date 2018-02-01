@@ -178,9 +178,7 @@ export async function fetchPartContent (
   if (!part) {
     throw new Error(`No part with ID ${String(partRef)} for message ${msg.id}`)
   }
-  msg.uriForPart(part)
-  const record = await getPartRecord(msg.uriForPart(part), db)
-  return blobToStream.toStream(record.content)
+  return fetchContentByUri(msg.uriForPart(part), db)
 }
 
 // TODO: in case URI was constructed using a partID instead of a contentID, fall
@@ -191,32 +189,6 @@ export async function fetchContentByUri (
 ): Promise<Readable> {
   const record = await getPartRecord(uri, db)
   return blobToStream.toStream(record.content)
-}
-
-function buildSelector (params: QueryParams): Object {
-  const { labels, mailingList, since } = params
-
-  // if (labels instanceof Array) {
-  //   selector['message.x-gm-labels'] = { $elemMatch: { $in: labels } }
-  // }
-
-  // if (typeof mailingList === 'string') {
-  //   selector.headers = {
-  //     ...(selector.headers || {}),
-  //     { $elemMatch:  }
-  //   }
-  //   selector['headers'] = { $elemMatch:  }
-  // }
-
-  const dateRange =
-    since && typeof since.toISOString === 'function'
-      ? { $gte: since.toISOString().slice(0, 10) }
-      : { $gt: null }
-
-  return {
-    type: 'Message',
-    'message.date': dateRange
-  }
 }
 
 function asMessage ({ message, headers }: MessageRecord): Message {
