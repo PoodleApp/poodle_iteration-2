@@ -80,7 +80,7 @@ export function transaction<R> (
     const stores = storeNames.map(s => tx.objectStore(s))
     try {
       const result = fn.apply(null, stores)
-      result.then(resolve)
+      result.then(resolve, reject)
     } catch (err) {
       reject(err)
       tx.abort()
