@@ -4,254 +4,195 @@ import type Conversation from 'arfe/lib/models/Conversation'
 import Message, * as Msg from 'arfe/lib/models/Message'
 import * as Part from 'arfe/lib/models/MessagePart'
 import unique from 'array-unique'
+import * as blobToStream from 'blob-to-stream'
 import * as kefir from 'kefir'
-import PouchDB from 'pouchdb-node'
-import stream from 'stream'
-import * as pouchdbUtil from '../util/pouchdb'
+import * as kefirUtil from '../util/kefir'
+import * as m from 'mori'
+import * as DB from './indexeddb'
 
 import type { UID } from 'imap'
 import type { Observable } from 'kefir'
 import type { Readable } from 'stream'
-import type { ChangeEvent, MessageRecord, QueryParams } from './types'
+import type { MessageRecord, PartRecord, QueryParams } from './types'
 
-export async function createIndexes (db: PouchDB): Promise<void> {
-  const indexes = [
-    db.createIndex({
-      index: {
-        fields: ['message.date', 'type']
-      },
-      ddoc: 'conversationIds',
-      name: 'conversationIds'
-    }),
-    db.createIndex({
-      index: {
-        fields: ['type', 'conversationId']
-      },
-      ddoc: 'messagesByConversation',
-      name: 'messagesByConversation'
-    }),
-    db.createIndex({
-      index: {
-        fields: ['message.x-gm-thrid']
-      },
-      ddoc: 'messagesByGoogleThreadId',
-      name: 'messagesByGoogleThreadId'
-    }),
-    pouchdbUtil.createDesignDocument(db, {
-      _id: '_design/messages',
-      views: {
-        byUid: {
-          map: `function (doc) {
-            if ('perBoxMetadata' in doc) {
-              doc.perBoxMetadata.forEach(function(meta) {
-                emit([meta.boxName, meta.uidvalidity, meta.uid], 1);
-              });
-            }
-          }`
-        }
-      }
-    })
-  ]
-  await Promise.all(indexes)
-}
-
-export function queryConversations (
-  params: QueryParams,
-  db: PouchDB
-): Observable<Message[], mixed> {
-  const selector = buildSelector(params)
-  const query: { [key: string]: any } = {
-    fields: ['conversationId'],
-    selector
-  }
-
-  // TODO: sorting currently only works if sorted field is selected according
-  // to an inequality operation. That means the `$exists` operator is not
-  // sufficient. See: https://github.com/pouchdb/pouchdb/issues/6266
-  if (selector['message.date']) {
-    query.sort = [{ 'message.date': 'desc' }]
-  }
-
-  return kefir
-    .fromPromise(fetchConversationIds(query, db, params.limit))
-    .flatMap(conversationIds => {
-      const convs = conversationIds.map(id =>
-        kefir.fromPromise(getConversationById(id, db))
-      )
-      return kefir.merge(convs) // build conversations in parallel
-    })
-}
-
-// Fetch the first `limit` distinct conversation IDs that match the given query
-async function fetchConversationIds (
-  query: Object,
-  db: PouchDB,
-  limit: number = 30, // total number of distinct values to fetch
-  skip: number = 0,
-  ids: string[] = [] // IDs that have been fetched so far
-): Promise<string[]> {
-  const { docs } = await db.find({
-    ...query,
-    limit,
-    skip
-  })
-  if (docs.length < 1) {
-    return ids
-  }
-  const newIds = docs.map(doc => doc.conversationId)
-  const updatedIds = unique(ids.concat(newIds))
-  if (updatedIds.length >= limit) {
-    return updatedIds.slice(0, limit)
-  }
-  return fetchConversationIds(query, db, limit, skip + limit, updatedIds)
-}
-
-export async function getConversation (
+export function getConversation (
   uri: string,
-  db: PouchDB
-): Promise<Message[]> {
+  db: DB.DB
+): kefir.Observable<Message> {
   const parsed = Msg.parseMidUri(uri)
-  if (!parsed) {
-    throw new Error(
-      'cannot parse conversation URI according to `mid:` scheme: ' + uri
+  const messageId = parsed && parsed.messageId
+  if (!messageId) {
+    return kefir.constantError(
+      new Error(
+        'cannot parse conversation URI according to `mid:` scheme: ' + uri
+      )
     )
   }
-  const messageId = parsed.messageId
-  const messageRecord = await db.get(messageId)
-  return getConversationById(messageRecord.conversationId, db)
+  return kefir
+    .fromPromise(getMessageRecord(messageId, db))
+    .flatMap(messageRecord =>
+      getConversationById(messageRecord.conversationId, db)
+    )
 }
 
-async function getConversationById (
+function getConversationById (
   conversationId: string,
-  db: PouchDB
-): Promise<Message[]> {
+  db: DB.DB
+): kefir.Observable<Message> {
   if (!conversationId) {
-    throw new Error('Cannot fetch thread without a conversation ID')
+    return kefir.constantError(
+      new Error('Cannot fetch thread without a conversation ID')
+    )
   }
-  const messageRecords = await getThread(conversationId, db)
-  return messageRecords.map(asMessage)
+  return getThread(conversationId, db).map(asMessage)
 }
 
-export async function getMessage (id: string, db: PouchDB): Promise<Message> {
-  const record = await db.get(id)
+export async function hasConversationBeenUpdated (
+  conversation: Conversation,
+  db: DB.DB
+): Promise<boolean> {
+  const messageCount = await DB.transaction(
+    db,
+    ['messages'],
+    'readonly',
+    messages =>
+      DB.count(messages, 'conversationId', DB.IDBKeyRange.only(conversation.id))
+  )
+  return messageCount > m.count(conversation.messages)
+}
+
+export async function getMessage (id: string, db: DB.DB): Promise<Message> {
+  const record = await getMessageRecord(id, db)
   return asMessage(record)
 }
 
-export async function getMessagesByThreadId (
-  threadId: string,
-  db: PouchDB
-): Promise<Message[]> {
-  if (!threadId) {
-    throw new Error('Cannot fetch thread without a thread ID')
-  }
-  return getMessages(
-    {
-      selector: {
-        'message.x-gm-thrid': threadId
-      }
-    },
-    db
+export function getMessageRecord (
+  id: string,
+  db: DB.DB
+): Promise<MessageRecord> {
+  return DB.transaction(db, ['messages'], 'readonly', messages =>
+    DB.get(messages, id)
   )
 }
 
-export async function verifyExistenceUids (
-  query: { boxName: string, uidvalidity: UID, uid: UID }[],
-  db: PouchDB
-): Promise<{ boxName: string, uidvalidity: UID, uid: UID }[]> {
-  const result = await db.query('messages/byUid', {
-    include_docs: false,
-    keys: query.map(({ boxName, uidvalidity, uid }) => [
-      boxName,
-      uidvalidity,
-      uid
-    ])
-  })
-  return result.rows.map(row => row.key)
+export function getPartRecord (uri: string, db: DB.DB): Promise<PartRecord> {
+  return DB.transaction(db, ['messageParts'], 'readonly', messageParts =>
+    DB.get(messageParts, uri).then(({ value }) => value)
+  )
 }
 
-async function getMessages (query: Object, db: PouchDB): Promise<Message[]> {
-  const result = await db.find(query)
-  const messageRecords = result.docs
-  return messageRecords.map(asMessage)
+export function getMessagesByThreadId (
+  threadId: string,
+  db: DB.DB
+): kefir.Observable<Message> {
+  if (!threadId) {
+    return kefir.constantError(
+      new Error('Cannot fetch thread without a thread ID')
+    )
+  }
+  return queryMessages(db, 'googleThreadId', DB.IDBKeyRange.only(threadId))
+}
+
+// Given a list of IMAP UIDs, returns the UIDs that are not present in the
+// cache.
+export function identifyMissingUids (
+  boxName: string,
+  uidvalidity: UID,
+  uids: UID[],
+  db: DB.DB
+): Promise<UID[]> {
+  const [min, max] = findExtrema(uids)
+  const keyRange = DB.IDBKeyRange.bound(
+    [boxName, uidvalidity, min],
+    [boxName, uidvalidity, max],
+    true,
+    true
+  )
+  const stream = DB.txStream(
+    db,
+    ['messages'],
+    'readonly',
+    messages =>
+      DB.query(messages, 'imapLocations', keyRange).map(({ key }) => key[2]) // Get keys, extract UID from each key
+  )
+  const present = kefirUtil.takeAll(stream)
+  const missing = present.map(uidsInCache =>
+    uids.filter(uid => !uidsInCache.includes(uid))
+  )
+  return missing.toPromise()
+}
+
+function findExtrema (xs: UID[]): [UID, UID] {
+  let min = xs[0]
+  let max = xs[0]
+  for (const x of xs) {
+    if (x < min) {
+      min = x
+    }
+    if (x > max) {
+      max = x
+    }
+  }
+  return [min, max]
+}
+
+function queryMessageRecords (
+  db: DB.DB,
+  indexName: string,
+  keyRange: IDBKeyRange,
+  direction?: IDBDirection
+): kefir.Observable<MessageRecord> {
+  return DB.txStream(db, ['messages'], 'readonly', messages =>
+    DB.query(messages, indexName, keyRange, direction).map(({ value }) => value)
+  )
+}
+
+function queryMessages (
+  db: DB.DB,
+  indexName: string,
+  keyRange: IDBKeyRange,
+  direction?: IDBDirection
+): kefir.Observable<Message> {
+  return queryMessageRecords(db, indexName, keyRange, direction).map(asMessage)
 }
 
 /*
  * Get all messages that reference or are referenced by the given message
  * (including the input message itself).
  */
-async function getThread (
+function getThread (
   conversationId: string,
-  db: PouchDB
-): Promise<MessageRecord[]> {
-  const result = await db.find({
-    selector: {
-      type: 'Message',
-      conversationId
-    }
-  })
-  return result.docs
+  db: DB.DB
+): kefir.Observable<MessageRecord> {
+  return queryMessageRecords(
+    db,
+    'conversationId',
+    DB.IDBKeyRange.only(conversationId)
+  )
 }
 
-export function fetchPartContent (
-  db: PouchDB,
+export async function fetchPartContent (
   msg: Message,
-  partRef: Part.PartRef
+  partRef: Part.PartRef,
+  db: DB.DB
 ): Promise<Readable> {
   const part = msg.getPart(partRef)
   if (!part) {
-    return Promise.reject(
-      new Error(`No part with ID ${String(partRef)} for message ${msg.id}`)
-    )
+    throw new Error(`No part with ID ${String(partRef)} for message ${msg.id}`)
   }
-  return db.getAttachment(msg.uriForPart(part), 'content').then(buffer => {
-    const rs = new stream.PassThrough()
-    rs.end(buffer)
-    return rs
-  })
+  msg.uriForPart(part)
+  const record = await getPartRecord(msg.uriForPart(part), db)
+  return blobToStream.toStream(record.content)
 }
 
 // TODO: in case URI was constructed using a partID instead of a contentID, fall
 // back to looking for a record with the matching partID
-export function fetchContentByUri (db: PouchDB, uri: string): Promise<Readable> {
-  return db.getAttachment(uri, 'content').then(buffer => {
-    const rs = new stream.PassThrough()
-    rs.end(buffer)
-    return rs
-  })
-}
-
-export function conversationUpdates (
-  db: PouchDB,
-  conversationUri: string
-): kefir.Observable<ChangeEvent<MessageRecord>, Error> {
-  return kefir.stream(emitter => {
-    const pouchEmitter = db.changes({
-      include_docs: true,
-      live: true,
-      since: 'now'
-    })
-    pouchEmitter.on('change', change => {
-      // TODO: we could use the `filter` option in `db.changes`
-      if (
-        change.doc &&
-        change.doc.type === 'Message'
-        // TODO: test that message belongs to given conversation
-        // change.doc.conversationId &&
-        // U.sameUri(conversationUri, U.midUri(change.doc.conversationId))
-      ) {
-        emitter.value(change)
-      }
-    })
-    pouchEmitter.on('complete', () => {
-      emitter.end()
-    })
-    pouchEmitter.on('error', err => {
-      emitter.error(err)
-    })
-    return () => {
-      pouchEmitter.cancel()
-    }
-  })
+export async function fetchContentByUri (
+  uri: string,
+  db: DB.DB
+): Promise<Readable> {
+  const record = await getPartRecord(uri, db)
+  return blobToStream.toStream(record.content)
 }
 
 function buildSelector (params: QueryParams): Object {
@@ -280,10 +221,6 @@ function buildSelector (params: QueryParams): Object {
   }
 }
 
-function asMessage ({
-  message,
-  headers,
-  perBoxMetadata
-}: MessageRecord): Message {
-  return new Message(message, new Map(headers), perBoxMetadata)
+function asMessage ({ message, headers }: MessageRecord): Message {
+  return new Message(message, new Map(headers))
 }

@@ -119,7 +119,7 @@ function getConversationByThreadIdFromCache (
   return Task.promisify(basic.fetchPartContent).flatMap(fetchPartContent => {
     return basic
       .dbTask(db =>
-        kefir.fromPromise(cache.getMessagesByThreadId(threadId, db))
+        kefirUtil.takeAll(cache.getMessagesByThreadId(threadId, db))
       )
       .flatMap(messages => {
         if (messages.length < 1) {
@@ -146,7 +146,7 @@ function getThreadIds (uids: imap.UID[]): Task<ThreadId> {
 
 /*
  * Downloads a conversation thread using Google's proprietary thread ID IMAP
- * extension; emits IDs of PouchDB records for downloaded messages
+ * extension.
  */
 function downloadThread (threadId: ThreadId): Task<void> {
   return basic
