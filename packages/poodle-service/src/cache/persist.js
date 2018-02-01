@@ -36,6 +36,7 @@ export async function persistMessageRecord (
     DB.update(messages, (existing: ?MessageRecord) => ({
       _id: message._id,
       conversationId: message.conversationId,
+      googleThreadId: message.googleThreadId,
       headers: message.headers,
       message: message.message,
       imapLocations: mergeImapLocations(
@@ -57,6 +58,7 @@ export function messageToRecord (
   return {
     _id: message.id,
     conversationId: message.conversationId,
+    googleThreadId: message.attributes['x-gm-thrid'],
     headers: headers,
     message: message.attributes,
     imapLocations,

@@ -21,6 +21,7 @@ export type ImapLocation = [BoxName, UIDValidity, UID]
 export type MessageRecord = {
   _id: string,
   conversationId: string, // First item in references header, or message ID
+  googleThreadId: ?string,
   headers: Array<[string, any]>,
   message: MessageAttributes,
   imapLocations: ImapLocation[],
