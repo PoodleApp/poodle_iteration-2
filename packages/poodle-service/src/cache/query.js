@@ -77,7 +77,7 @@ export function getMessageRecord (
 
 export function getPartRecord (uri: string, db: DB.DB): Promise<PartRecord> {
   return DB.transaction(db, ['messageParts'], 'readonly', messageParts =>
-    DB.get(messageParts, uri).then(({ value }) => value)
+    DB.get(messageParts, uri)
   )
 }
 
