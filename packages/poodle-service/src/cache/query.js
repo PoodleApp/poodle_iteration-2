@@ -4,7 +4,7 @@ import type Conversation from 'arfe/lib/models/Conversation'
 import Message, * as Msg from 'arfe/lib/models/Message'
 import * as Part from 'arfe/lib/models/MessagePart'
 import unique from 'array-unique'
-import * as blobToStream from 'blob-to-stream'
+import blobToStream from 'blob-to-stream'
 import * as kefir from 'kefir'
 import * as kefirUtil from '../util/kefir'
 import * as m from 'mori'
@@ -188,7 +188,7 @@ export async function fetchContentByUri (
   db: DB.DB
 ): Promise<Readable> {
   const record = await getPartRecord(uri, db)
-  return blobToStream.toStream(record.content)
+  return blobToStream(record.content)
 }
 
 function asMessage ({ message, headers }: MessageRecord): Message {
