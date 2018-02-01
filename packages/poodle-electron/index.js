@@ -3,7 +3,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const contextMenu = require('electron-context-menu')
 const path = require('path')
-const S = require('poodle-service/lib/ImapInterface/Server')
+// const S = require('poodle-service/lib/ImapInterface/Server')
 const url = require('url')
 // const db = require('./lib/db')
 
