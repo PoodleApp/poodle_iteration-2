@@ -186,6 +186,9 @@ export function query<K, T> (
           c.continue()
         }
       }
+      else {
+        emitter.end()
+      }
     }
     return function onUnsubscribe () {
       alive = false
