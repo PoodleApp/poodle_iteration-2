@@ -43,6 +43,9 @@ export function charset (part: MessagePart): ?string {
 }
 
 export function contentType (part: MessagePart): string {
+  if (!part.type) {
+    throw new Error('cannot determine content type of part')
+  }
   if (!part.subtype) {
     // TODO: My observations so far indicate that if there is no value for
     // `subtype`, then the type is `multipart`, and the value given for `type`
