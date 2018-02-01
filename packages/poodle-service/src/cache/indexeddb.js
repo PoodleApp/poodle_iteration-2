@@ -126,20 +126,18 @@ export function toPromise<T> (request: IDBRequest): Promise<T> {
   })
 }
 
-export function get<T> (store: IDBObjectStore, key: any): Promise<T> {
-  return toPromise(store.get(key))
+export class NotFoundException extends Error {}
+
+export async function get<T> (store: IDBObjectStore, key: any): Promise<T> {
+  const value = await toPromise(store.get(key))
+  if (typeof value === 'undefined') {
+    throw new NotFoundException()
+  }
+  return value
 }
 
-export async function maybeGet<T> (
-  store: IDBObjectStore,
-  key: any
-): Promise<?T> {
-  try {
-    return toPromise(store.get(key))
-  } catch (err) {
-    debugger // TODO: what did we get here?
-    return undefined
-  }
+export function maybeGet<T> (store: IDBObjectStore, key: any): Promise<?T> {
+  return toPromise(store.get(key))
 }
 
 export function add<T> (store: IDBObjectStore, data: T): Promise<void> {
