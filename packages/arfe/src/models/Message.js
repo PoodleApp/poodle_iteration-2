@@ -33,13 +33,6 @@ export type HeaderValue =
       params?: { charset?: string }
     }
 
-export type PerBoxMetadata = {
-  boxName: string,
-  flags: Flag[],
-  uid: UID,
-  uidvalidity: UID
-}
-
 export default class Message {
   attributes: MessageAttributes
   headers: Headers
@@ -51,13 +44,8 @@ export default class Message {
   receivedDate: Moment
   subject: ?AS.models.LanguageValue
   to: ?(Address[])
-  perBoxMetadata: ?(PerBoxMetadata[])
 
-  constructor (
-    msg: MessageAttributes,
-    headers: Headers,
-    perBoxMetadata?: PerBoxMetadata[]
-  ) {
+  constructor (msg: MessageAttributes, headers: Headers) {
     this.attributes = msg
     this.headers = headers
     // TODO: not every message has a messageId header
@@ -71,7 +59,6 @@ export default class Message {
     this.subject =
       msg.envelope.subject && asutil.newString(msg.envelope.subject)
     this.to = addressList(msg.envelope.to)
-    this.perBoxMetadata = perBoxMetadata
   }
 
   // Request metadata for a message part by `partId` or `contentId`. Content ID
@@ -123,9 +110,7 @@ export default class Message {
 
   get references (): MessageId[] {
     const val = getHeaderValue('references', this.headers)
-    const refs = typeof val === 'string'
-      ? val.split(/\s+/)
-      : val
+    const refs = typeof val === 'string' ? val.split(/\s+/) : val
     return refs.map(idFromHeaderValue).filter(id => !!id)
   }
 
