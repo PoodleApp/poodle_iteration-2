@@ -1,55 +1,67 @@
 /* @flow */
 
 import Message, * as Msg from 'arfe/lib/models/Message'
+import * as Part from 'arfe/lib/models/MessagePart'
 import { type URI, midUri } from 'arfe/lib/models/uri'
 import { immutable as unique } from 'array-unique'
-import PouchDB from 'pouchdb-node'
-import streamToPromise from 'stream-to-promise'
-import * as pouchdbUtil from '../util/pouchdb'
+import streamToBlob from 'stream-to-blob'
+import * as DB from './indexeddb'
 
 import type { Box, MessagePart } from 'imap'
 import type { Readable } from 'stream'
-import type { MessageRecord, PartRecord } from './types'
+import type {
+  BoxName,
+  ImapLocation,
+  MessageRecord,
+  PartRecord,
+  UIDValidity
+} from './types'
 
 type ID = string
 
 export async function persistMessage (
   message: Message,
-  db: PouchDB
+  imapLocations: ImapLocation[],
+  db: DB.DB
 ): Promise<void> {
-  return persistMessageRecord(messageToRecord(message), db)
+  return persistMessageRecord(messageToRecord(message, imapLocations), db)
 }
 
 export async function persistMessageRecord (
   message: MessageRecord,
-  db: PouchDB
+  db: DB.DB
 ): Promise<void> {
-  const requestedAt = toISOStringSecondPrecision(new Date())
-  await pouchdbUtil.update(db, (existing: ?MessageRecord) => {
-    return {
+  const requestedAt = new Date()
+  await DB.transaction(db, ['messages'], 'readwrite', messages =>
+    DB.update(messages, (existing: ?MessageRecord) => ({
       _id: message._id,
       conversationId: message.conversationId,
+      googleThreadId: message.googleThreadId,
       headers: message.headers,
       message: message.message,
-      perBoxMetadata: mergePerBoxMetadata(
-        existing && existing.perBoxMetadata,
-        message && message.perBoxMetadata
+      imapLocations: mergeImapLocations(
+        existing ? existing.imapLocations : [],
+        message ? message.imapLocations : []
       ),
       requestedAt,
       type: 'Message'
-    }
-  })
+    }))
+  )
 }
 
-export function messageToRecord(message: Message): MessageRecord {
+export function messageToRecord (
+  message: Message,
+  imapLocations: ImapLocation[] = []
+): MessageRecord {
   const headers = Array.from(message.headers.entries())
-  const requestedAt = toISOStringSecondPrecision(new Date())
+  const requestedAt = new Date()
   return {
     _id: message.id,
     conversationId: message.conversationId,
+    googleThreadId: message.attributes['x-gm-thrid'],
     headers: headers,
     message: message.attributes,
-    perBoxMetadata: message.perBoxMetadata || [],
+    imapLocations,
     requestedAt,
     type: 'Message'
   }
@@ -62,62 +74,50 @@ export async function persistPart (
   messageId: string,
   part: MessagePart,
   data: Readable,
-  db: PouchDB
+  db: DB.DB
 ): Promise<ID> {
   const _id = midUri(messageId, part.id || part.partID) // prefer content ID over part ID
-  const existing = await pouchdbUtil.maybeGet(db, _id)
-  if (existing) {
+  const existingCount = await DB.transaction(
+    db,
+    ['messageParts'],
+    'readonly',
+    messageParts => DB.count(messageParts, DB.IDBKeyRange.only(_id))
+  )
+  if (existingCount > 0) {
     return _id
   }
 
-  const buffer = await streamToPromise(data)
-
-  const { type, subtype } = part
-  if (!type || !subtype) {
-    throw new Error('cannot persist part content without MIME subtype')
-  }
+  const contentType = Part.contentType(part)
+  const blob = await new Promise((resolve, reject) => {
+    streamToBlob(data, contentType, (err, b) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(b)
+      }
+    })
+  })
 
   const record: PartRecord = {
     _id,
-    _attachments: {
-      content: {
-        content_type: `${type}/${subtype}`,
-        data: buffer
-      }
-    },
+    content: blob,
     part,
-    requestedAt: new Date().toISOString(),
+    requestedAt: new Date(),
     type: 'PartContent'
   }
-  try {
-    await db.put(record)
-  } catch (err) {
-    if (err.status !== 409) {
-      throw err
-    }
-  }
+
+  await DB.transaction(db, ['messageParts'], 'readwrite', messageParts =>
+    DB.put(messageParts, record)
+  )
   return _id
 }
 
-function mergePerBoxMetadata (
-  existing: ?(Msg.PerBoxMetadata[]),
-  update: ?(Msg.PerBoxMetadata[])
-): Msg.PerBoxMetadata[] {
-  existing = existing || []
-  update = update || []
-  const firstUpdate = update[0]
-  const uidvalidity = firstUpdate && firstUpdate.uidvalidity
-  const merged = []
-  for (const meta of update.concat(existing)) {
-    if (meta.uidvalidity === uidvalidity && !merged.some(({ boxName, uid }) => (
-      boxName === meta.boxName && uid === meta.uid
-    ))) {
-      merged.push(meta)
-    }
-  }
-  return merged
-}
-
-function toISOStringSecondPrecision (date: Date): string {
-  return date.toISOString().slice(0, 19) + 'Z'
+function mergeImapLocations (
+  existing: ImapLocation[],
+  update: ImapLocation[]
+): ImapLocation[] {
+  const locationsInOtherBoxes = existing.filter(
+    ([boxName, _, __]) => !update.some(([b, _, __]) => boxName === b)
+  )
+  return locationsInOtherBoxes.concat(update)
 }

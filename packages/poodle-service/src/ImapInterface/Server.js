@@ -2,9 +2,9 @@
 
 import type EventEmitter from 'events'
 import * as kefir from 'kefir'
-import type PouchDB from 'pouchdb-node'
 import * as accounts from '../accounts'
 import { type Action as AccountAction } from '../accounts/actions'
+import * as cache from '../cache'
 import { type ImapAccount } from '../models/ImapAccount'
 import * as request from '../request'
 import { type Action as ImapAction } from '../request/actions'
@@ -17,11 +17,11 @@ import { type AccountMetadata, type Email } from '../types'
 export opaque type Server = {
   accountManager: accounts.AccountManager,
   activeAccounts: kefir.Observable<AccountMetadata[]>,
-  db: PouchDB,
+  db: Promise<cache.DB>,
   onAccountsChange: (as: AccountMetadata[]) => any
 }
 
-export function NewServer (db: PouchDB): Server {
+export function NewServer (db?: cache.DB): Server {
   let emitter
   const onAccountsChange = (as: AccountMetadata[]) => {
     if (emitter) {
@@ -35,7 +35,7 @@ export function NewServer (db: PouchDB): Server {
   return {
     accountManager: new accounts.AccountManager(),
     activeAccounts,
-    db,
+    db: db ? Promise.resolve(db) : cache.initialize(),
     onAccountsChange
   }
 }
@@ -50,12 +50,14 @@ export function perform<T, Args: *> (
   args: Args,
   initialState?: ?tasks.State
 ): kefir.Observable<T> {
-  return taskFn(...args).perform({
-    runAccountAction: runAccountAction(server),
-    runImapAction: runImapAction(server.accountManager),
-    runSmtpAction: runSmtpAction(server.accountManager),
-    db: server.db
-  }, initialState)
+  return kefir.fromPromise(server.db).flatMap(db =>
+    taskFn(...args).perform({
+      runAccountAction: runAccountAction(server),
+      runImapAction: runImapAction(server.accountManager),
+      runSmtpAction: runSmtpAction(server.accountManager),
+      db
+    }, initialState)
+  )
 }
 
 function runAccountAction (

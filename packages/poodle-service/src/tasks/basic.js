@@ -12,7 +12,6 @@ import dateformat from 'dateformat'
 import * as kefir from 'kefir'
 import { simpleParser } from 'mailparser'
 import * as m from 'mori'
-import type PouchDB from 'pouchdb-node'
 import { type Readable } from 'stream'
 import toString from 'stream-to-string'
 import * as cache from '../cache'
@@ -71,26 +70,19 @@ export function downloadMessages (uids: UID[]): Task<void> {
       const boxName = box.name
       const uidvalidity = String(box.uidvalidity)
 
-      const uidsInCache = dbTask(db =>
+      const uidsToFetch = dbTask(db =>
         kefir.fromPromise(
-          cache
-            .verifyExistenceUids(
-              uids.map(uid => ({ boxName, uidvalidity, uid })),
-              db
-            )
-            .then(keys => keys.map(({ uid }) => uid))
+          cache.identifyMissingUids(boxName, uidvalidity, uids, db)
         )
-      )
-
-      const uidsToFetch = uidsInCache.map(inCache =>
-        uids.filter(uid => !inCache.includes(uid))
       )
 
       return uidsToFetch
         .filter(uids => uids.length > 0)
         .flatMap(uids =>
           fetchMessages(uids).flatMap(message =>
-            dbTask(db => kefir.fromPromise(cache.persistMessage(message, db)))
+            dbTask(db =>
+              kefir.fromPromise(cache.persistMessageRecord(message, db))
+            )
           )
         )
     })
@@ -141,7 +133,7 @@ export function fetchMessagePart (uid: UID, part: MessagePart): Task<Readable> {
 /*
  * Downloads message structure and metadata, but not content parts
  */
-export function fetchMessages (source: MessageSource): Task<Message> {
+function fetchMessages (source: MessageSource): Task<cache.MessageRecord> {
   return getBox().flatMap(box => {
     const uidvalidity = String(box.uidvalidity)
     const respStream = fetch(source, {
@@ -154,12 +146,10 @@ export function fetchMessages (source: MessageSource): Task<Message> {
       const headersStream = getHeaders(imapMsg)
       return Task.lift(
         kefir.zip([attrStream, headersStream], (imapMsg, headers) => {
-          const flags = imapMsg.flags
+          const message = new Message(imapMsg, headers)
           const uid = String(imapMsg.uid)
-          const perBoxMetadata = [
-            { boxName: box.name, flags, uid, uidvalidity }
-          ]
-          return new Message(imapMsg, headers, perBoxMetadata)
+          const imapLocation = [box.name, uidvalidity, uid]
+          return cache.messageToRecord(message, [imapLocation])
         })
       )
     })
@@ -168,7 +158,7 @@ export function fetchMessages (source: MessageSource): Task<Message> {
 
 function fetchPartContentByUri (uri: URI): Task<?Readable> {
   return dbTask(db =>
-    kefir.fromPromise(cache.fetchContentByUri(db, uri).catch(() => {}))
+    kefir.fromPromise(cache.fetchContentByUri(uri, db).catch(() => {}))
   ).flatMap(data => {
     if (data) {
       return Task.result(data)
@@ -233,26 +223,12 @@ export function fetchPartContent (
         )
       )
     }
-    const meta = msg.perBoxMetadata && msg.perBoxMetadata[0]
-    if (!meta) {
-      return Task.error(
-        new Error(
-          `Cannot fetch part content for message with no UID, ${msg.id}`
-        )
-      )
-    }
-    const { boxName, uid, uidvalidity } = meta
     return Task.isolate(
-      openBox({ name: boxName }, true).flatMap(getBox).flatMap(box => {
-        // TODO: make changes to be more consistent about string-vs-number
-        if (String(box.uidvalidity) !== uidvalidity) {
-          // TODO: check other stored UIDs; download content from server
-          return Task.error(new Error(`Stored uidvalidity does not match!`))
-        }
-        return downloadPartContent(msg.id, uid, part)
-      })
+      locateImapMessage(msg).flatMap(uid =>
+        downloadPartContent(msg.id, uid, part)
+      )
     ).flatMap(cacheId =>
-      dbTask(db => kefir.fromPromise(cache.fetchContentByUri(db, cacheId)))
+      dbTask(db => kefir.fromPromise(cache.fetchContentByUri(cacheId, db)))
     )
   })
 }
@@ -263,8 +239,49 @@ function fetchPartContentFromCache (
 ): Task<?Readable> {
   return dbTask(db =>
     kefir.fromPromise(
-      cache.fetchPartContent(db, msg, partRef).catch(() => undefined) // Resolve to `undefined` if content is not in cache
+      cache.fetchPartContent(msg, partRef, db).catch(() => undefined) // Resolve to `undefined` if content is not in cache
     )
+  )
+}
+
+// Attempts to find a cached UID that is valid on the IMAP server, and opens the
+// appropriate IMAP box.
+// TODO: attempt to update message record when encountering stale uids
+function locateImapMessage (msg: Message): Task<UID> {
+  return dbTask(db =>
+    kefir.fromPromise(cache.getMessageRecord(msg.id, db))
+  ).flatMap(messageRecord => {
+    const locs = messageRecord.imapLocations
+    if (!locs || locs.length < 1) {
+      return Task.error(
+        new Error(
+          `Cannot fetch part content for message with no known UID, ${msg.id}`
+        )
+      )
+    }
+    return locateImapMessageHelper(msg, locs)
+  })
+}
+
+function locateImapMessageHelper (
+  msg: Message,
+  locations: cache.ImapLocation[]
+): Task<UID> {
+  if (locations.length < 1) {
+    return Task.error(
+      new Error(`No stored UID for message is currently valid, ${msg.id}`)
+    )
+  }
+  const [boxName, uidValidity, uid] = locations[0]
+  return Task.isolate(
+    openBox({ name: boxName }, true).flatMap(getBox).flatMap(box => {
+      // TODO: make changes to be more consistent about string-vs-number
+      if (String(box.uidvalidity) !== uidValidity) {
+        // TODO: remove stale location from cache
+        return locateImapMessageHelper(msg, locations.slice(1))
+      }
+      return Task.result(uid)
+    })
   )
 }
 
@@ -379,7 +396,7 @@ function getHeaders (message: ImapMessage): Observable<Headers, Error> {
 export function getConversation (uri: URI): Task<Conversation> {
   return Task.promisify(fetchPartContent).flatMap(fetchPartContent => {
     return dbTask(db =>
-      kefir.fromPromise(cache.getConversation(uri, db))
+      kefirUtil.takeAll(cache.getConversation(uri, db))
     ).flatMap(messages => {
       if (messages.length < 1) {
         return Task.error(
@@ -393,15 +410,28 @@ export function getConversation (uri: URI): Task<Conversation> {
   })
 }
 
+const pollInterval = 5000 // 5 seconds
+
 // Gets a conversation from cache by URI; emits updates to conversation as new
 // messages appear in cache.
 export function watchConversation (uri: URI): Task<LiveConversation> {
   return getConversation(uri).flatMap(conversation => {
-    return dbTask(db => cache.conversationUpdates(db, conversation.id))
+    let conversationSnapshot = conversation
+    return dbTask(db =>
+      kefir
+        .interval(pollInterval)
+        .flatMap(() =>
+          kefir.fromPromise(
+            cache.hasConversationBeenUpdated(conversationSnapshot, db)
+          )
+        )
+    )
+      .filter(updated => updated)
       .flatMap(() => getConversation(uri))
       .modifyObservable(updatedConvs =>
         updatedConvs.scan(
           (prev, next) => {
+            conversationSnapshot = next
             const changes = m.intoArray(Conv.changes(prev.conversation, next))
             return { conversation: next, changes }
           },
@@ -446,7 +476,7 @@ function connectionTask<T> (action: actions.Action<T>): Task<T> {
   )
 }
 
-export function dbTask<T> (fn: (db: PouchDB) => Observable<T, Error>): Task<T> {
+export function dbTask<T> (fn: (db: cache.DB) => Observable<T, Error>): Task<T> {
   return Task.getContext().flatMap(({ db }) => Task.lift(fn(db)))
 }
 

@@ -1,7 +1,6 @@
 /* @flow */
 
-import db from './db'
 import * as Imap from 'poodle-service/lib/ImapInterface/Server'
 
-const imapService = Imap.NewServer(db)
+const imapService = Imap.NewServer()
 export default imapService

@@ -1,13 +1,14 @@
 /* @flow */
 
-import type { PerBoxMetadata } from 'arfe/lib/models/Message'
-import type { Flag, MessageAttributes, MessagePart } from 'imap'
+import type { Flag, MessageAttributes, MessagePart, UID } from 'imap'
+
+export type BoxName = string
+export type UIDValidity = UID
 
 export type QueryParams = { [key: string]: any }
 
 export type BoxRecord = {
   _id: string,
-  _rev?: string,
   flags: Flag[],
   name: string,
   persistentUIDs: boolean,
@@ -15,38 +16,25 @@ export type BoxRecord = {
   uidvalidity: number
 }
 
+export type ImapLocation = [BoxName, UIDValidity, UID]
+
 export type MessageRecord = {
   _id: string,
-  _rev?: string,
-  conversationId: string,
+  conversationId: string, // First item in references header, or message ID
+  googleThreadId: ?string,
   headers: Array<[string, any]>,
   message: MessageAttributes,
-  perBoxMetadata: PerBoxMetadata[],
-  requestedAt: string, // ISO-8601, used for cache invalidation
+  imapLocations: ImapLocation[],
+  requestedAt: Date, // used for cache invalidation
   type: 'Message'
 }
 
 export type PartRecord = {
   _id: string,
-  _rev?: string,
-  _attachments: {
-    content: {
-      content_type: string,
-      data?: Buffer,
-      digest?: string,
-      stub?: true
-    }
-  },
+  content: Blob,
   part: MessagePart,
-  requestedAt: string, // ISO-8601, used for cache invalidation
+  requestedAt: Date, // used for cache invalidation
   type: 'PartContent'
-}
-
-export type ChangeEvent<Doc> = {
-  id: string,
-  seq: number,
-  changes: { rev: string }[],
-  doc: Doc
 }
 
 // NOTE: `requestedAt` times indicate time when a message or part was most
