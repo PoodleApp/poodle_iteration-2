@@ -14,7 +14,7 @@
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",
   "scripts": {
-    "test": "babel-node test/index.js",
+    "test": "ava",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
     "prepublishOnly": "npm test && npm run build"
@@ -32,6 +32,14 @@
         }
       ]
     ]
+  },
+  "ava": {
+    "require": [
+      "babel-register"
+    ],
+    "babel": "inherit",
+    "color": false,
+    "files": ["test/**/*_test.js"]
   },
   "dependencies": {
     "arfe": "link:../arfe",
@@ -58,6 +66,7 @@
     "xoauth2": "^1.2.0"
   },
   "devDependencies": {
+    "ava": "^0.25.0",
     "format-json": "^1.0.3",
     "install-peers": "^1.0.2"
   },

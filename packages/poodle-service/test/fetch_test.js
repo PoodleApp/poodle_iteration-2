@@ -1,16 +1,18 @@
 /* @flow */
 
-import * as json          from 'format-json'
-import * as google        from '../src/models/ImapAccount/google'
-import * as googletest    from './models/ImapAccount/google'
-import * as promises      from '../src/util/promises'
+import test from 'ava'
+import * as json from 'format-json'
+import * as google from '../src/models/ImapAccount/google'
+import * as googletest from './models/ImapAccount/google'
+import * as promises from '../src/util/promises'
 
 const msgId = '55dad9e6.633e460a.c2b46.ffffce8f@mx.google.com'
 
 // TODO: redesign test suite
-export default function test(): Promise<void> {
-  return Promise.resolve()
-}
+test('ok', t => {
+  t.plan(1)
+  t.pass()
+})
 
 // export default function test() {
 //   return [
