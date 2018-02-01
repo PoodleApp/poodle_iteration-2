@@ -104,9 +104,7 @@ export function identifyMissingUids (
   const [min, max] = findExtrema(uids)
   const keyRange = DB.IDBKeyRange.bound(
     [boxName, uidvalidity, min],
-    [boxName, uidvalidity, max],
-    true,
-    true
+    [boxName, uidvalidity, max]
   )
   const stream = DB.txStream(
     db,
