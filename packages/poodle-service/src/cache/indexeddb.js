@@ -42,6 +42,7 @@ export function requestDb (opts: {
       try {
         applyMigrations(oldVersion, newVersion, migrations, db)
       } catch (err) {
+        request.transaction.abort()
         return reject(err)
       }
     }
