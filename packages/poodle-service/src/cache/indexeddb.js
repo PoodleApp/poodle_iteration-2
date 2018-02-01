@@ -199,7 +199,7 @@ type Count =
   & ((store: IDBObjectStore, index: string, keyRange: IDBKeyRange) => Promise<number>)
 
 export const count: Count = (store, index, keyRange) => {
-  if (arguments.length < 3) {
+  if (!keyRange) {
     keyRange = index
     return toPromise(store.count(keyRange))
   } else {
