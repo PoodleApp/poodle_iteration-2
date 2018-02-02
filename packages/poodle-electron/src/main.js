@@ -2,8 +2,11 @@
 
 import { app, BrowserWindow, ipcMain, protocol } from 'electron'
 import contextMenu from 'electron-context-menu'
+import { requireTaskPool } from 'electron-remote'
 import * as fs from 'fs'
 import * as Path from 'path'
+import { PassThrough } from 'stream'
+import * as tmp from 'tmp'
 import * as URL from 'url'
 
 if (process.env.NODE_ENV === 'development') {
@@ -24,6 +27,7 @@ app.on('ready', () => {
   //   server = new S.NewServer(ipcMain, db) // Listen for IMAP requests
   // }
   handlePoodleProtocol()
+  handleMidProtocol()
   createWindow('poodle://app/')
 })
 
@@ -51,14 +55,41 @@ function handlePoodleProtocol () {
     const filePath = lookupFile(path)
     fs.stat(filePath, (err, stats) => {
       if (err || !stats.isFile()) {
-        console.log(`${request.url} -- serving index.html`)
         callback({ path: lookupFile('index.html') })
-      }
-      else {
-        console.log(`${request.url} -- serving ${filePath}`)
+      } else {
         callback({ path: filePath })
       }
     })
+  })
+}
+
+function handleMidProtocol () {
+  const cache = requireTaskPool(require.resolve('poodle-service/lib/cache'))
+  protocol.registerStreamProtocol('mid', async (request, callback) => {
+    const { path: tempFile, cleanup } = await getTempFile()
+    try {
+      const { contentType } = await cache.writePartContentToFile(
+        request.url,
+        tempFile
+      )
+      const stream = fs.createReadStream(tempFile)
+      stream.on('close', cleanup)
+      callback({
+        statusCode: 200,
+        headers: {
+          'content-type': contentType
+        },
+        data: stream
+      })
+    } catch (err) {
+      callback({
+        statusCode: 500,
+        headers: {
+          'content-type': 'text/plain; charset=utf8'
+        },
+        data: createStream(err.message)
+      })
+    }
   })
 }
 
@@ -73,6 +104,25 @@ function lookupFile (path: string): string {
     return sourceMap
   }
   return Path.join(__dirname, '..', 'public', path)
+}
+
+function getTempFile (): Promise<{ path: string, cleanup: () => mixed }> {
+  return new Promise((resolve, reject) => {
+    tmp.file((err, path, fd, cleanup) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve({ path, cleanup })
+      }
+    })
+  })
+}
+
+function createStream (text: string) {
+  const rv = new PassThrough() // PassThrough is also a Readable stream
+  rv.push(text)
+  rv.push(null)
+  return rv
 }
 
 // Keep a global reference of the window object, if you don't, the window will

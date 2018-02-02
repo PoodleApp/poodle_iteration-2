@@ -51,6 +51,7 @@
   "dependencies": {
     "arfe": "link:../arfe",
     "electron-context-menu": "^0.9.1",
+    "electron-remote": "^1.2.0",
     "history": "^4.6.1",
     "kefir": "3.8.1",
     "keytar": "^3.0.2",
@@ -74,13 +75,14 @@
     "redux-saga": "^0.15.6",
     "repa": "^1.0.0",
     "string-hash": "^1.1.3",
+    "tmp": "^0.0.33",
     "vocabs-as": "^2"
   },
   "devDependencies": {
     "ava": "^0.20.0",
-    "electron": "^1.7.5",
-    "electron-builder": "^19.19.1",
-    "electron-devtools-installer": "^2.2.0",
+    "electron": "1.8.2-beta.5",
+    "electron-builder": "^19.55.3",
+    "electron-devtools-installer": "^2.2.3",
     "react-test-renderer": "^15.6.1"
   },
   "files": [
