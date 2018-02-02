@@ -20,6 +20,7 @@ import Avatar from '../Avatar'
 import ActivityOptsMenu from './ActivityOptsMenu'
 import DisplayContent from './DisplayContent'
 import EditNote from './EditNote'
+import ShowAttachments from './ShowAttachments'
 import * as helpers from './helpers'
 
 import type { ActivityViewProps } from './types'
@@ -113,6 +114,7 @@ function NoteView (props: ActivityViewProps) {
           </p>
         : ''}
       <DisplayContent activity={activity} />
+      <ShowAttachments activity={activity} />
     </ActivityCard>
   )
 }
@@ -145,6 +147,7 @@ function DocumentView (props: ActivityViewProps) {
             </em>
           </p>}
       <DisplayContent activity={activity} style={styles.documentBody} />
+      <ShowAttachments activity={activity} />
     </div>
   )
 }

@@ -6,6 +6,7 @@ import * as Vocab from 'vocabs-as'
 import * as asutil from '../util/activity'
 import Activity from './Activity'
 import Message from './Message'
+import * as Part from './MessagePart'
 import { mailtoUri, sameUri } from './uri'
 
 import type { List, Map, Seq, Seqable } from 'mori'
@@ -204,6 +205,11 @@ export default class DerivedActivity {
 
   get types (): URI[] {
     return this.activity.types
+  }
+
+  get attachments (): Seqable<Part.MessagePart> {
+    const msg = this.message
+    return msg ? msg.attachmentParts : []
   }
 }
 

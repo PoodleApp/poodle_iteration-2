@@ -21,6 +21,8 @@ type EditOptions = MessageParams & {
 /*
  * Produce a message carrying an activity that describes changes to be applied
  * to some existing activity
+ *
+ * TODO: copy attachments and related content from original message
  */
 export default function edit (options: EditOptions): Builder<Message> {
   const originalActivity = options.activity.activity.activity
