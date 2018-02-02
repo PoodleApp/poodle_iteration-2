@@ -8,7 +8,7 @@
       content="
         default-src 'self';
         connect-src 'self';
-        script-src 'sha256-pXHhFuW4FnvYs7GOvZLBWsAp7SfU1Pyko5axo/W+H9Q=' chrome-extension:;
+        script-src 'sha256-cdEjzUsI2C4lscGeBcAxuOfdfyJHFtsaMnGs10ZXS3k=' chrome-extension:;
         style-src 'self' 'unsafe-inline' http://fonts.googleapis.com;
         img-src 'self' data:;
         child-src 'self' data:;
@@ -19,10 +19,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,500" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"    rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="stylesheet" type="text/css" href="/main.css">
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        require('./lib/browserMain').main(document.getElementById('app'));
+        // When index.html is served via a custom protocol the computed
+        // directory in the renderer is the location of `electron.asar`.
+        // Thus this silly require path.
+        require('../../../../../../lib/browserMain').main(document.getElementById('app'))
       });
     </script>
   </head>

@@ -1,6 +1,6 @@
 /* @flow */
 
-import createHistory from 'history/createHashHistory'
+import createHistory from 'history/createBrowserHistory'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import * as imap from 'poodle-core/lib/imap-redux'
 import * as React from 'react'
