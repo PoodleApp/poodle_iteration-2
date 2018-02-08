@@ -126,7 +126,11 @@ export function toPromise<T> (request: IDBRequest): Promise<T> {
   })
 }
 
-export class NotFoundException extends Error {}
+export class NotFoundException extends Error {
+  constructor (message: string = 'Record not found') {
+    super(message)
+  }
+}
 
 export async function get<T> (store: IDBObjectStore, key: any): Promise<T> {
   const value = await toPromise(store.get(key))
@@ -183,8 +187,7 @@ export function query<K, T> (
         if (alive) {
           c.continue()
         }
-      }
-      else {
+      } else {
         emitter.end()
       }
     }
@@ -194,9 +197,15 @@ export function query<K, T> (
   })
 }
 
-type Count =
-  & ((store: IDBObjectStore, keyRange: IDBKeyRange) => Promise<number>)
-  & ((store: IDBObjectStore, index: string, keyRange: IDBKeyRange) => Promise<number>)
+type Count = ((
+  store: IDBObjectStore,
+  keyRange: IDBKeyRange
+) => Promise<number>) &
+  ((
+    store: IDBObjectStore,
+    index: string,
+    keyRange: IDBKeyRange
+  ) => Promise<number>)
 
 export const count: Count = (store, index, keyRange) => {
   if (!keyRange) {
