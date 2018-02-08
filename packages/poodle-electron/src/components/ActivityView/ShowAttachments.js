@@ -17,7 +17,7 @@ export default function ShowAttachments ({ activity }: Props) {
   }
   const as = m.map(a => {
     const uri = message.uriForPart(a)
-    const filename = a.params && a.params.filename
+    const filename = a.params && a.params.name
     return (
       <div key={uri}>
         <a href={uri} download={filename || 'file'}>
