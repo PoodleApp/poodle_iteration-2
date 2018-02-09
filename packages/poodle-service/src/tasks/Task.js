@@ -4,20 +4,15 @@ import * as kefir from 'kefir'
 import { type Action as AccountAction } from '../accounts/actions'
 import { type DB } from '../cache'
 import { type Action as RequestAction } from '../request/actions'
-import { type ConnectionState, any } from '../request/state'
+import { any } from '../request/state'
 import { type Action as SmtpAction } from '../smtp/actions'
-import { type Email } from '../types'
 import * as kefirUtil from '../util/kefir'
+import { type State } from './types'
 
-export type State = {
-  accountName: ?Email,
-  connectionState: ConnectionState
-}
-
-export type Context = {
-  runAccountAction: <A>(action: AccountAction<A>) => Obs<A>,
-  runImapAction: <A>(action: RequestAction<A>, state: State) => Obs<A>,
-  runSmtpAction: <A>(action: SmtpAction<A>, state: State) => Obs<A>,
+export interface Context {
+  runAccountAction <A>(action: AccountAction<A>): Obs<A>,
+  runImapAction <A>(action: RequestAction<A>, state: State): Obs<A>,
+  runSmtpAction <A>(action: SmtpAction<A>, state: State): Obs<A>,
   db: DB
 }
 

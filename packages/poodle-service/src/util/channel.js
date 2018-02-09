@@ -9,18 +9,18 @@ import type EventEmitter from 'events'
 import * as kefir from 'kefir'
 import uuid from 'uuid/v4'
 
-type Request<T> = {
-  transactionId: string,
-  action: T
-}
+type Request<T> = { transactionId: string, action: T }
 
 type Response<R> =
   | { transactionId: string, value: R }
   | { transactionId: string, error: string }
   | { transactionId: string, complete: true }
 
-export const REQUEST = 'imap-action-channel-request'
-export const RESPONSE = 'imap-action-channel-response'
+type Unsubscribe = { transactionId: string }
+
+export const REQUEST = 'action-channel-request'
+export const RESPONSE = 'action-channel-response'
+export const UNSUBSCRIBE = 'action-channel-unsubscribe'
 
 export function request<T, R> (action: T, channel: EventEmitter): kefir.Observable<R> {
   return kefir.stream(emitter => {
@@ -47,6 +47,7 @@ export function request<T, R> (action: T, channel: EventEmitter): kefir.Observab
 
     return function unsubscribe() {
       channel.removeListener(RESPONSE, responseListener)
+      channel.emit(UNSUBSCRIBE, { transactionId })
     }
   })
 }
@@ -56,7 +57,7 @@ export function serve<T, R> (
   channel: EventEmitter
 ) {
   channel.addListener(REQUEST, (request: Request<T>) => {
-    handler(request.action).observe({
+    const subscription = handler(request.action).observe({
       value(value) {
         const response: Response<R> = {
           transactionId: request.transactionId,
@@ -77,8 +78,16 @@ export function serve<T, R> (
           complete: true
         }
         channel.emit(RESPONSE, response)
+        channel.removeListener(UNSUBSCRIBE, unsubscribe)
       }
     })
+    function unsubscribe({ transactionId }: Unsubscribe) {
+      if (transactionId === request.transactionId) {
+        subscription.unsubscribe()
+        channel.removeListener(UNSUBSCRIBE, unsubscribe)
+      }
+    }
+    channel.addListener(UNSUBSCRIBE, unsubscribe)
   })
 }
 

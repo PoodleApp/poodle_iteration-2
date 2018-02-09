@@ -8,7 +8,7 @@ import chromeSaga from 'poodle-core/lib/sagas/chrome'
 import queueSaga from 'poodle-core/lib/queue/saga'
 import { type OauthCredentials } from 'poodle-service/lib/models/ImapAccount'
 import { all, fork } from 'redux-saga/effects'
-import imapClient from '../imapClient'
+import { _perform as perform } from '../imapClient'
 import * as oauth from '../oauth'
 
 import type { Effect } from 'redux-saga'
@@ -45,7 +45,7 @@ async function saveAccount (account: auth.Account) {
 }
 
 const authDeps: Dependencies = {
-  imapClient,
+  perform,
   getAccessToken: oauth.getAccessToken,
   loadAccessToken,
   storeAccessToken,
@@ -57,7 +57,7 @@ export default function * root (): Generator<Effect, void, any> {
   yield all([
     fork(authSaga, authDeps),
     fork(chromeSaga),
-    fork(compose.sagas, { imapClient }),
-    fork(queueSaga, { imapClient })
+    fork(compose.sagas, { perform }),
+    fork(queueSaga, { perform })
   ])
 }

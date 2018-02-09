@@ -9,7 +9,6 @@ import Message from 'arfe/lib/models/Message'
 import { type MessagePart } from 'arfe/lib/models/MessagePart'
 import { type URI } from 'arfe/lib/models/uri'
 import * as cache from 'poodle-service/lib/cache'
-import * as C from 'poodle-service/lib/ImapInterface/Client'
 import * as tasks from 'poodle-service/lib/tasks'
 import * as router from 'react-router-redux'
 import {
@@ -28,7 +27,7 @@ import * as composeActions from './actions'
 import contentFromFile from './contentFromFile'
 
 export interface Dependencies {
-  imapClient: C.Client
+  perform: tasks.Perform
 }
 
 // Generator type parameters are of the form: `Generator<+Yield,+Return,-Next>`
@@ -124,8 +123,7 @@ function * transmit (
 
     // write copy of message and content to local cache
     const messageRecord = cache.messageToRecord(message)
-    yield C.perform(
-      deps.imapClient,
+    yield deps.perform(
       tasks.storeLocalCopyOfMessage,
       [messageRecord, parts],
       {
@@ -135,8 +133,7 @@ function * transmit (
 
     // recording local record consumes content streams, so read content back
     // from database to serialize message for transmission
-    const serialized = yield C.perform(
-      deps.imapClient,
+    const serialized = yield deps.perform(
       tasks.serialize,
       [message],
       {
@@ -145,8 +142,7 @@ function * transmit (
     ).toPromise()
 
     // transmit the message
-    const result = yield C.perform(
-      deps.imapClient,
+    const result = yield deps.perform(
       tasks.sendMail,
       [serialized],
       {

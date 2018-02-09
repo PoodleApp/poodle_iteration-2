@@ -29,6 +29,8 @@ function _perform (
       return kefir.constant(accountManager.listAccounts())
     case actions.REMOVE_ACCOUNT:
       return kefir.fromPromise(removeAccount(action.accountName, accountManager))
+    case actions.WATCH_ACCOUNTS:
+      return accountManager.accounts
     default:
       return kefir.constantError(
         new Error(`Unknown action type: ${action.type}`)

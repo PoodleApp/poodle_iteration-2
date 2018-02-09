@@ -1,6 +1,5 @@
 /* @flow */
 
-import * as C from 'poodle-service/lib/ImapInterface/Client'
 import * as ImapAccount from 'poodle-service/lib/models/ImapAccount'
 import * as tasks from 'poodle-service/lib/tasks'
 import { all, call, cancelled, fork, put, takeLatest } from 'redux-saga/effects'
@@ -11,7 +10,7 @@ import { client_id, client_secret } from '../constants'
 import type { Effect } from 'redux-saga'
 
 export interface Dependencies {
-  imapClient: C.Client,
+  perform: tasks.Perform,
 
   // Should initiate OAuth flow to get a new access token if no valid token is
   // available in the keychain
@@ -59,8 +58,7 @@ function * initAccount (
     yield call(deps.storeAccessToken, token, account)
 
     // TODO: check account type
-    yield C.perform(
-      deps.imapClient,
+    yield deps.perform(
       tasks.addAccount,
       [{
         type: ImapAccount.GOOGLE,

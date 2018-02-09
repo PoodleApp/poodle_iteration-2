@@ -13,7 +13,7 @@ import * as redux from 'redux'
 import reduxLogger from 'redux-logger'
 import sagaMiddleware from 'redux-saga'
 import App from './components/App'
-import imapClient from './imapClient'
+import { accountClient } from './imapClient'
 import buildRootReducer from './reducers'
 import sagas from './sagas'
 import poodleTheme from './themes/poodle'
@@ -27,7 +27,7 @@ const history = createHistory()
 const saga = sagaMiddleware()
 
 const enhancer = redux.compose(
-  imap.enhancer(imapClient),
+  imap.enhancer(accountClient),
   redux.applyMiddleware(reduxLogger, saga, r3.routerMiddleware(history)),
   typeof window.devToolsExtension !== 'undefined'
     ? window.devToolsExtension()
@@ -35,14 +35,6 @@ const enhancer = redux.compose(
 )
 
 const store = redux.createStore(buildRootReducer(r3.routerReducer), enhancer)
-
-// Run the IMAP service in the renderer process in development so that we can
-// use the Webkit debugger, and reload code changes easily. Eventually we will
-// run the service in the main process when running in production.
-let imapService
-// if (process.env.NODE_ENV === 'development') {
-  imapService = require('./imapService')
-// }
 
 saga.run(sagas)
 

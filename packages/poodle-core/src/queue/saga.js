@@ -5,7 +5,6 @@ import composeLike from 'arfe/lib/compose/like'
 import * as Addr from 'arfe/lib/models/Address'
 import Message from 'arfe/lib/models/Message'
 import * as cache from 'poodle-service/lib/cache'
-import * as C from 'poodle-service/lib/ImapInterface/Client'
 import * as tasks from 'poodle-service/lib/tasks'
 import {
   type Effect,
@@ -22,7 +21,7 @@ import * as chrome from '../actions/chrome'
 import * as queue from './actions'
 
 export interface Dependencies {
-  imapClient: C.Client
+  perform: tasks.Perform
 }
 
 // Generator type parameters are of the form: `Generator<+Yield,+Return,-Next>`
@@ -66,8 +65,7 @@ function * transmit (
   try {
     // write copy of message and content to local cache
     const messageRecord = cache.messageToRecord(message)
-    yield C.perform(
-      deps.imapClient,
+    yield deps.perform(
       tasks.storeLocalCopyOfMessage,
       [messageRecord, parts],
       {
@@ -77,8 +75,7 @@ function * transmit (
 
     // recording local record consumes content streams, so read content back
     // from database to serialize message for transmission
-    const serialized = yield C.perform(
-      deps.imapClient,
+    const serialized = yield deps.perform(
       tasks.serialize,
       [message],
       {
@@ -87,8 +84,7 @@ function * transmit (
     ).toPromise()
 
     // transmit the message
-    const result = yield C.perform(
-      deps.imapClient,
+    const result = yield deps.perform(
       tasks.sendMail,
       [serialized],
       {

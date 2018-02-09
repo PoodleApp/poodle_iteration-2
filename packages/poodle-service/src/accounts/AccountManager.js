@@ -17,12 +17,23 @@ import ConnectionManager from './ConnectionManager'
 export default class AccountManager {
   _accounts: m.Map<Email, ConnectionManager>
   _metadata: m.Map<Email, AccountMetadata>
+  _onAccountsChange: (as: AccountMetadata[]) => mixed
   _smtpAccounts: m.Map<Email, smtp.Transporter>
+  accounts: kefir.Observable<AccountMetadata[]> // stream of accounts
 
   constructor () {
+    let emitter
     this._accounts = m.hashMap()
     this._metadata = m.hashMap()
+    this._onAccountsChange = (as: AccountMetadata[]) => {
+      if (emitter) {
+        emitter.value(as)
+      }
+    }
     this._smtpAccounts = m.hashMap()
+    this.accounts = kefir.stream(e => {
+      emitter = e
+    }).toProperty(() => this.listAccounts())
   }
 
   async add (account: ImapAccount): Promise<void> {
@@ -43,12 +54,14 @@ export default class AccountManager {
       capabilities
     }
     this._metadata = m.assoc(this._metadata, account.email, metadata)
+    this._onAccountsChange(this.listAccounts())
   }
 
   async remove (accountName: Email): Promise<void> {
     this.withAccount(accountName, cm => cm.request(actions.end(), state.any))
     this._accounts = m.dissoc(this._accounts, accountName)
     this._metadata = m.dissoc(this._metadata, accountName)
+    this._onAccountsChange(this.listAccounts())
   }
 
   listAccounts (): AccountMetadata[] {

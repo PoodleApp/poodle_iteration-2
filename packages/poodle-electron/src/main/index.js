@@ -8,6 +8,7 @@ import * as Path from 'path'
 import { PassThrough } from 'stream'
 import * as tmp from 'tmp'
 import * as URL from 'url'
+import './accountService'
 
 if (process.env.NODE_ENV === 'development') {
   const {
@@ -96,14 +97,14 @@ function handleMidProtocol () {
 // Match request paths to files in `public/` or to source maps. This function
 // also uses a bit of a hack to work around the odd way that source map paths
 // are resolved when loading javascript files using `require`.
-const topDir = Path.normalize(Path.join(__dirname, '..'))
+const topDir = Path.normalize(Path.join(__dirname, '..', '..'))
 const sourceMapPattern = new RegExp(`${topDir}.*\\.js\\.map$`)
 function lookupFile (path: string): string {
   const sourceMap = (path.match(sourceMapPattern) || [])[0]
   if (sourceMap) {
     return sourceMap
   }
-  return Path.join(__dirname, '..', 'public', path)
+  return Path.join(topDir, 'public', path)
 }
 
 function getTempFile (): Promise<{ path: string, cleanup: () => mixed }> {

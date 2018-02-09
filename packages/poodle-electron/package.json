@@ -2,7 +2,7 @@
   "name": "poodle-electron",
   "version": "0.2.3",
   "description": "Desktop version of Poodle, an email client with social features",
-  "main": "lib/main.js",
+  "main": "lib/main/index.js",
   "repository": "git+https://github.com/PoodleApp/poodle-electron.git",
   "author": "Jesse Hallett <jesse@sitr.us>",
   "license": "Apache-2.0",

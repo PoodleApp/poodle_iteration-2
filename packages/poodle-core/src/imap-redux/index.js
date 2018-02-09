@@ -1,17 +1,18 @@
 /* @flow */
 
 import { type AccountMetadata } from 'poodle-service'
-import * as C from 'poodle-service/lib/ImapInterface/Client'
+import * as accounts from 'poodle-service/lib/accounts'
 import * as redux from 'redux'
 
 export const ACCOUNT_LIST = 'ImapInterface/accountList'
 
 type Action = { type: typeof ACCOUNT_LIST, accounts: AccountMetadata[] }
 
-export function enhancer (client: C.Client): redux.StoreEnhancer<any, any> {
+export function enhancer (client: accounts.AccountClient): redux.StoreEnhancer<any, any> {
+  const accountsStream = client.runAccountAction(accounts.watchAccounts())
   return next => (reducer, initState, enhancer) => {
     const store = next(reducer, initState, enhancer)
-    C.accounts(client).onValue(accounts => {
+    accountsStream.onValue(accounts => {
       store.dispatch({ type: ACCOUNT_LIST, accounts })
     })
     return store
