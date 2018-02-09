@@ -39,8 +39,10 @@ export function request<T> (action: Action<T>): kefir.Observable<T, Error> {
         } else if (response.complete) {
           emitter.end()
           ipcRenderer.removeListener(RESPONSE, responseListener)
-        } else {
+        } else if (response.error) {
           emitter.error(new Error(response.error || 'request failed'))
+        } else {
+          console.error('Unknown response type:', response)
         }
       }
     }
