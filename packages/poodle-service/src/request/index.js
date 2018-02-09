@@ -1,8 +1,12 @@
 /* @flow */
 
+import { type Headers } from 'arfe/lib/models/Message'
 import * as imap from 'imap'
 import type Connection from 'imap'
 import * as kefir from 'kefir'
+import { simpleParser } from 'mailparser'
+import { type Readable } from 'stream'
+import { decode } from '../encoding'
 import * as kefirUtil from '../util/kefir'
 import * as promises from '../util/promises'
 import * as actions from './actions'
@@ -36,12 +40,33 @@ function _perform (
     case actions.END:
       connection.end()
       return kefir.constant(undefined)
-    case actions.FETCH:
-      return kefirUtil.fromEventsWithEnd(
-        connection.fetch(action.source, action.options),
-        'message',
-        (msg, seqno) => msg
-      )
+    case actions.FETCH_BODY:
+      const encoding = action.encoding
+      return kefirUtil
+        .fromEventsWithEnd(
+          connection.fetch(action.source, action.options),
+          'message',
+          (msg, seqno) => msg
+        )
+        .flatMap(msg => messageBodyStream(msg))
+        .take(1)
+        .map(body => (encoding ? decode(encoding, body) : body))
+        .flatMap(body => kefirUtil.fromReadable(body))
+    case actions.FETCH_METADATA:
+      return kefirUtil
+        .fromEventsWithEnd(
+          connection.fetch(action.source, action.options),
+          'message',
+          (msg, seqno) => msg
+        )
+        .flatMap((imapMsg: imap.ImapMessage) => {
+          const attrStream = getAttributes(imapMsg)
+          const headersStream = getHeaders(imapMsg)
+          return kefir.zip(
+            [attrStream, headersStream],
+            (attributes, headers) => ({ attributes, headers })
+          )
+        })
     case actions.GET_BOX:
       return kefir.constant((connection: any)._box)
     case actions.GET_BOXES:
@@ -60,4 +85,38 @@ function _perform (
         new Error(`unknown request type: ${action.type}`)
       )
   }
+}
+
+// TODO: this might come in multiple chunks
+function messageBodyStream (
+  msg: imap.ImapMessage
+): kefir.Observable<Readable, Error> {
+  return kefirUtil.fromEventsWithEnd(msg, 'body', (stream, info) => stream)
+}
+
+function getAttributes (
+  message: imap.ImapMessage
+): kefir.Observable<imap.MessageAttributes, Error> {
+  return kefirUtil.fromEventsWithEnd(message, 'attributes')
+}
+
+const headersSelection = 'HEADER'
+
+function getHeaders (
+  message: imap.ImapMessage
+): kefir.Observable<Headers, Error> {
+  const bodies = kefirUtil.fromEventsWithEnd(
+    message,
+    'body',
+    (stream, info) => [stream, info]
+  )
+  return bodies.flatMap(([stream, info]) => {
+    if (info.which !== headersSelection) {
+      return kefir.never()
+    }
+    return kefirUtil.collectData(stream).flatMap(data => {
+      const headers = simpleParser(data).then(mail => mail.headers)
+      return kefir.fromPromise(headers)
+    })
+  })
 }

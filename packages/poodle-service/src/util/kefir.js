@@ -1,8 +1,8 @@
 /* @flow */
 
 import * as kefir from 'kefir'
-
-import type { Observable } from 'kefir'
+import { type Observable } from 'kefir'
+import { Readable } from 'stream'
 
 export function batch<A, B, E> (
   batchSize: number,
@@ -32,6 +32,17 @@ export function collectData<S: events$EventEmitter> (
     .map(chunks => {
       return Buffer.concat(chunks)
     })
+}
+
+export function fromReadable (input: Readable): Observable<Buffer> {
+  return fromEventsWithEnd(input, 'data')
+}
+
+export function toReadable (input: Observable<Buffer>): Readable {
+  const output = new Readable()
+  input.onValue(buffer => { output.push(buffer) })
+  input.onEnd(() => { output.push(null) })
+  return output
 }
 
 /*
@@ -74,7 +85,10 @@ export function fromEventsWithEnd<T, S: events$EventEmitter> (
  * Wait until the given observable ends, then run the callback to produce
  * a second observable. Returns an observable that emits all values from both.
  */
-export function andThen <A, E>(obs: Observable<A, E>, fn: () => Observable<A, E>): Observable<A, E> {
+export function andThen<A, E> (
+  obs: Observable<A, E>,
+  fn: () => Observable<A, E>
+): Observable<A, E> {
   const next = obs.ignoreValues().beforeEnd(() => 1).flatMap(fn)
   return obs.concat(next)
 }

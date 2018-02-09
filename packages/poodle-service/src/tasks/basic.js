@@ -5,17 +5,16 @@ import * as compose from 'arfe/lib/compose'
 import Conversation, * as Conv from 'arfe/lib/models/Conversation'
 import * as mediaType from 'arfe/lib/models/mediaType'
 import Message from 'arfe/lib/models/Message'
+import { type Headers } from 'arfe/lib/models/Message'
 import * as Part from 'arfe/lib/models/MessagePart'
 import DerivedActivity from 'arfe/lib/models/DerivedActivity'
 import { type URI, parseMidUri } from 'arfe/lib/models/uri'
 import dateformat from 'dateformat'
 import * as kefir from 'kefir'
-import { simpleParser } from 'mailparser'
 import * as m from 'mori'
 import { type Readable } from 'stream'
 import toString from 'stream-to-string'
 import * as cache from '../cache'
-import { decode } from '../encoding'
 import { type Connection, type OpenBox } from '../models/connection'
 import * as request from '../request'
 import * as actions from '../request/actions'
@@ -29,7 +28,6 @@ import type {
   Box,
   BoxList,
   FetchOptions,
-  ImapMessage,
   MessageAttributes,
   MessagePart,
   MessageSource,
@@ -116,18 +114,21 @@ export function search (criteria: mixed[]): Task<UID[]> {
   return connectionTask(actions.search(criteria))
 }
 
-export function fetch (
+export function fetchMetadata (
   source: MessageSource,
   opts: FetchOptions
-): Task<ImapMessage> {
-  return connectionTask(actions.fetch(source, opts))
+): Task<{ attributes: MessageAttributes, headers: Headers }> {
+  return connectionTask(actions.fetchMetadata(source, opts))
 }
 
 export function fetchMessagePart (uid: UID, part: MessagePart): Task<Readable> {
   const encoding = part.encoding
-  return fetch(([uid]: string[]), { bodies: part.partID })
-    .flatMap(msg => Task.lift(messageBodyStream(msg)))
-    .map(body => (encoding ? decode(encoding, body) : body))
+  return connectionTask(
+    actions.fetchBody(([uid]: string[]), { bodies: part.partID }, encoding)
+  ).modifyObservable(bufferStream => {
+    const readable = kefirUtil.toReadable(bufferStream)
+    return kefir.constant(readable)
+  })
 }
 
 /*
@@ -136,22 +137,15 @@ export function fetchMessagePart (uid: UID, part: MessagePart): Task<Readable> {
 function fetchMessages (source: MessageSource): Task<cache.MessageRecord> {
   return getBox().flatMap(box => {
     const uidvalidity = String(box.uidvalidity)
-    const respStream = fetch(source, {
+    return fetchMetadata(source, {
       bodies: headersSelection,
       envelope: true,
       struct: true
-    })
-    return respStream.flatMap(imapMsg => {
-      const attrStream = getAttributes(imapMsg)
-      const headersStream = getHeaders(imapMsg)
-      return Task.lift(
-        kefir.zip([attrStream, headersStream], (imapMsg, headers) => {
-          const message = new Message(imapMsg, headers)
-          const uid = String(imapMsg.uid)
-          const imapLocation = [box.name, uidvalidity, uid]
-          return cache.messageToRecord(message, [imapLocation])
-        })
-      )
+    }).map(({ attributes, headers }) => {
+      const message = new Message(attributes, headers)
+      const uid = String(attributes.uid)
+      const imapLocation = [box.name, uidvalidity, uid]
+      return cache.messageToRecord(message, [imapLocation])
     })
   })
 }
@@ -285,11 +279,6 @@ function locateImapMessageHelper (
   )
 }
 
-// TODO: this might come in multiple chunks
-function messageBodyStream (msg: ImapMessage): Observable<Readable, Error> {
-  return kefirUtil.fromEventsWithEnd(msg, 'body', (stream, info) => stream)
-}
-
 export type Content = {
   content: string,
   mediaType: string
@@ -343,12 +332,6 @@ export function getActivityContentSnippet (
   )
 }
 
-export function getAttributes (
-  message: ImapMessage
-): Observable<MessageAttributes, Error> {
-  return kefirUtil.fromEventsWithEnd(message, 'attributes')
-}
-
 export function getBoxes (): Task<BoxList> {
   return connectionTask(actions.getBoxes())
 }
@@ -362,33 +345,6 @@ export function getBox (): Task<Box> {
     } else {
       return Task.result(box)
     }
-  })
-}
-
-// native Javascript Map
-type Headers = Map<string, HeaderValue>
-type HeaderValue =
-  | string
-  | string[]
-  | {
-      value: string,
-      params: { charset: string }
-    }
-
-function getHeaders (message: ImapMessage): Observable<Headers, Error> {
-  const bodies = kefirUtil.fromEventsWithEnd(
-    message,
-    'body',
-    (stream, info) => [stream, info]
-  )
-  return bodies.flatMap(([stream, info]) => {
-    if (info.which !== headersSelection) {
-      return kefir.never()
-    }
-    return kefirUtil.collectData(stream).flatMap(data => {
-      const headers = simpleParser(data).then(mail => mail.headers)
-      return kefir.fromPromise(headers)
-    })
   })
 }
 
