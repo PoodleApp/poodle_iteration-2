@@ -15,7 +15,6 @@ import { type Action as ImapAction } from '../request/actions'
 import * as smtp from '../smtp'
 import { type Action as SmtpAction } from '../smtp/actions'
 import { type State as TaskState } from '../tasks/types'
-import * as Chan from '../util/channel'
 import AccountManager from './AccountManager'
 import perform from './perform'
 
@@ -23,10 +22,15 @@ const ACCOUNT_ACTION = 'accountAction'
 const IMAP_ACTION = 'imapAction'
 const SMTP_ACTION = 'smtpAction'
 
-type Action<T> =
+export type Action<T> =
   | { type: typeof ACCOUNT_ACTION, accountAction: AccountAction<T> }
   | { type: typeof IMAP_ACTION, imapAction: ImapAction<T>, state: TaskState }
   | { type: typeof SMTP_ACTION, smtpAction: SmtpAction<T>, state: TaskState }
+
+export interface Channel {
+  request<T> (action: Action<T>): kefir.Observable<T, Error>,
+  serve (handle: <T>(action: Action<T>) => kefir.Observable<T, Error>): void
+}
 
 export class AccountService {
   accountManager: AccountManager
@@ -35,8 +39,12 @@ export class AccountService {
     this.accountManager = new AccountManager()
   }
 
-  serve (channel: EventEmitter) {
-    Chan.serve(this.handle.bind(this), channel)
+  serve (channel: Channel) {
+    const that = this
+    function handle<T> (action: Action<T>): kefir.Observable<T, Error> {
+      return that.handle(action)
+    }
+    channel.serve(handle)
   }
 
   handle<T> (action: Action<T>): kefir.Observable<T> {
@@ -91,19 +99,19 @@ export class AccountService {
 
 function request<T> (
   action: Action<T>,
-  channel: EventEmitter
+  channel: Channel
 ): kefir.Observable<T> {
-  return Chan.request(action, channel)
+  return channel.request(action)
 }
 
 export class AccountClient {
-  channel: EventEmitter
+  channel: Channel
 
-  constructor (channel: EventEmitter) {
+  constructor (channel: Channel) {
     this.channel = channel
   }
 
-  runAccountAction<T> (action: AccountAction<T>): kefir.Observable<T> {
+  runAccountAction<T> (action: AccountAction<T>): kefir.Observable<T, Error> {
     return request(
       {
         type: ACCOUNT_ACTION,

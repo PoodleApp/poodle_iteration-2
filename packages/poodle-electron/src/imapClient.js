@@ -1,6 +1,5 @@
 /* @flow */
 
-import { ipcRenderer } from 'electron'
 import * as kefir from 'kefir'
 import { type Effect, subscribe } from 'poodle-core/lib/slurp/effects'
 import * as accounts from 'poodle-service/lib/accounts'
@@ -8,8 +7,9 @@ import * as cache from 'poodle-service/lib/cache'
 import { type Action as ImapAction } from 'poodle-service/lib/request/actions'
 import { type Action as SmtpAction } from 'poodle-service/lib/smtp/actions'
 import * as tasks from 'poodle-service/lib/tasks'
+import electronChannel from './util/electronChannel'
 
-export const accountClient = new accounts.AccountClient(ipcRenderer)
+export const accountClient = new accounts.AccountClient(electronChannel)
 const dbPromise = cache.initialize()
 
 export function _perform<T, Args: *> (

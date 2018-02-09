@@ -1,6 +1,6 @@
 /* @flow */
 
-import { app, BrowserWindow, ipcMain, protocol } from 'electron'
+import { app, BrowserWindow, protocol } from 'electron'
 import contextMenu from 'electron-context-menu'
 import { requireTaskPool } from 'electron-remote'
 import * as fs from 'fs'
@@ -23,10 +23,6 @@ if (process.env.NODE_ENV === 'development') {
 protocol.registerStandardSchemes(['poodle'], { secure: true })
 
 app.on('ready', () => {
-  // Eventually we will run the IMAP interface in the main process in production
-  // if (process.env.NODE_ENV !== 'development') {
-  //   server = new S.NewServer(ipcMain, db) // Listen for IMAP requests
-  // }
   handlePoodleProtocol()
   handleMidProtocol()
   createWindow('poodle://app/')

@@ -1,8 +1,8 @@
 /* @flow */
 
-import { ipcMain } from 'electron'
 import { AccountService } from 'poodle-service/lib/accounts/AccountService'
+import electronChannel from '../util/electronChannel'
 
 const service = new AccountService()
-service.serve(ipcMain)
+service.serve(electronChannel)
 export default service
