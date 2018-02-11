@@ -52,21 +52,14 @@ function _perform (
         .take(1)
         .map(body => (encoding ? decode(encoding, body) : body))
         .flatMap(body => kefirUtil.fromReadable(body))
-    case actions.FETCH_METADATA:
-      return kefirUtil
-        .fromEventsWithEnd(
-          connection.fetch(action.source, action.options),
-          'message',
-          (msg, seqno) => msg
-        )
-        .flatMap((imapMsg: imap.ImapMessage) => {
-          const attrStream = getAttributes(imapMsg)
-          const headersStream = getHeaders(imapMsg)
-          return kefir.zip(
-            [attrStream, headersStream],
-            (attributes, headers) => ({ attributes, headers })
-          )
-        })
+    case actions.FETCH_ATTRIBUTES:
+      return fetchAttributes(action.source, action.options, connection)
+    case actions.FETCH_ATTRIBUTES_AND_HEADERS:
+      return fetchAttributesAndHeaders(
+        action.source,
+        action.options,
+        connection
+      )
     case actions.GET_BOX:
       return kefir.constant((connection: any)._box)
     case actions.GET_BOXES:
@@ -85,6 +78,48 @@ function _perform (
         new Error(`unknown request type: ${action.type}`)
       )
   }
+}
+
+function fetchAttributes (
+  source: imap.MessageSource,
+  options: imap.FetchOptions,
+  connection: Connection
+): kefir.Observable<imap.MessageAttributes> {
+  return kefirUtil
+    .fromEventsWithEnd(
+      connection.fetch(source, options),
+      'message',
+      (msg, seqno) => msg
+    )
+    .flatMap(getAttributes)
+}
+
+function fetchAttributesAndHeaders (
+  source: imap.MessageSource,
+  options: imap.FetchOptions,
+  connection: Connection
+): kefir.Observable<{ attributes: imap.MessageAttributes, headers: Headers }> {
+  if (!bodiesIncludes(headersSelection, options)) {
+    return kefir.constantError(
+      new Error(
+        `Cannot fetch message headers unless fetch options include '${headersSelection}' body`
+      )
+    )
+  }
+  return kefirUtil
+    .fromEventsWithEnd(
+      connection.fetch(source, options),
+      'message',
+      (msg, seqno) => msg
+    )
+    .flatMap((imapMsg: imap.ImapMessage) => {
+      const attrStream = getAttributes(imapMsg)
+      const headersStream = getHeaders(imapMsg)
+      return kefir.zip(
+        [attrStream, headersStream],
+        (attributes, headers) => ({ attributes, headers })
+      )
+    })
 }
 
 // TODO: this might come in multiple chunks
@@ -119,4 +154,15 @@ function getHeaders (
       return kefir.fromPromise(headers)
     })
   })
+}
+
+function bodiesIncludes (body: string, options: imap.FetchOptions): boolean {
+  const bodies = options.bodies
+  if (!bodies) {
+    return false
+  } else if (typeof bodies === 'string') {
+    return bodies === body
+  } else {
+    return bodies.includes(body)
+  }
 }

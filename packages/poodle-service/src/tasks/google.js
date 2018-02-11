@@ -138,8 +138,8 @@ function getThreadIds (uids: imap.UID[]): Task<ThreadId> {
   // only thing we really want.
   // TODO: is there a way to request nothing extra here?
   const threadIds = basic
-    .fetchMetadata(uids, { bodies: 'HEADER.FIELDS (Message-ID)' })
-    .map(({ attributes }) => attributes['x-gm-thrid'])
+    .fetchAttributes(uids, { bodies: 'HEADER.FIELDS (Message-ID)' })
+    .map(attributes => attributes['x-gm-thrid'])
   return threadIds.modifyObservable(kefirUtil.catMaybes)
 }
 

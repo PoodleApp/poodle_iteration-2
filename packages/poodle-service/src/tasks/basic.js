@@ -114,11 +114,18 @@ export function search (criteria: mixed[]): Task<UID[]> {
   return connectionTask(actions.search(criteria))
 }
 
-export function fetchMetadata (
+export function fetchAttributes (
+  source: MessageSource,
+  opts: FetchOptions
+): Task<MessageAttributes> {
+  return connectionTask(actions.fetchAttributes(source, opts))
+}
+
+export function fetchAttributesAndHeaders (
   source: MessageSource,
   opts: FetchOptions
 ): Task<{ attributes: MessageAttributes, headers: Headers }> {
-  return connectionTask(actions.fetchMetadata(source, opts))
+  return connectionTask(actions.fetchAttributesAndHeaders(source, opts))
 }
 
 export function fetchMessagePart (uid: UID, part: MessagePart): Task<Readable> {
@@ -137,7 +144,7 @@ export function fetchMessagePart (uid: UID, part: MessagePart): Task<Readable> {
 function fetchMessages (source: MessageSource): Task<cache.MessageRecord> {
   return getBox().flatMap(box => {
     const uidvalidity = String(box.uidvalidity)
-    return fetchMetadata(source, {
+    return fetchAttributesAndHeaders(source, {
       bodies: headersSelection,
       envelope: true,
       struct: true
