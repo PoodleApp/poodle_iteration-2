@@ -1,6 +1,6 @@
 /* @flow */
 
-import { type Headers } from 'arfe/lib/models/Message'
+import { type HeaderValue } from 'arfe/lib/models/Message'
 import * as imap from 'imap'
 
 export const END = 'imapRequest/end'
@@ -46,10 +46,12 @@ export function fetchAttributes (
   return { type: FETCH_ATTRIBUTES, source, options }
 }
 
+export type SerializedHeaders = [[string, HeaderValue]]
+
 export function fetchAttributesAndHeaders (
   source: imap.MessageSource,
   options: imap.FetchOptions = {}
-): Action<{ attributes: imap.MessageAttributes, headers: Headers }> {
+): Action<{ attributes: imap.MessageAttributes, headers: SerializedHeaders }> {
   return { type: FETCH_ATTRIBUTES_AND_HEADERS, source, options }
 }
 

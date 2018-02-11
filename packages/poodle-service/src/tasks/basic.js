@@ -18,6 +18,7 @@ import * as cache from '../cache'
 import { type Connection, type OpenBox } from '../models/connection'
 import * as request from '../request'
 import * as actions from '../request/actions'
+import { jsonToMap } from '../util/native'
 import * as kefirUtil from '../util/kefir'
 import * as promises from '../util/promises'
 import { openBox } from './stateChanges'
@@ -125,7 +126,12 @@ export function fetchAttributesAndHeaders (
   source: MessageSource,
   opts: FetchOptions
 ): Task<{ attributes: MessageAttributes, headers: Headers }> {
-  return connectionTask(actions.fetchAttributesAndHeaders(source, opts))
+  return connectionTask(
+    actions.fetchAttributesAndHeaders(source, opts)
+  ).map(({ attributes, headers }) => ({
+    attributes,
+    headers: jsonToMap(headers)
+  }))
 }
 
 export function fetchMessagePart (uid: UID, part: MessagePart): Task<Readable> {

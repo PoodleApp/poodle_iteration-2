@@ -7,6 +7,7 @@ import * as kefir from 'kefir'
 import { simpleParser } from 'mailparser'
 import { type Readable } from 'stream'
 import { decode } from '../encoding'
+import { mapToJson } from '../util/native'
 import * as kefirUtil from '../util/kefir'
 import * as promises from '../util/promises'
 import * as actions from './actions'
@@ -98,7 +99,10 @@ function fetchAttributesAndHeaders (
   source: imap.MessageSource,
   options: imap.FetchOptions,
   connection: Connection
-): kefir.Observable<{ attributes: imap.MessageAttributes, headers: Headers }> {
+): kefir.Observable<{
+  attributes: imap.MessageAttributes,
+  headers: actions.SerializedHeaders
+}> {
   if (!bodiesIncludes(headersSelection, options)) {
     return kefir.constantError(
       new Error(
@@ -115,10 +119,10 @@ function fetchAttributesAndHeaders (
     .flatMap((imapMsg: imap.ImapMessage) => {
       const attrStream = getAttributes(imapMsg)
       const headersStream = getHeaders(imapMsg)
-      return kefir.zip(
-        [attrStream, headersStream],
-        (attributes, headers) => ({ attributes, headers })
-      )
+      return kefir.zip([attrStream, headersStream], (attributes, headers) => ({
+        attributes,
+        headers: mapToJson(headers)
+      }))
     })
 }
 
