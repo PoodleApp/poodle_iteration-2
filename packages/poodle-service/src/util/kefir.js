@@ -39,7 +39,8 @@ export function fromReadable (input: Readable): Observable<Buffer> {
 }
 
 export function toReadable (input: Observable<Buffer>): Readable {
-  const output = new Readable()
+  // TODO: We might need to revisit this to handle back-pressure properly
+  const output = new Readable({ read() {} })
   input.onValue(buffer => { output.push(buffer) })
   input.onEnd(() => { output.push(null) })
   return output
