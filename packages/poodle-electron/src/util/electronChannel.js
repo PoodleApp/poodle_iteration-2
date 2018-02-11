@@ -65,16 +65,16 @@ export function serve<T> (
   ipcMain.on(REQUEST, (event: Object, request: Request<T>) => {
     const subscription = handler(request.action).observe({
       value (value) {
-        const response: Response<T> = {
+        const response: Response<T | null> = {
           transactionId: request.transactionId,
-          value
+          value: prepareForSerialization(value)
         }
         event.sender.send(RESPONSE, response)
       },
       error (error) {
         const response: Response<T> = {
           transactionId: request.transactionId,
-          error: error.message
+          error: (prepareForSerialization(error.message): any)
         }
         event.sender.send(RESPONSE, response)
       },
@@ -95,6 +95,14 @@ export function serve<T> (
     }
     ipcMain.on(UNSUBSCRIBE, unsubscribe)
   })
+}
+
+// When an object is serialized any property whose value is `undefined` is
+// excluded from the serialized form of the object. In order to preserve
+// property keys we replace `undefined` values with `null`, which can be
+// serialized to JSON.
+function prepareForSerialization<T> (value: T): T | null {
+  return typeof value === 'undefined' ? null : value
 }
 
 /*
