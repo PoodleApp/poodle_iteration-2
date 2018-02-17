@@ -51,11 +51,13 @@ function handlePoodleProtocol () {
 }
 
 function handleMidProtocol () {
-  const cache = requireTaskPool(require.resolve('poodle-service/lib/cache'))
+  const rendererTasks = requireTaskPool(
+    require.resolve('../renderer/fetchPartContent')
+  )
   protocol.registerStreamProtocol('mid', async (request, callback) => {
     const { path: tempFile, cleanup } = await getTempFile()
     try {
-      const { contentType } = await cache.writePartContentToFile(
+      const { contentType } = await rendererTasks.writePartContentToFile(
         request.url,
         tempFile
       )

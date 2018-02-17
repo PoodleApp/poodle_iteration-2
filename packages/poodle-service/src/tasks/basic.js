@@ -163,49 +163,64 @@ function fetchMessages (source: MessageSource): Task<cache.MessageRecord> {
   })
 }
 
-function fetchPartContentByUri (uri: URI): Task<?Readable> {
+export function fetchPartByUri (
+  uri: URI
+): Task<?{ message: Message, part: Part.MessagePart }> {
+  return fetchPartContext(uri).map(({ message, partRef }) => {
+    const part = message.getPart(partRef)
+    return part && { message, part }
+  })
+}
+
+export function fetchPartContentByUri (uri: URI): Task<?Readable> {
   return dbTask(db =>
     kefir.fromPromise(cache.fetchContentByUri(uri, db).catch(() => {}))
   ).flatMap(data => {
     if (data) {
       return Task.result(data)
     }
-    const parsed = parseMidUri(uri)
-    const messageId = parsed && parsed.messageId
-    const contentId = parsed && parsed.contentId
-    if (!messageId || !contentId) {
-      throw new Error(
-        `Unable to parse messageID and contentID from URI: ${uri}`
-      )
-    }
-
-    // Some message parts do not have content IDs. (content IDs are explicit
-    // headers on parts, part IDs are assigned to content parts in order when
-    // parsing a message). In cases with no content ID we fall back to part IDs
-    // for `mid:` URIs (in contradiction of RFC-2392). Unfortunately that means
-    // that when we parse a `mid` URI we do not know whether the result is
-    // a content ID or a part ID. The ambiguous ID type encodes a ref for those
-    // cases. In general an ambiguous ID will result in a lookup by content ID
-    // first, and then by part ID in case the content ID lookup fails.
-    const partRef = Part.ambiguousId(contentId)
-
-    return dbTask(db =>
-      kefir.fromPromise(
-        cache.getMessage(messageId, db).catch(err => {
-          // TODO: fall back to scanning mailboxes for the given message ID
-          throw new Error(
-            `Tried to fetch content, but there is no local copy of the containing message, so we don't know which mailbox to look in.`
-          )
-        })
-      )
-    )
-      .flatMap(message => fetchPartContent(message, partRef))
+    return fetchPartContext(uri)
+      .flatMap(({ message, partRef }) => fetchPartContent(message, partRef))
       .modifyObservable(obs =>
         // Insert `undefined` so that we get a value emitted in case an error
         // occurred
         obs.beforeEnd(() => undefined).take(1)
       )
   })
+}
+
+function fetchPartContext (
+  uri: URI
+): Task<{ message: Message, partRef: Part.PartRef }> {
+  const parsed = parseMidUri(uri)
+  const messageId = parsed && parsed.messageId
+  const contentId = parsed && parsed.contentId
+  if (!messageId || !contentId) {
+    return Task.error(
+      new Error(`Unable to parse messageID and contentID from URI: ${uri}`)
+    )
+  }
+
+  // Some message parts do not have content IDs. (content IDs are explicit
+  // headers on parts, part IDs are assigned to content parts in order when
+  // parsing a message). In cases with no content ID we fall back to part IDs
+  // for `mid:` URIs (in contradiction of RFC-2392). Unfortunately that means
+  // that when we parse a `mid` URI we do not know whether the result is
+  // a content ID or a part ID. The ambiguous ID type encodes a ref for those
+  // cases. In general an ambiguous ID will result in a lookup by content ID
+  // first, and then by part ID in case the content ID lookup fails.
+  const partRef = Part.ambiguousId(contentId)
+
+  return dbTask(db =>
+    kefir.fromPromise(
+      cache.getMessage(messageId, db).catch(err => {
+        // TODO: fall back to scanning mailboxes for the given message ID
+        throw new Error(
+          `Tried to fetch content, but there is no local copy of the containing message, so we don't know which mailbox to look in.`
+        )
+      })
+    )
+  ).map(message => ({ message, partRef }))
 }
 
 /*
