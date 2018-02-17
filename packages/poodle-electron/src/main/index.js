@@ -10,16 +10,6 @@ import * as tmp from 'tmp'
 import * as URL from 'url'
 import './accountService'
 
-if (process.env.NODE_ENV === 'development') {
-  const {
-    default: installExtension,
-    REACT_DEVELOPER_TOOLS
-  } = require('electron-devtools-installer')
-  installExtension(REACT_DEVELOPER_TOOLS)
-    .then(name => console.log(`Added Extension:  ${name}`))
-    .catch(err => console.log('An error occurred: ', err))
-}
-
 protocol.registerStandardSchemes(['poodle'], { secure: true })
 
 app.on('ready', () => {
