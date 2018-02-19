@@ -2,16 +2,11 @@
 
 import keytar from 'keytar'
 import * as auth from 'poodle-core/lib/actions/auth'
-import * as compose from 'poodle-core/lib/compose'
-import authSaga, { type Dependencies } from 'poodle-core/lib/sagas/auth'
-import chromeSaga from 'poodle-core/lib/sagas/chrome'
-import queueSaga from 'poodle-core/lib/queue/saga'
+import coreSagas, { type Dependencies } from 'poodle-core/lib/sagas'
 import { type OauthCredentials } from 'poodle-service/lib/models/ImapAccount'
-import { all, fork } from 'redux-saga/effects'
+import { type Effect, all, fork } from 'redux-saga/effects'
 import { _perform as perform } from '../imapClient'
 import * as oauth from '../oauth'
-
-import type { Effect } from 'redux-saga'
 
 // Generator type parameters are of the form: `Generator<+Yield,+Return,-Next>`
 
@@ -54,10 +49,5 @@ const authDeps: Dependencies = {
 }
 
 export default function * root (): Generator<Effect, void, any> {
-  yield all([
-    fork(authSaga, authDeps),
-    fork(chromeSaga),
-    fork(compose.sagas, { perform }),
-    fork(queueSaga, { perform })
-  ])
+  yield fork(coreSagas, authDeps)
 }
