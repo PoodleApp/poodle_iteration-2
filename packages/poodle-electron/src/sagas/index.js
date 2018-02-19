@@ -1,7 +1,7 @@
 /* @flow */
 
-import { shell } from 'electron'
 import keytar from 'keytar'
+import open from 'open'
 import * as auth from 'poodle-core/lib/actions/auth'
 import coreSagas, { type Dependencies } from 'poodle-core/lib/sagas'
 import { type OauthCredentials } from 'poodle-service/lib/models/ImapAccount'
@@ -47,7 +47,7 @@ const authDeps: Dependencies = {
   storeAccessToken,
   loadAccount,
   saveAccount,
-  openExternal: shell.openExternal
+  openExternal: open
 }
 
 export default function * root (): Generator<Effect, void, any> {
