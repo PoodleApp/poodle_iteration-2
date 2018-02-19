@@ -71,6 +71,7 @@ function handleMidProtocol () {
         data: stream
       })
     } catch (err) {
+      console.error('error serving part content:', err)
       callback({
         statusCode: 500,
         headers: {
