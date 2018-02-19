@@ -52,7 +52,8 @@
     "process-nextick-args": "^1.0.7",
     "prop-types": "^15.5.10",
     "react-router-redux": "^5.0.0-alpha.9",
-    "string-to-stream": "^1.1.0"
+    "string-to-stream": "^1.1.0",
+    "tmp": "^0.0.33"
   },
   "devDependencies": {
     "ava": "^0.21.0",

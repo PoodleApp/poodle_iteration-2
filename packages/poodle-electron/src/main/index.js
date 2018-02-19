@@ -1,17 +1,12 @@
 /* @flow */
 
-import { app, BrowserWindow, protocol } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import contextMenu from 'electron-context-menu'
-import { requireTaskPool } from 'electron-remote'
-import * as fs from 'fs'
 import * as Path from 'path'
-import { PassThrough } from 'stream'
-import * as tmp from 'tmp'
 import * as URL from 'url'
 import './accountService'
 
 app.on('ready', () => {
-  handleMidProtocol()
   createWindow()
 })
 
@@ -32,57 +27,6 @@ app.on('activate', () => {
   }
 })
 
-function handleMidProtocol () {
-  const rendererTasks = requireTaskPool(
-    require.resolve('../renderer/fetchPartContent')
-  )
-  protocol.registerStreamProtocol('mid', async (request, callback) => {
-    const { path: tempFile, cleanup } = await getTempFile()
-    try {
-      const { contentType } = await rendererTasks.writePartContentToFile(
-        request.url,
-        tempFile
-      )
-      const stream = fs.createReadStream(tempFile)
-      stream.on('close', cleanup)
-      callback({
-        statusCode: 200,
-        headers: {
-          'content-type': contentType
-        },
-        data: stream
-      })
-    } catch (err) {
-      console.error('error serving part content:', err)
-      callback({
-        statusCode: 500,
-        headers: {
-          'content-type': 'text/plain; charset=utf8'
-        },
-        data: createStream(err.message)
-      })
-    }
-  })
-}
-
-function getTempFile (): Promise<{ path: string, cleanup: () => mixed }> {
-  return new Promise((resolve, reject) => {
-    tmp.file((err, path, fd, cleanup) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve({ path, cleanup })
-      }
-    })
-  })
-}
-
-function createStream (text: string) {
-  const rv = new PassThrough() // PassThrough is also a Readable stream
-  rv.push(text)
-  rv.push(null)
-  return rv
-}
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is GCed.

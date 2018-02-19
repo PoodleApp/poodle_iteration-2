@@ -114,7 +114,7 @@ function NoteView (props: ActivityViewProps) {
           </p>
         : ''}
       <DisplayContent activity={activity} />
-      <ShowAttachments activity={activity} />
+      <ShowAttachments {...props} />
     </ActivityCard>
   )
 }
@@ -147,7 +147,7 @@ function DocumentView (props: ActivityViewProps) {
             </em>
           </p>}
       <DisplayContent activity={activity} style={styles.documentBody} />
-      <ShowAttachments activity={activity} />
+      <ShowAttachments {...props} />
     </div>
   )
 }
@@ -235,22 +235,26 @@ function AsideView (props: ActivityViewProps) {
     return <p>[private aside not found]</p>
   }
 
-  const ppl = m.intoArray(m.map(p => p.displayName, aside.flatParticipants)).join(', ')
+  const ppl = m
+    .intoArray(m.map(p => p.displayName, aside.flatParticipants))
+    .join(', ')
 
   // TODO: This is a bit of a hack
   // const showReplyForm = m.equals(activity, m.last(m.filter(act => (
   //   Act.hasType(Act.syntheticTypes.Aside, act) && m.equals(act.aside, activity.aside)
   // ), conversation.activities)))
 
-  const activities = m.intoArray(aside.activities).map(act =>
-    <ActivityView
-      {...props}
-      activity={act}
-      conversation={aside}
-      key={act.id}
-      nestLevel={nestLevel + 1}
-    />
-  )
+  const activities = m
+    .intoArray(aside.activities)
+    .map(act =>
+      <ActivityView
+        {...props}
+        activity={act}
+        conversation={aside}
+        key={act.id}
+        nestLevel={nestLevel + 1}
+      />
+    )
 
   // const { palette } = (this.context: any).muiTheme.baseTheme
   // const backgroundColor = palette.primary3Color
@@ -290,14 +294,28 @@ type LikeButtonProps = ActivityViewProps & {
 }
 
 function LikeButton (props: LikeButtonProps) {
-  const { account, activity, conversation, dispatch, pendingLikes, style } = props
+  const {
+    account,
+    activity,
+    conversation,
+    dispatch,
+    pendingLikes,
+    style
+  } = props
   const me = URI.mailtoUri(account.email)
   const alreadyLiked = activity.likedBy(me)
   const mine = helpers.myContent(activity, account.email)
 
   function like () {
     const recipients = conversation.replyRecipients(props.account)
-    dispatch(queue.sendLikes(account, conversation, m.intoArray(activity.objectUris), recipients))
+    dispatch(
+      queue.sendLikes(
+        account,
+        conversation,
+        m.intoArray(activity.objectUris),
+        recipients
+      )
+    )
   }
 
   return (
@@ -305,7 +323,9 @@ function LikeButton (props: LikeButtonProps) {
       style={style || {}}
       label={`+${activity.likeCount + 1}`} // `
       onTouchTap={like}
-      disabled={mine || alreadyLiked || helpers.pendingLike(activity, pendingLikes)}
+      disabled={
+        mine || alreadyLiked || helpers.pendingLike(activity, pendingLikes)
+      }
     />
   )
 }

@@ -22,11 +22,11 @@ export type PartRef =
 // ID. The ambiguous ID type encodes a ref for those cases. In general an
 // ambiguous ID will result in a lookup by content ID first, and then by part ID
 // in case the content ID lookup fails.
-export function ambiguousId(id: string): PartRef {
+export function ambiguousId (id: string): PartRef {
   return { type: AMBIGUOUS_ID, id }
 }
 
-export function contentId(id: string): PartRef {
+export function contentId (id: string): PartRef {
   if (id.startsWith('<')) {
     // TODO
     throw new Error('Remove angle brackets from contentId!')
@@ -34,7 +34,7 @@ export function contentId(id: string): PartRef {
   return { type: CONTENT_ID, contentId: id }
 }
 
-export function partId(id: string): PartRef {
+export function partId (id: string): PartRef {
   return { type: PART_ID, partId: id }
 }
 
@@ -55,9 +55,7 @@ export function contentType (part: MessagePart): string {
 
   const baseType = `${part.type}/${part.subtype}`
   const cs = charset(part)
-  return cs
-    ? `${baseType}; charset=${cs}`
-    : baseType
+  return cs ? `${baseType}; charset=${cs}` : baseType
 }
 
 export function disposition (part: MessagePart): ?string {
@@ -68,6 +66,16 @@ export function filename (part: MessagePart): ?string {
   const params = part.disposition && part.disposition.params
   if (params) {
     return params.filename
+  }
+}
+
+export function getRef (part: MessagePart): PartRef {
+  if (part.id) {
+    return contentId(part.id)
+  } else if (part.partID) {
+    return partId(part.partID)
+  } else {
+    throw new Error('Cannot get ref for part with no ID')
   }
 }
 
