@@ -10,12 +10,9 @@ import * as tmp from 'tmp'
 import * as URL from 'url'
 import './accountService'
 
-protocol.registerStandardSchemes(['poodle'], { secure: true })
-
 app.on('ready', () => {
-  handlePoodleProtocol()
   handleMidProtocol()
-  createWindow('poodle://app/')
+  createWindow()
 })
 
 // Quit when all windows have been closed - except in OS X
@@ -31,24 +28,9 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (!mainWindow) {
-    createWindow('poodle://app/')
+    createWindow()
   }
 })
-
-function handlePoodleProtocol () {
-  protocol.registerFileProtocol('poodle', (request, callback) => {
-    // strip scheme and first component to get path
-    const path = URL.parse(request.url).path || '/'
-    const filePath = lookupFile(path)
-    fs.stat(filePath, (err, stats) => {
-      if (err || !stats.isFile()) {
-        callback({ path: lookupFile('index.html') })
-      } else {
-        callback({ path: filePath })
-      }
-    })
-  })
-}
 
 function handleMidProtocol () {
   const rendererTasks = requireTaskPool(
@@ -83,19 +65,6 @@ function handleMidProtocol () {
   })
 }
 
-// Match request paths to files in `public/` or to source maps. This function
-// also uses a bit of a hack to work around the odd way that source map paths
-// are resolved when loading javascript files using `require`.
-const topDir = Path.normalize(Path.join(__dirname, '..', '..'))
-const sourceMapPattern = new RegExp(`${topDir}.*\\.js\\.map$`)
-function lookupFile (path: string): string {
-  const sourceMap = (path.match(sourceMapPattern) || [])[0]
-  if (sourceMap) {
-    return sourceMap
-  }
-  return Path.join(topDir, 'public', path)
-}
-
 function getTempFile (): Promise<{ path: string, cleanup: () => mixed }> {
   return new Promise((resolve, reject) => {
     tmp.file((err, path, fd, cleanup) => {
@@ -119,7 +88,13 @@ function createStream (text: string) {
 // be closed automatically when the JavaScript object is GCed.
 let mainWindow = null
 
-function createWindow (url: string) {
+function createWindow (
+  url: string = URL.format({
+    pathname: Path.join(__dirname, '..', '..', 'index.html'),
+    protocol: 'file:',
+    slashes: true
+  })
+) {
   mainWindow = new BrowserWindow({ width: 800, height: 600 })
 
   contextMenu({

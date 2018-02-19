@@ -87,7 +87,8 @@
   },
   "files": [
     "bin/",
+    "index.html",
     "lib/",
-    "public/"
+    "main.css"
   ]
 }
