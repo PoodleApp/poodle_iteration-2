@@ -216,7 +216,7 @@ function fetchPartContext (
       cache.getMessage(messageId, db).catch(err => {
         // TODO: fall back to scanning mailboxes for the given message ID
         throw new Error(
-          `Tried to fetch content, but there is no local copy of the containing message, so we don't know which mailbox to look in.`
+          `tried to fetch content, but there is no local copy of the containing message, so we don't know which mailbox to look in (message ID: ${messageId}): ${err.message}`
         )
       })
     )
