@@ -23,14 +23,16 @@
     "prepublishOnly": "yarn test && yarn run build"
   },
   "babel": {
+    "plugins": [
+      "transform-object-rest-spread"
+    ],
     "presets": [
       "react",
-      "stage-3",
       [
         "env",
         {
           "targets": {
-            "electron": "1.6"
+            "electron": "1.8"
           }
         }
       ]

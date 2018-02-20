@@ -23,14 +23,16 @@
   },
   "homepage": "https://github.com/PoodleApp/arfe#readme",
   "babel": {
+    "plugins": [
+      "transform-object-rest-spread"
+    ],
     "presets": [
       "react",
-      "stage-3",
       [
         "env",
         {
           "targets": {
-            "electron": "1.7"
+            "electron": "1.8"
           }
         }
       ]

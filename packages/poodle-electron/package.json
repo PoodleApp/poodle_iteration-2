@@ -22,9 +22,11 @@
     "poodle": "./bin/poodle"
   },
   "babel": {
+    "plugins": [
+      "transform-object-rest-spread"
+    ],
     "presets": [
       "react",
-      "stage-3",
       [
         "env",
         {
