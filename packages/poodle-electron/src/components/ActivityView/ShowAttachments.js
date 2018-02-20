@@ -16,6 +16,12 @@ type Props = {
   dispatch: Function
 }
 
+const styles = {
+  attachmentCard: {
+    maxHeight: '5em'
+  }
+}
+
 export default function ShowAttachments (props: Props) {
   const message = props.activity.message
   const attachments = props.activity.attachments
@@ -24,12 +30,19 @@ export default function ShowAttachments (props: Props) {
   }
   const as = m.map(
     a =>
-      <Attachment
-        attachment={a}
-        key={message.uriForPart(a)}
-        message={message}
-        {...props}
-      />,
+      a.type === 'image'
+        ? <ImageAttachment
+            attachment={a}
+            key={message.uriForPart(a)}
+            message={message}
+            {...props}
+          />
+        : <Attachment
+            attachment={a}
+            key={message.uriForPart(a)}
+            message={message}
+            {...props}
+          />,
     attachments
   )
   return (
@@ -55,6 +68,7 @@ function Attachment ({
   const filename = (attachment.params && attachment.params.name) || 'file'
   const mediaType = Part.contentType(attachment)
   const size = attachment.size ? `${attachment.size} bytes` : ''
+  const uri = message.uriForPart(attachment)
 
   function openAttachment (event: Event) {
     event.preventDefault()
@@ -62,14 +76,50 @@ function Attachment ({
   }
 
   return (
-    <Card>
+    <Card style={styles.attachmentCard}>
       <CardTitle
         title={filename || 'file'}
         subtitle={`${mediaType}; ${size}`}
       />
       <CardActions>
         <FlatButton label='View' onClick={openAttachment} />
-        <FlatButton label='Save' disabled={true} />
+        <FlatButton label='Save' href={uri} download={filename} />
+      </CardActions>
+    </Card>
+  )
+}
+
+function ImageAttachment ({
+  account,
+  attachment,
+  dispatch,
+  message
+}: AttachmentProps) {
+  const filename = (attachment.params && attachment.params.name) || 'file'
+  const mediaType = Part.contentType(attachment)
+  const size = attachment.size ? `${attachment.size} bytes` : ''
+  const uri = message.uriForPart(attachment)
+
+  function openAttachment (event: Event) {
+    event.preventDefault()
+    dispatch(actions.openAttachment({ message, attachment, account }))
+  }
+
+  return (
+    <Card style={styles.attachmentCard}>
+      <CardMedia
+        overlay={
+          <CardTitle
+            title={filename || 'file'}
+            subtitle={`${mediaType}; ${size}`}
+          />
+        }
+      >
+        <img src={uri} />
+      </CardMedia>
+      <CardActions>
+        <FlatButton label='View' onClick={openAttachment} />
+        <FlatButton label='Save' href={uri} download={filename} />
       </CardActions>
     </Card>
   )
