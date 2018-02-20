@@ -23,7 +23,13 @@ export default function ShowAttachments (props: Props) {
     return <section />
   }
   const as = m.map(
-    a => <Attachment attachment={a} message={message} {...props} />,
+    a =>
+      <Attachment
+        attachment={a}
+        key={message.uriForPart(a)}
+        message={message}
+        {...props}
+      />,
     attachments
   )
   return (
