@@ -30,7 +30,8 @@ export async function failOnUndefined<T> (
   p: Promise<T>
 ): Promise<$NonMaybeType<T>> {
   const result = await p
-  if (typeof p === 'undefined') {
+  if (typeof result === 'undefined') {
     throw new Error('undefined result')
   }
+  return result
 }
