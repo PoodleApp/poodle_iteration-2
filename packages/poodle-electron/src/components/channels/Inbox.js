@@ -17,19 +17,18 @@ type OwnProps = {
 const Inbox = slurp(
   ({ auth, chrome }: State, { account }: OwnProps) => {
     const email = auth.account && auth.account.email
-    const conversations =
-      email
-        ? perform(
-            tasks.queryConversationsForListView,
-          [
-            {
-              limit: 30,
-              query: 'in:inbox'
-            }
-          ],
-            { accountName: email }
-          )
-        : subscribe(kefir.constant, [])
+    const conversations = email
+      ? perform(
+          tasks.queryConversationsForListView,
+        [
+          {
+            limit: 30,
+            query: 'in:inbox'
+          }
+        ],
+          { accountName: email }
+        )
+      : subscribe(kefir.never, [])
     return {
       conversations,
       errors: chrome.errors
@@ -43,4 +42,3 @@ const Inbox = slurp(
 )(ActivityStream)
 
 export default Inbox
-
