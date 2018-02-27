@@ -3,15 +3,12 @@
 import { app, BrowserWindow, protocol } from 'electron'
 import contextMenu from 'electron-context-menu'
 import { requireTaskPool } from 'electron-remote'
-import installDl from 'electron-dl'
 import * as fs from 'fs'
 import * as Path from 'path'
 import { PassThrough } from 'stream'
 import tmp from 'tmp'
 import * as URL from 'url'
 import './accountService'
-
-installDl()
 
 app.on('ready', () => {
   handleContentDownloads()
