@@ -7,6 +7,7 @@ import * as kefir from 'kefir'
 import { simpleParser } from 'mailparser'
 import { type Readable } from 'stream'
 import { decode } from '../encoding'
+import * as C from '../models/connection'
 import { mapToJson } from '../util/native'
 import * as kefirUtil from '../util/kefir'
 import * as promises from '../util/promises'
@@ -70,7 +71,7 @@ function _perform (
           nsPrefix ? connection.getBoxes(nsPrefix, cb) : connection.getBoxes(cb)
       )
     case actions.GET_CAPABILITIES:
-      return kefir.constant(connection._caps || [])
+      return kefir.constant(C.capabilities(connection) || [])
     case actions.SEARCH:
       const criteria = action.criteria
       return kefir.fromNodeCallback(cb => connection.search(criteria, cb))

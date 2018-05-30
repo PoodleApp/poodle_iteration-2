@@ -1,13 +1,10 @@
 # Makefile for transpiling with Babel in a Node app, or in a client- or
 # server-side shared library.
 
-packages = node_modules/arfe node_modules/poodle-core node_modules/poodle-service
-
-.PHONY: all build clean remove_symlinks
+.PHONY: all build clean
 
 # Install `babel-cli` in a project to get the transpiler.
-project_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-babel := $(project_dir)../../node_modules/.bin/babel
+babel := ../../node_modules/.bin/babel
 
 # Identify modules to be transpiled by recursively searching the `src/`
 # directory.
@@ -35,7 +32,10 @@ all: build
 
 # Ask `make` to build all of the transpiled `.js` and `.js.flow` files that we
 # want to end up with in `lib/`.
-build: $(flow_files) $(transpiled_files) remove_symlinks $(packages)
+#
+# This target also depends on the `node_modules/` directory, so that `make`
+# automatically runs `yarn install` if `package.json` has changed.
+build: node_modules $(flow_files) $(transpiled_files)
 
 # This rule tells `make` how to transpile a source file using `babel`.
 # Transpiled files will be written to `lib/`
@@ -56,26 +56,9 @@ lib/%.js.flow: src/%.js
 
 clean:
 	rm -rf lib
-	rm -rf dist
 
-remove_symlinks:
-	for file in $(packages); \
-	do if test -L "$$file"; then rm "$$file"; fi; \
-	done
-
-define package_dir
-../$(notdir $(1))
-endef
-
-define package_template
-$(1): $(call package_dir,$(1))/package.json $(shell find '$(call package_dir,$(1))/src/' -type f)
-	if test -L '$$@'; then rm '$$@'; else rm -rf '$$@'; fi && \
-	$$(MAKE) -C '$$(call package_dir,$$@)' && \
-	archive=$$$$(npm pack '$$(call package_dir,$$@)' | grep '.tgz$$$$') && \
-	mkdir -p 'node_modules/$$(notdir $$@)' && \
-	tar -xzf "$$$$archive" --strip-components 1 -C 'node_modules/$$(notdir $$@)' && \
-	rm "$$$$archive"
-endef
-
-# Compute a rule for rebuilding each dependency when its source files change
-$(foreach package,$(packages),$(eval $(call package_template,$(package))))
+# This rule informs `make` that the `node_modules/` directory is out-of-date
+# after changes to `package.json`, and instructs `make` on how to install
+# modules to get back up-to-date.
+node_modules: package.json
+	yarn install

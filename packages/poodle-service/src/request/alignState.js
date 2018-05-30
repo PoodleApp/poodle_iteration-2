@@ -9,6 +9,7 @@
 import * as imap from 'imap'
 import type Connection from 'imap'
 import * as B from '../models/BoxList'
+import * as C from '../models/connection'
 import * as promises from '../util/promises'
 import * as S from './state'
 import { type BoxSpecifier } from './types'
@@ -48,7 +49,7 @@ async function openBox (
   connection: Connection
 ): Promise<void> {
   const boxName = await getBoxName(boxSpec, connection)
-  const _box = (connection: any)._box
+  const _box = C.activeBox(connection)
   if (_box && _box.name === boxName && _box.readOnly == readonly) {
     // No change necessary
   } else {
@@ -61,7 +62,7 @@ async function closeBox (
   autoExpunge: boolean,
   connection: Connection
 ): Promise<void> {
-  if (connection._box) {
+  if (C.activeBox(connection)) {
     await promises.lift0(cb => connection.closeBox(autoExpunge, cb))
   }
 }

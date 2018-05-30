@@ -20,16 +20,18 @@
     "test": "ava",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
-    "prepublishOnly": "yarn test && yarn run build"
+    "prepublishOnly": "yarn test && yarn run build",
+    "postinstall": "../../scripts/postinstall"
   },
   "babel": {
     "plugins": [
-      "transform-object-rest-spread"
+      "@babel/plugin-proposal-object-rest-spread"
     ],
     "presets": [
-      "react",
+      "@babel/preset-flow",
+      "@babel/preset-react",
       [
-        "env",
+        "@babel/preset-env",
         {
           "targets": {
             "electron": "1.8"
@@ -39,18 +41,23 @@
     ]
   },
   "ava": {
-    "require": [
-      "babel-register"
+    "color": false,
+    "files": [
+      "test/**/*_test.js"
     ],
-    "babel": "inherit",
-    "color": false
+    "sources": [
+      "src/**/*.js"
+    ],
+    "require": [
+      "@babel/register"
+    ]
   },
   "dependencies": {
-    "arfe": "link:../arfe",
+    "arfe": "*",
     "deep-equal": "^1.0.1",
     "filereader-stream": "^1.0.0",
     "lodash.mapvalues": "^4.6.0",
-    "poodle-service": "link:../poodle-service",
+    "poodle-service": "*",
     "process-nextick-args": "^1.0.7",
     "prop-types": "^15.5.10",
     "react-router-redux": "^5.0.0-alpha.9",
@@ -58,8 +65,15 @@
     "tmp": "^0.0.33"
   },
   "devDependencies": {
-    "ava": "^0.21.0",
-    "install-peers": "^1.0.2",
+    "@babel/cli": "7.0.0-beta.44",
+    "@babel/core": "7.0.0-beta.44",
+    "@babel/plugin-proposal-object-rest-spread": "7.0.0-beta.44",
+    "@babel/preset-env": "7.0.0-beta.44",
+    "@babel/preset-flow": "7.0.0-beta.44",
+    "@babel/preset-react": "7.0.0-beta.44",
+    "@babel/register": "7.0.0-beta.44",
+    "ava": "1.0.0-beta.4",
+    "flow-bin": "^0.73.0",
     "react-test-renderer": "^15.6.1"
   },
   "files": [

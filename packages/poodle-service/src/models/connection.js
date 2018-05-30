@@ -76,7 +76,7 @@ export function withBox<T, E, OT: kefir.Observable<T, E>> (
     () =>
       kefir.fromPromise(
         promises.lift0(cb => {
-          if (connection._box) {
+          if (activeBox(connection)) {
             connection.closeBox(cb)
           }
         })
@@ -94,7 +94,7 @@ export function withAllMail<T, E, OT: kefir.Observable<T, E>> (
     () =>
       kefir.fromPromise(
         promises.lift0(cb => {
-          if (connection._box) {
+          if (activeBox(connection)) {
             connection.closeBox(cb)
           }
         })
@@ -132,4 +132,14 @@ export function boxByName (
   name: string
 ): (_: imap.BoxListItem, boxName: string) => boolean {
   return (_, boxName) => boxName === name
+}
+
+// Warning: this function relies on undocument internals of the imap library!
+export function activeBox (connection: Connection): ?imap.Box {
+  return (connection: any)._box
+}
+
+// Warning: this function relies on undocument internals of the imap library!
+export function capabilities (connection: Connection): string[] {
+  return (connection: any)._caps
 }

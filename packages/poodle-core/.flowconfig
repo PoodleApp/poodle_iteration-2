@@ -7,6 +7,7 @@
 
 [libs]
 ./types/
+../../types/
 
 [options]
 suppress_comment=\\(.\\|\n\\)*\\$ExpectError

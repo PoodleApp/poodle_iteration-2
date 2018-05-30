@@ -38,7 +38,7 @@ declare module "imap" {
     nomodseq: boolean,
     permFlags: Flag[],
     persistentUIDs: boolean,
-    readyOnly?: boolean, // only available with openBox() calls
+    readOnly?: boolean, // only available with openBox() calls
     uidnext: number,
     uidvalidity: number,
   }

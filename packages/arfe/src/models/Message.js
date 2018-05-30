@@ -367,7 +367,10 @@ function foldAttachmentParts<T> (
   struct: MessageStruct
 ): T {
   const fallbackSelector = selectPrimaryContent(filter)
-  function selector (subtype: string, nestedStructs: MessageStruct[]): MessageStruct[] {
+  function selector (
+    subtype: string,
+    nestedStructs: MessageStruct[]
+  ): MessageStruct[] {
     if (subtype === 'mixed') {
       // mixed: the first part is primary, the remaining parts are attachments
       return nestedStructs.slice(1)
@@ -379,7 +382,8 @@ function foldAttachmentParts<T> (
 }
 
 function attachmentParts (msg: MessageAttributes): Vector<MessagePart> {
-  const f = (parts, part) => (!P.isMultipart(part) ? m.conj(parts, part) : parts)
+  const f = (parts, part) =>
+    !P.isMultipart(part) ? m.conj(parts, part) : parts
   const filter = _ => true
   const zero = m.vector()
   return foldAttachmentParts(f, zero, filter, msg.struct)

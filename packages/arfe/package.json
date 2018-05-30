@@ -6,7 +6,8 @@
     "test": "ava",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
-    "prepublishOnly": "npm test && npm run build"
+    "prepublishOnly": "npm test && npm run build",
+    "postinstall": "../../scripts/postinstall"
   },
   "repository": {
     "type": "git",
@@ -24,12 +25,12 @@
   "homepage": "https://github.com/PoodleApp/arfe#readme",
   "babel": {
     "plugins": [
-      "transform-object-rest-spread"
+      "@babel/plugin-proposal-object-rest-spread"
     ],
     "presets": [
-      "react",
+      "@babel/preset-flow",
       [
-        "env",
+        "@babel/preset-env",
         {
           "targets": {
             "electron": "1.8"
@@ -39,20 +40,26 @@
     ]
   },
   "ava": {
+    "color": false,
     "files": [
       "test/**/*_test.js"
     ],
-    "source": [
+    "sources": [
       "src/**/*.js"
     ],
     "require": [
-      "babel-register"
-    ],
-    "babel": "inherit",
-    "color": false
+      "@babel/register"
+    ]
   },
   "devDependencies": {
-    "ava": "^0.23.0",
+    "@babel/cli": "7.0.0-beta.44",
+    "@babel/core": "7.0.0-beta.44",
+    "@babel/plugin-proposal-object-rest-spread": "7.0.0-beta.44",
+    "@babel/preset-env": "7.0.0-beta.44",
+    "@babel/preset-flow": "7.0.0-beta.44",
+    "@babel/register": "7.0.0-beta.44",
+    "ava": "1.0.0-beta.4",
+    "flow-bin": "^0.73.0",
     "libmime": "^3.1.0",
     "string-to-stream": "^1.1.0"
   },
@@ -68,7 +75,7 @@
     "stream-from-promise": "^1.0.0",
     "stream-to-string": "^1.1.0",
     "traverse": "^0.6.6",
-    "vocabs-as": "^1.0.0"
+    "vocabs-as": "^2"
   },
   "files": [
     "lib/"

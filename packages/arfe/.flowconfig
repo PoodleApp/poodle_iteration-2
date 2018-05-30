@@ -10,6 +10,7 @@
 
 [libs]
 ./types/
+../../types/
 
 [options]
 
