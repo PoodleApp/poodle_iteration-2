@@ -15,6 +15,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "test": "ava",
+    "prebuild": "make -C ../arfe",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
     "prepublishOnly": "npm test && npm run build",

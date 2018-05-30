@@ -18,6 +18,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "ava",
+    "prebuild": "make -C ../arfe && make -C ../poodle-service",
     "build": "make",
     "build:watch": "watch 'yarn run build' src",
     "prepublishOnly": "yarn test && yarn run build",
