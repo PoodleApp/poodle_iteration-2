@@ -15,7 +15,7 @@ import * as oauth from '../oauth'
 async function loadAccessToken (
   account: auth.Account
 ): Promise<?OauthCredentials> {
-  let creds = keytar.getPassword('Poodle', account.email)
+  let creds = await keytar.getPassword('Poodle', account.email)
   creds = creds && JSON.parse(creds)
   if (creds && creds.refresh_token) {
     return creds
@@ -26,7 +26,7 @@ async function storeAccessToken (
   token: OauthCredentials,
   account: auth.Account
 ) {
-  keytar.replacePassword('Poodle', account.email, JSON.stringify(token))
+  keytar.setPassword('Poodle', account.email, JSON.stringify(token))
 }
 
 async function loadAccount (): Promise<?auth.Account> {
