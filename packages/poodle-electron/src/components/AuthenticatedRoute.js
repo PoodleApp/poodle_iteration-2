@@ -7,24 +7,20 @@ import { type AccountMetadata } from 'poodle-service/lib/types'
 import * as queryString from 'query-string'
 import * as React from 'react'
 import * as redux from 'react-redux'
-import { Redirect, Route } from 'react-router-dom'
-
-import type { ContextRouter } from 'react-router-dom'
-import type { State } from '../reducers'
+import { type ContextRouter, Redirect, Route } from 'react-router-dom'
+import { type State } from '../reducers'
 
 type Props = {
   account: ?authActions.Account,
-  component?: React.ComponentType<*>,
+  children: (account: authActions.Account, router: ContextRouter) => React.Node,
   connected?: boolean,
-  render?: (router: ContextRouter) => React.Element<any>,
   path?: string,
   exact?: boolean,
   strict?: boolean
 }
 
-export function AuthenticatedRoute ({ component, render, ...rest }: Props) {
+export function AuthenticatedRoute ({ children, ...rest }: Props) {
   const { account, connected } = rest
-
   return (
     <Route
       {...rest}
@@ -40,7 +36,6 @@ export function AuthenticatedRoute ({ component, render, ...rest }: Props) {
             />
           )
         }
-
         if (!connected) {
           return (
             <div>
@@ -48,18 +43,7 @@ export function AuthenticatedRoute ({ component, render, ...rest }: Props) {
             </div>
           )
         }
-
-        if (component) {
-          return React.createElement(component, { ...props, account })
-        }
-
-        if (render) {
-          return render({ ...props, account })
-        }
-
-        throw new Error(
-          '`AuthenticatedRoute` requires either a `component` or a `render` prop'
-        )
+        return children(account, props)
       }}
     />
   )

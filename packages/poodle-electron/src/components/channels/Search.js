@@ -6,7 +6,7 @@ import * as chromeActions from 'poodle-core/lib/actions/chrome'
 import { type Slurp, slurp, subscribe } from 'poodle-core/lib/slurp'
 import * as tasks from 'poodle-service/lib/tasks'
 import { perform } from '../../imapClient'
-import ActivityStream from '../ActivityStream'
+import ActivityStream, { type Props as ActivityStreamProps } from '../ActivityStream'
 
 import type { State } from '../../reducers'
 
@@ -15,7 +15,7 @@ type OwnProps = {
 }
 
 const WithData = slurp(
-  ({ auth, chrome }: State, { account }: OwnProps) => {
+  ({ auth, chrome }: State, { account }: OwnProps): $Shape<ActivityStreamProps> => {
     const email = auth.account && auth.account.email
     const conversations =
       email && chrome.searchQuery
@@ -36,7 +36,7 @@ const WithData = slurp(
       searchQuery: chrome.searchQuery
     }
   },
-  (dispatch: Dispatch<*>) => ({
+  (dispatch: Dispatch<*>): $Shape<ActivityStreamProps> => ({
     onDismissError (...args) {
       dispatch(chromeActions.dismissError(...args))
     },

@@ -6,6 +6,7 @@ import ContentAdd from 'material-ui/svg-icons/content/add'
 import * as auth from 'poodle-core/lib/actions/auth'
 import * as chrome from 'poodle-core/lib/actions/chrome'
 import * as React from 'react'
+import { type Dispatch } from 'redux'
 import * as redux from 'react-redux'
 
 const styles = {
@@ -21,7 +22,8 @@ const styles = {
 }
 
 type Props = {
-  onNewDiscussion(account: auth.Account): void
+  account: auth.Account,
+  onNewDiscussion(): void
 }
 
 export function ComposeButton (props: Props) {
@@ -35,12 +37,15 @@ export function ComposeButton (props: Props) {
   )
 }
 
-const ComposeButtonWithActions = redux.connect(null, (dispatch, ownProps) => {
-  return {
-    onNewDiscussion () {
-      dispatch(chrome.composeNewDiscussion(ownProps.account))
+const ComposeButtonWithActions = redux.connect(
+  null,
+  (dispatch: Dispatch<*>, ownProps) => {
+    return {
+      onNewDiscussion () {
+        dispatch(chrome.composeNewDiscussion(ownProps.account))
+      }
     }
   }
-})(ComposeButton)
+)(ComposeButton)
 
 export default ComposeButtonWithActions

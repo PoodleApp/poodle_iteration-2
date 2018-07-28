@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow strict */
 
 import * as queryString from 'query-string'
 import React from 'react'
@@ -14,7 +14,9 @@ type AppProps = {}
 export default function App ({ }: AppProps) {
   return (
     <Switch>
-      <AuthenticatedRoute path='/activity' component={Search} />
+      <AuthenticatedRoute path='/activity'>
+        {account => <Search account={account} />}
+      </AuthenticatedRoute>
       <AuthenticatedRoute
         path='/compose/discussion'
         render={props => {
@@ -22,14 +24,19 @@ export default function App ({ }: AppProps) {
           return <ComposeConversation draftId={query.draftId} {...props} />
         }}
       />
-      <AuthenticatedRoute
-        path='/conversations/:id'
-        render={props =>
-          <Conversation
-            conversationId={decodeURIComponent(props.match.params.id)}
-            {...props}
-          />}
-      />
+      <AuthenticatedRoute path='/conversations/:id'>
+        {(account, router) => {
+          const id = router.match.params.id
+          return id ? (
+            <Conversation
+              account={account}
+              conversationId={decodeURIComponent(id)}
+            />
+          ) : (
+            'Not Found'
+          )
+        }}
+      </AuthenticatedRoute>
       <Route path='/login' component={Login} />
       <Route render={props => <Redirect to='/activity' />} />
     </Switch>

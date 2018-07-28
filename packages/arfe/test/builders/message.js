@@ -1,12 +1,12 @@
 /*
  * Utilities to build email messages for testing
  *
- * @flow
+ * @flow strict
  */
 
 import * as AS       from 'activitystrea.ms'
 import * as m        from 'mori'
-import * as uuid     from 'node-uuid'
+import uuid          from 'uuid'
 import stream        from 'string-to-stream'
 import Address       from '../../src/models/Address'
 import Message       from '../../src/models/Message'
@@ -136,7 +136,7 @@ function randomUid(): number {
 }
 
 export function randomMessageId(): string {
-  return `${uuid.v4()}@sitr.us`
+  return `${uuid()}@sitr.us`
 }
 
 function unwrapAddresses(addrs: Address[]): ImapAddress[] {

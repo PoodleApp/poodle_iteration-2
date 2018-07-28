@@ -6,8 +6,8 @@ import * as Addr from 'arfe/lib/models/Address'
 import Message from 'arfe/lib/models/Message'
 import * as cache from 'poodle-service/lib/cache'
 import * as tasks from 'poodle-service/lib/tasks'
+import { type Saga } from 'redux-saga'
 import {
-  type Effect,
   all,
   call,
   fork,
@@ -18,6 +18,7 @@ import {
 import stringToStream from 'string-to-stream'
 import { type Account } from '../actions/auth'
 import * as chrome from '../actions/chrome'
+import { callObservableProducer } from '../sagas/effects'
 import * as queue from './actions'
 
 export interface Dependencies {
@@ -29,7 +30,7 @@ export interface Dependencies {
 function * sendLike (
   deps: Dependencies,
   action: queue.Action
-): Generator<Effect, void, any> {
+): Saga<void> {
   if (action.type !== queue.SEND_LIKES) {
     return
   }
@@ -57,40 +58,40 @@ function * transmit (
   deps: Dependencies,
   account: Account,
   messageBuilder: compose.Builder<Message>
-): Generator<Effect, void, any> {
+): Saga<void> {
   const sender = Addr.build(account)
-  const { message, parts } = yield compose.build(messageBuilder, sender)
+  const { message, parts } = yield call(compose.build, messageBuilder, sender)
   yield put(queue.sending([message.uri]))
 
   try {
     // write copy of message and content to local cache
     const messageRecord = cache.messageToRecord(message)
-    yield deps.perform(
+    yield callObservableProducer(deps.perform,
       tasks.storeLocalCopyOfMessage,
       [messageRecord, parts],
       {
         accountName: account.email
       }
-    ).toPromise()
+    )
 
     // recording local record consumes content streams, so read content back
     // from database to serialize message for transmission
-    const serialized = yield deps.perform(
+    const serialized = yield callObservableProducer(deps.perform,
       tasks.serialize,
       [message],
       {
         accountName: account.email
       }
-    ).toPromise()
+    )
 
     // transmit the message
-    const result = yield deps.perform(
+    const result = yield callObservableProducer(deps.perform,
       tasks.sendMail,
       [serialized],
       {
         accountName: account.email
       }
-    ).toPromise()
+    )
   } catch (err) {
     yield put(chrome.showError(err))
     throw err
@@ -101,7 +102,7 @@ function * transmit (
 
 export default function * root (
   deps: Dependencies
-): Generator<Effect, void, any> {
+): Saga<void> {
   yield all([
     fork(takeEvery, queue.SEND_LIKES, sendLike, deps)
   ])

@@ -9,7 +9,7 @@ import * as chromeState from 'poodle-core/lib/reducers/chrome'
 import * as selectors from 'poodle-core/lib/selectors'
 import PropTypes from 'prop-types'
 import * as queryString from 'query-string'
-import React from 'react'
+import * as React from 'react'
 import * as redux from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import Errors from '../Errors'
@@ -59,12 +59,15 @@ function getStyles (palette: Object) {
   }
 }
 
+type _Void<Args: *, F: (...args: Args) => any> = (...args: Args) => void
+type Void<F> = _Void<*, F>
+
 type LoginProps = {
   account: ?authActions.Account,
   errors: ?(Error[]),
   oauthLoadingMessages: string[],
-  onDismissError: typeof chromeActions.dismissError,
-  onLogin: typeof authActions.setAccount,
+  onDismissError: Void<typeof chromeActions.dismissError>,
+  onLogin: Void<typeof authActions.setAccount>,
   location: Object
 }
 
@@ -99,7 +102,7 @@ export function Login ({
 }
 
 type LoginFormProps = {
-  onLogin: typeof authActions.setAccount
+  onLogin: Void<typeof authActions.setAccount>
 }
 
 function LoginForm (props: LoginFormProps, context) {
@@ -169,10 +172,10 @@ function mapStateToProps (state: State): $Shape<LoginProps> {
   }
 }
 
-function mapDispatchToProps (dispatch: Dispatch<*>) {
+function mapDispatchToProps (dispatch: Dispatch<*>): $Shape<LoginProps> {
   return {
-    onLogin(...args) { dispatch(authActions.setAccount(...args)) },
-    onDismissError(...args) { dispatch(chromeActions.dismissError(...args)) }
+    onDismissError(...args: *) { dispatch(chromeActions.dismissError(...args)) },
+    onLogin(...args: *) { dispatch(authActions.setAccount(...args)) }
   }
 }
 

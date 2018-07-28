@@ -1,7 +1,8 @@
 /* @flow */
 
 import { type OauthCredentials } from 'poodle-service/lib/models/ImapAccount'
-import { type Effect, all, fork } from 'redux-saga/effects'
+import { type Effect } from 'redux-saga'
+import { all, fork } from 'redux-saga/effects'
 import * as compose from '../compose'
 import queueSaga from '../queue/saga'
 import viewSaga, { type Dependencies as ViewDeps } from '../view/sagas'

@@ -5,7 +5,8 @@ import open from 'open'
 import * as auth from 'poodle-core/lib/actions/auth'
 import coreSagas, { type Dependencies } from 'poodle-core/lib/sagas'
 import { type OauthCredentials } from 'poodle-service/lib/models/ImapAccount'
-import { type Effect, all, fork } from 'redux-saga/effects'
+import { type Saga } from "redux-saga"
+import { all, fork } from 'redux-saga/effects'
 import { _perform as perform } from '../imapClient'
 import * as oauth from '../oauth'
 
@@ -50,6 +51,6 @@ const authDeps: Dependencies = {
   openExternal: open
 }
 
-export default function * root (): Generator<Effect, void, any> {
+export default function * root (): Saga<void> {
   yield fork(coreSagas, authDeps)
 }

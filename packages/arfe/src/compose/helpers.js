@@ -1,10 +1,10 @@
-/* @flow */
+/* @flow strict */
 
 import * as AS from 'activitystrea.ms'
 import type { Address as ImapAddress, Disposition, MessagePart } from 'imap'
 import * as mediaType from 'media-type'
 import * as m from 'mori'
-import * as uuid from 'node-uuid'
+import uuid from 'uuid/v4'
 import Address from '../models/Address'
 import Conversation from '../models/Conversation'
 import * as asutil from '../util/activity'
@@ -43,7 +43,7 @@ export function buildContentPart ({
 
 export function getUniqueId (senderEmail?: Address) {
   const host = senderEmail ? senderEmail.host : ''
-  return `${uuid.v4()}@${host}`
+  return `${uuid()}@${host}`
 }
 
 /* formatting helpers */

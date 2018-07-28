@@ -2,12 +2,12 @@
 
 import * as ImapAccount from 'poodle-service/lib/models/ImapAccount'
 import * as tasks from 'poodle-service/lib/tasks'
+import { type Saga } from 'redux-saga'
 import { all, call, cancelled, fork, put, takeLatest } from 'redux-saga/effects'
 import * as auth from '../actions/auth'
 import * as chrome from '../actions/chrome'
 import { client_id, client_secret } from '../constants'
-
-import type { Effect } from 'redux-saga'
+import { callObservableProducer } from './effects'
 
 export interface Dependencies {
   perform: tasks.Perform,
@@ -34,7 +34,7 @@ export interface Dependencies {
 
 // Generator type parameters are of the form: `Generator<+Yield,+Return,-Next>`
 
-function * lookupAccount (deps: Dependencies): Generator<Effect, void, any> {
+function * lookupAccount (deps: Dependencies): Saga<void> {
   try {
     const account = yield call(deps.loadAccount)
     if (account) {
@@ -49,7 +49,7 @@ function * lookupAccount (deps: Dependencies): Generator<Effect, void, any> {
 function * initAccount (
   deps: Dependencies,
   { account }: Object
-): Generator<Effect, void, any> {
+): Saga<void> {
   let token = yield call(deps.loadAccessToken, account)
   if (!token) {
     token = yield * fetchNewAccessToken(account, deps)
@@ -58,7 +58,7 @@ function * initAccount (
     yield call(deps.storeAccessToken, token, account)
 
     // TODO: check account type
-    yield deps.perform(
+    yield callObservableProducer(deps.perform,
       tasks.addAccount,
       [{
         type: ImapAccount.GOOGLE,
@@ -67,7 +67,7 @@ function * initAccount (
         client_secret,
         credentials: token
       }]
-    ).toPromise()
+    )
 
     // persist account info on successful login
     deps.saveAccount(account)
@@ -77,12 +77,12 @@ function * initAccount (
 function * fetchNewAccessToken (
   account: auth.Account,
   deps: Dependencies
-): Generator<Effect, ?ImapAccount.OauthCredentials, any> {
+): Saga<?ImapAccount.OauthCredentials> {
   try {
     yield put(
       chrome.indicateLoading('authentication-flow', 'Authorizing with Google')
     )
-    return yield call(deps.getAccessToken, account)
+    return yield call(deps.getAccessToken, account.email)
   } catch (err) {
     yield put(chrome.showError(err))
   } finally {
@@ -92,7 +92,7 @@ function * fetchNewAccessToken (
 
 export default function * root (
   deps: Dependencies
-): Generator<Effect, void, any> {
+): Saga<void> {
   yield all([
     fork(takeLatest, 'auth/setAccount', initAccount, deps),
     fork(lookupAccount, deps)

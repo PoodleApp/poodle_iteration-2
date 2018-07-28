@@ -97,7 +97,7 @@
     "electron": "^1.8.2",
     "electron-builder": "^20.0.7",
     "electron-devtools-installer": "^2.2.3",
-    "flow-bin": "^0.73.0",
+    "flow-bin": "^0.77.0",
     "react-test-renderer": "^15.6.1"
   },
   "files": [

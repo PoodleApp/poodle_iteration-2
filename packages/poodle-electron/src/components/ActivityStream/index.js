@@ -27,12 +27,15 @@ import Errors from '../Errors'
 import SearchBar from '../SearchBar'
 import ChannelListSidebar from './ChannelListSidebar'
 
-type Props = {
+type _Void<Args: *, F: (...args: Args) => any> = (...args: Args) => void
+type Void<F> = _Void<*, F>
+
+export type Props = {
   account: authActions.Account,
   conversations: Slurp<ConversationListItem[], Error>,
   errors: ?(Error[]),
-  onDismissError: typeof chrome.dismissError,
-  onSearch: typeof chrome.search,
+  onDismissError: Void<typeof chrome.dismissError>,
+  onSearch: Void<typeof chrome.search>,
   searchQuery: ?string
 }
 

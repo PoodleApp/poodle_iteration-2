@@ -3,7 +3,9 @@
 import deepEqual from 'deep-equal'
 import * as kefir from 'kefir'
 import nextTick from 'process-nextick-args'
+import { type ComponentType, type ElementConfig } from 'react'
 import { connect } from 'react-redux'
+import { type Dispatch } from 'redux'
 import * as chrome from '../actions/chrome'
 import * as actions from './actions'
 import * as effects from './effects'
@@ -11,14 +13,6 @@ import * as helpers from './helpers'
 import * as selectors from './selectors'
 import lifecycle from './lifecycle'
 
-import type { Dispatch } from 'redux'
-import type {
-  Connector,
-  ConnectOptions,
-  MapDispatchToProps,
-  MergeProps,
-  Null
-} from 'react-redux'
 import type {
   ComponentKey,
   PropName,
@@ -40,44 +34,108 @@ const getKey = (function () {
   }
 })()
 
-type MapSubscriptionsToProps<S, OP: Object, SP: Object> = (
+type MapSubscriptionsToProps<S, SP: Object, RSP: Object> = (
   state: S,
+  ownProps: SP
+) => RSP
+
+type MapDispatchToProps<A, OP: Object, RDP: Object> = (
+  dispatch: Dispatch<A>,
   ownProps: OP
-) => SP
+) => RDP
 
-declare function slurp<S: { slurp: SlurpState }, A, OP, SP>(
-  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
-  mapDispatchToProps: Null,
-  mergeProps: Null,
-  options?: ConnectOptions
-): Connector<
-  OP,
-  $Supertype<$ObjMap<SP, FromEffect> & { dispatch: Dispatch<A> } & OP>
->
+type MergeProps<SP: Object, DP: Object, MP: Object, RMP: Object> = (
+  stateProps: SP,
+  dispatchProps: DP,
+  ownProps: MP
+) => RMP
 
-declare function slurp<S: { slurp: SlurpState }, A, OP, SP, DP>(
-  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
-  mapDispatchToProps: MapDispatchToProps<A, OP, DP>,
-  mergeProps: Null,
-  options?: ConnectOptions
-): Connector<OP, $Supertype<$ObjMap<SP, FromEffect> & DP & OP>>
+type ConnectOptions<S: Object, OP: Object, RSP: Object, RMP: Object> = {|
+  pure?: boolean,
+  withRef?: boolean,
+  areStatesEqual?: (next: S, prev: S) => boolean,
+  areOwnPropsEqual?: (next: OP, prev: OP) => boolean,
+  areStatePropsEqual?: (next: RSP, prev: RSP) => boolean,
+  areMergedPropsEqual?: (next: RMP, prev: RMP) => boolean,
+  storeKey?: string
+|}
 
-declare function slurp<S: { slurp: SlurpState }, A, OP, SP, DP, P>(
-  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
-  mapDispatchToProps: Null,
-  mergeProps: MergeProps<$ObjMap<SP, FromEffect>, DP, OP, P>,
-  options?: ConnectOptions
-): Connector<OP, P>
+type OmitDispatch<Component> = $Diff<Component, { dispatch: Dispatch<*> }>
 
-declare function slurp<S: { slurp: SlurpState }, A, OP, SP, DP, P>(
-  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
-  mapDispatchToProps: MapDispatchToProps<A, OP, DP>,
-  mergeProps: MergeProps<$ObjMap<SP, FromEffect>, DP, OP, P>,
-  options?: ConnectOptions
-): Connector<OP, P>
+// export function Slurp<
+//   State: { slurp: SlurpState },
+//   OwnProps: Object
+// >(props: {
+//   children(state: State): React.Node,
+//   mapDispatchToProps
+// }) {
+//   return props.children()
+// }
 
-export function slurp<S: { slurp: SlurpState }, OP: Object, SP: Object> (
-  mapSubscriptionsToProps: MapSubscriptionsToProps<S, OP, SP>,
+
+declare function slurp<
+  Com: ComponentType<*>,
+  S: { slurp: SlurpState },
+  DP: Object,
+  RSP: Object,
+  CP: $Diff<OmitDispatch<ElementConfig<Com>>, $ObjMap<RSP, FromEffect>>
+>(
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, DP, RSP>,
+  mapDispatchToProps?: null
+): (component: Com) => ComponentType<CP & DP>
+
+declare function slurp<
+  A,
+  S: { slurp: SlurpState },
+  DP: Object,
+  SP: Object,
+  RSP: Object,
+  RDP: Object
+>(
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, SP, RSP>,
+  mapDispatchToProps: MapDispatchToProps<A, DP, RDP>
+): <Com: ComponentType<*>>(
+  component: Com
+) => ComponentType<$Diff<$Diff<ElementConfig<Com>, $ObjMap<RSP, FromEffect>>, RDP> & SP & DP>
+
+declare function slurp<
+  Com: ComponentType<*>,
+  A,
+  S: { slurp: SlurpState },
+  DP: Object,
+  SP: Object,
+  RSP: Object,
+  RDP: Object,
+  MP: Object,
+  RMP: Object,
+  CP: $Diff<ElementConfig<Com>, RMP>
+>(
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, SP, RSP>,
+  mapDispatchToProps: ?MapDispatchToProps<A, DP, RDP>,
+  mergeProps: MergeProps<RSP, RDP, MP, RMP>
+): (component: Com) => ComponentType<CP & SP & DP & MP>
+
+declare function slurp<
+  Com: ComponentType<*>,
+  A,
+  S: { slurp: SlurpState },
+  DP: Object,
+  SP: Object,
+  RSP: Object,
+  RDP: Object,
+  MP: Object,
+  RMP: Object
+>(
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, SP, RSP>,
+  mapDispatchToProps: ?MapDispatchToProps<A, DP, RDP>,
+  mergeProps: ?MergeProps<RSP, RDP, MP, RMP>,
+  options?: ConnectOptions<S, SP & DP & MP, RSP, RMP>
+): (
+  component: Com
+) => ComponentType<$Diff<ElementConfig<Com>, RMP> & SP & DP & MP>
+
+export function slurp<S: { slurp: SlurpState }, SP: Object, RSP: Object> (
+  mapSubscriptionsToProps: MapSubscriptionsToProps<S, SP, RSP>,
   mapDispatchToProps: *,
   mergeProps: *,
   extraOptions: * = {}
@@ -138,7 +196,12 @@ function initMapStateToProps<S: { slurp: SlurpState }, OP: Object, SP: Object> (
         }
         // Dispatch on next tick to avoid a tight loop in cases where, e.g.,
         // a subscription ends synchronously.
-        const unsubscribe = subscribe(delayedDispatch, componentKey, key, newSource)
+        const unsubscribe = subscribe(
+          delayedDispatch,
+          componentKey,
+          key,
+          newSource
+        )
         sources[key] = { source: newSource, unsubscribe }
       }
     }

@@ -11,8 +11,8 @@ import { type URI } from 'arfe/lib/models/uri'
 import * as cache from 'poodle-service/lib/cache'
 import * as tasks from 'poodle-service/lib/tasks'
 import * as router from 'react-router-redux'
+import { type Saga } from 'redux-saga'
 import {
-  type Effect,
   all,
   call,
   fork,
@@ -23,6 +23,7 @@ import { type Readable } from 'stream'
 import stringToStream from 'string-to-stream'
 import { type Account } from '../actions/auth'
 import * as chrome from '../actions/chrome'
+import { callObservableProducer } from '../sagas/effects'
 import * as composeActions from './actions'
 import contentFromFile from './contentFromFile'
 
@@ -35,7 +36,7 @@ export interface Dependencies {
 function * sendEdit (
   deps: Dependencies,
   action: composeActions.Action
-): Generator<Effect, void, any> {
+): Saga<void> {
   if (action.type !== composeActions.EDIT) {
     return
   }
@@ -62,7 +63,7 @@ function * sendEdit (
 function * sendReply (
   deps: Dependencies,
   action: composeActions.Action
-): Generator<Effect, void, any> {
+): Saga<void> {
   if (action.type !== composeActions.REPLY) {
     return
   }
@@ -81,7 +82,7 @@ function * sendReply (
 function * sendNewDiscussion (
   deps: Dependencies,
   action: composeActions.Action
-): Generator<Effect, void, any> {
+): Saga<void> {
   if (action.type !== composeActions.NEW_DISCUSSION) {
     return
   }
@@ -115,40 +116,40 @@ function * transmit (
   draftId: string,
   account: Account,
   messageBuilder: compose.Builder<Message>
-): Generator<Effect, ?URI, any> {
+): Saga<?URI> {
   const sender = Addr.build(account)
-  const { message, parts } = yield compose.build(messageBuilder, sender)
+  const { message, parts } = yield call(compose.build, messageBuilder, sender)
   try {
     yield put(composeActions.sending(draftId))
 
     // write copy of message and content to local cache
     const messageRecord = cache.messageToRecord(message)
-    yield deps.perform(
+    yield callObservableProducer(deps.perform,
       tasks.storeLocalCopyOfMessage,
       [messageRecord, parts],
       {
         accountName: account.email
       }
-    ).toPromise()
+    )
 
     // recording local record consumes content streams, so read content back
     // from database to serialize message for transmission
-    const serialized = yield deps.perform(
+    const serialized = yield callObservableProducer(deps.perform,
       tasks.serialize,
       [message],
       {
         accountName: account.email
       }
-    ).toPromise()
+    )
 
     // transmit the message
-    const result = yield deps.perform(
+    const result = yield callObservableProducer(deps.perform,
       tasks.sendMail,
       [serialized],
       {
         accountName: account.email
       }
-    ).toPromise()
+    )
     console.log('DeliveryResult') // TODO: debugging output
     console.dir(result)
     yield put(composeActions.sent(draftId))
@@ -160,7 +161,7 @@ function * transmit (
 
 export default function * root (
   deps: Dependencies
-): Generator<Effect, void, any> {
+): Saga<void> {
   yield all([
     fork(takeEvery, composeActions.EDIT, sendEdit, deps),
     fork(takeEvery, composeActions.REPLY, sendReply, deps),
