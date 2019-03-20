@@ -4,6 +4,9 @@ all: build
 
 build:
 	yarn
+	cd packages/arfe && make
+	cd packages/poodle-service && make
+	cd packages/poodle-core && make
 	cd packages/poodle-electron && yarn && make
 
 start: build
